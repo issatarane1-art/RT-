@@ -31,13 +31,11 @@ def process():
         
         filename_lower = file.filename.lower()
         
-        # بررسی فایل تصویر
+        # بخش بررسی تصویر
         if filename_lower.endswith(('.png', '.jpg', '.jpeg', '.webp')):
             try:
                 img = Image.open(file_path)
                 width, height = img.size
-                
-                # خروجی پایدار و سبک برای جلوگیری از کرش سرور
                 extracted_text = f"فایل تصویر '{file.filename}' با موفقیت پردازش شد.\nابعاد تصویر: {width}x{height} پیکسل\nوضعیت: تصویر دریافت شد و آماده کپی و استفاده است."
             except Exception as e:
                 extracted_text = f"خطا در پردازش تصویر: {str(e)}"
@@ -45,7 +43,7 @@ def process():
             return render_template('index.html', extracted_text=extracted_text)
             
         else:
-            # بخش صوتی (جداسازی موزیک و خواننده با librosa)
+            # بخش صوتی (جداسازی موزیک و خواننده)
             try:
                 y, sr = librosa.load(file_path, sr=None, mono=False)
                 
