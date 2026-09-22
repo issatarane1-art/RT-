@@ -96,7 +96,7 @@
         .info-box h3 { color: #38bdf8; text-shadow: 0 0 10px rgba(56, 189, 248, 0.4); }
         .info-box span { color: #38bdf8; font-weight: bold; }
 
-        .result-box { margin-top: 30px; background: rgba(17, 24, 39, 0.9); backdrop-filter: blur(10px); padding: 20px; border-radius: 16px; text-align: left; direction: ltr; white-space: pre-wrap; border: 1px solid #0284c7; color: #38bdf8; box-shadow: 0 0 20px rgba(2, 132, 199, 0.3); }
+        .result-box { margin-top: 30px; background: rgba(17, 24, 39, 0.9); backdrop-filter: blur(10px); padding: 20px; border-radius: 16px; text-align: left; direction: ltr; border: 1px solid #0284c7; color: #38bdf8; box-shadow: 0 0 20px rgba(2, 132, 199, 0.3); }
         .alert-success { color: #4ade80; margin-top: 20px; font-weight: bold; background: rgba(17, 24, 39, 0.9); padding: 15px; border-radius: 8px; border: 1px solid #16a34a; box-shadow: 0 0 15px rgba(74, 222, 128, 0.3); }
         .alert-error { color: #f87171; margin-top: 20px; font-weight: bold; background: rgba(17, 24, 39, 0.9); padding: 15px; border-radius: 8px; border: 1px solid #dc2626; box-shadow: 0 0 15px rgba(248, 113, 113, 0.3); }
     </style>
@@ -110,7 +110,6 @@
     </nav>
 
     <div class="container">
-        <!-- تب صفحه اصلی -->
         <div id="tab-home" class="tab-content active">
             <h2>سامانه هوشمند پردازش صوت و تصویر</h2>
             
@@ -134,7 +133,6 @@
                 </div>
             </div>
 
-            <!-- نوار پیشرفت درصدی -->
             <div id="progress-container">
                 <span>در حال آپلود و پردازش فایل...</span>
                 <div class="progress-bar-bg">
@@ -143,23 +141,25 @@
                 <span id="progress-text">0%</span>
             </div>
 
+            <!-- بخش نمایش متن استخراج‌شده همراه با دکمه کپی -->
             {% if extracted_text %}
-                <div class="result-box">
-                    <strong>متن استخراج‌شده از تصویر:</strong><br>
-                    {{ extracted_text }}
+                <div class="result-box" style="text-align: right; direction: rtl;">
+                    <h3 style="color: #38bdf8; margin-top: 0; font-size: 18px;">متن استخراج‌شده از تصویر:</h3>
+                    <textarea id="ocr-text" style="width: 100%; height: 120px; background: rgba(11, 15, 25, 0.9); color: #38bdf8; border: 1px solid #0284c7; border-radius: 8px; padding: 10px; box-sizing: border-box; resize: vertical; font-family: Tahoma, sans-serif;" readonly>{{ extracted_text }}</textarea>
+                    <br><br>
+                    <button type="button" onclick="copyText()" style="background: #059669; box-shadow: 0 0 15px rgba(5, 150, 105, 0.4); width: auto; padding: 10px 25px;">کپی متن</button>
+                    <span id="copy-msg" style="color: #4ade80; margin-right: 15px; font-weight: bold; display: none;">متن با موفقیت کپی شد!</span>
                 </div>
             {% endif %}
-
-            {% if success %}
+{% if success %}
                 <div class="alert-success">{{ success }}</div>
                 
-                <!-- بخش جدید: نمایش پلیر و دکمه دانلود صوت بی‌کلام و صدای خواننده -->
                 <div class="result-box" style="text-align: right; direction: rtl;">
                     <h3 style="color: #38bdf8; margin-top: 0; font-size: 18px;">فایل‌های خروجی آماده دانلود و پخش:</h3>
                     
                     {% if instrumental %}
                         <div style="margin-bottom: 20px; background: rgba(11, 15, 25, 0.8); padding: 15px; border-radius: 8px; border: 1px solid #0284c7;">
-<p style="color: #fff; margin-bottom: 8px;">🎼 موزیک بی‌کلام (Instrumental):</p>
+                            <p style="color: #fff; margin-bottom: 8px;">🎼 موزیک بی‌کلام (Instrumental):</p>
                             <audio controls style="width: 100%; margin-bottom: 10px;">
                                 <source src="{{ url_for('download_file', filename=instrumental) }}" type="audio/mpeg">
                             </audio>
@@ -186,15 +186,13 @@
             {% endif %}
         </div>
 
-        <!-- تب درباره ما -->
         <div id="tab-about" class="tab-content">
             <div class="info-box">
                 <h3>درباره سامانه هوشمند</h3>
-                <p>این سامانه یک پلتفرم پیشرفته مبتنی بر هوش مصنوعی است که به شما امکان می‌دهد فایل‌های صوتی خود را به صورت هوشمند مدیریت کنید و همچنین به کمک سیستم قدرتمند <span>OCR</span>، متون موجود درون تصاویر را با دقت بالا استخراج و به متن دیجیتال تبدیل نمایید. هدف ما ارائه ابزارهایی سریع، دقیق و با رابط کاربری حرفه‌ای است.</p>
+                <p>این سامانه یک پلتفرم پیشرفته مبتنی بر هوش مصنوعی است که به شما امکان می‌دهد فایل‌های صوتی خود را به صورت هوشمند مدیریت کنید و همچنین به کمک سیستم قدرتمند <span>OCR</span>، متون موجود درون تصاویر را با دقت بالا استخراج و به متن دیجیتال تبدیل نمایید.</p>
             </div>
         </div>
 
-        <!-- تب تماس با ما -->
         <div id="tab-contact" class="tab-content">
             <div class="info-box">
                 <h3>ارتباط با پشتیبانی</h3>
@@ -219,8 +217,7 @@
             
             document.getElementById('forms-grid').style.display = 'none';
             document.getElementById('progress-container').style.display = 'block';
-            
-            let width = 0;
+let width = 0;
             const fill = document.getElementById('progress-fill');
             const text = document.getElementById('progress-text');
             
@@ -234,6 +231,19 @@
                     text.innerText = width + '%';
                 }
             }, 40);
+        }
+
+        function copyText() {
+            const textarea = document.getElementById('ocr-text');
+            textarea.select();
+            textarea.setSelectionRange(0, 99999); // برای موبایل
+            navigator.clipboard.writeText(textarea.value).then(() => {
+                const msg = document.getElementById('copy-msg');
+                msg.style.display = 'inline';
+                setTimeout(() => {
+                    msg.style.display = 'none';
+                }, 2000);
+            });
         }
     </script>
 </body>
