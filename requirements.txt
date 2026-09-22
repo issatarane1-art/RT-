@@ -2,3 +2,4 @@ Flask
 librosa
 soundfile
 numpy
+gunicorn
