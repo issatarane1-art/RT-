@@ -3,7 +3,7 @@ from flask import Flask, redirect, render_template, request, url_for
 from PIL import Image
 import pytesseract
 
-app = Flask(name)
+app = Flask(__name__)
 UPLOAD_FOLDER = 'uploads'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -45,5 +45,5 @@ def process_file():
   return redirect(url_for('index'))
 
 
-if name == 'main':
+if __name__ == '__main__':
   app.run(host='0.0.0.0', port=5000)
