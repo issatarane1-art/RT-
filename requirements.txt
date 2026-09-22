@@ -1,4 +1,4 @@
 Flask
-Pillow
-pytesseract
-gunicorn
+librosa
+soundfile
+numpy
