@@ -110,6 +110,7 @@
     </nav>
 
     <div class="container">
+        <!-- تب صفحه اصلی -->
         <div id="tab-home" class="tab-content active">
             <h2>سامانه هوشمند پردازش صوت و تصویر</h2>
             
@@ -133,6 +134,7 @@
                 </div>
             </div>
 
+            <!-- نوار پیشرفت درصدی -->
             <div id="progress-container">
                 <span>در حال آپلود و پردازش فایل...</span>
                 <div class="progress-bar-bg">
@@ -150,6 +152,33 @@
 
             {% if success %}
                 <div class="alert-success">{{ success }}</div>
+                
+                <!-- بخش جدید: نمایش پلیر و دکمه دانلود صوت بی‌کلام و صدای خواننده -->
+                <div class="result-box" style="text-align: right; direction: rtl;">
+                    <h3 style="color: #38bdf8; margin-top: 0; font-size: 18px;">فایل‌های خروجی آماده دانلود و پخش:</h3>
+                    
+                    {% if instrumental %}
+                        <div style="margin-bottom: 20px; background: rgba(11, 15, 25, 0.8); padding: 15px; border-radius: 8px; border: 1px solid #0284c7;">
+<p style="color: #fff; margin-bottom: 8px;">🎼 موزیک بی‌کلام (Instrumental):</p>
+                            <audio controls style="width: 100%; margin-bottom: 10px;">
+                                <source src="{{ url_for('download_file', filename=instrumental) }}" type="audio/mpeg">
+                            </audio>
+                            <br>
+                            <a href="{{ url_for('download_file', filename=instrumental) }}" style="display: inline-block; background: #0284c7; color: white; padding: 8px 15px; border-radius: 6px; text-decoration: none; font-size: 14px;">دانلود فایل بی‌کلام</a>
+                        </div>
+                    {% endif %}
+
+                    {% if vocals %}
+                        <div style="background: rgba(11, 15, 25, 0.8); padding: 15px; border-radius: 8px; border: 1px solid #0284c7;">
+                            <p style="color: #fff; margin-bottom: 8px;">🎤 صدای جدا شده خواننده (Vocals):</p>
+                            <audio controls style="width: 100%; margin-bottom: 10px;">
+                                <source src="{{ url_for('download_file', filename=vocals) }}" type="audio/mpeg">
+                            </audio>
+                            <br>
+                            <a href="{{ url_for('download_file', filename=vocals) }}" style="display: inline-block; background: #0284c7; color: white; padding: 8px 15px; border-radius: 6px; text-decoration: none; font-size: 14px;">دانلود صدای خواننده</a>
+                        </div>
+                    {% endif %}
+                </div>
             {% endif %}
 
             {% if error %}
@@ -157,13 +186,16 @@
             {% endif %}
         </div>
 
+        <!-- تب درباره ما -->
         <div id="tab-about" class="tab-content">
             <div class="info-box">
                 <h3>درباره سامانه هوشمند</h3>
                 <p>این سامانه یک پلتفرم پیشرفته مبتنی بر هوش مصنوعی است که به شما امکان می‌دهد فایل‌های صوتی خود را به صورت هوشمند مدیریت کنید و همچنین به کمک سیستم قدرتمند <span>OCR</span>، متون موجود درون تصاویر را با دقت بالا استخراج و به متن دیجیتال تبدیل نمایید. هدف ما ارائه ابزارهایی سریع، دقیق و با رابط کاربری حرفه‌ای است.</p>
             </div>
         </div>
-<div id="tab-contact" class="tab-content">
+
+        <!-- تب تماس با ما -->
+        <div id="tab-contact" class="tab-content">
             <div class="info-box">
                 <h3>ارتباط با پشتیبانی</h3>
                 <p>جهت پشتیبانی، انتقادات و پیشنهادات یا ارتباط مستقیم با مدیریت سامانه، می‌توانید از طریق شماره تلفن زیر با ما در ارتباط باشید:</p>
