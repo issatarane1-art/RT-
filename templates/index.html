@@ -113,6 +113,7 @@
             padding: 10px;
             border-radius: 6px;
             margin-bottom: 15px;
+            text-align: center;
         }
         .alert-error {
             color: #ff4d4d;
@@ -120,6 +121,7 @@
             padding: 10px;
             border-radius: 6px;
             margin-bottom: 15px;
+            text-align: center;
         }
         .download-btn {
             display: inline-block;
@@ -141,15 +143,15 @@
     </style>
 </head>
 <body>
-
-    <header>
+<header>
         <nav>
             <a href="/">صفحه اصلی</a>
             <a href="#">درباره ما</a>
             <a href="#">تماس با ما</a>
         </nav>
     </header>
-<div class="container">
+
+    <div class="container">
         <h1>سامانه هوشمند پردازش صوت و تبدیل متن</h1>
 
         <!-- نمایش پیام‌های خطا یا موفقیت کلی -->
@@ -158,10 +160,10 @@
         {% endif %}
 
         <div class="grid">
-            <!-- کارت تبدیل متن به صوت (جایگزین OCR) -->
+            <!-- کارت تبدیل متن به صوت -->
             <div class="card">
                 <h3>تبدیل متن به صوت (Text-to-Speech)</h3>
-                <p class="desc">متن فارسی خود را وارد کنید تا به فایل صوتی تبدیل شود.</p>
+                <p class="desc">متن خود را وارد کنید تا به فایل صوتی تبدیل شود.</p>
                 <form action="/process" method="POST">
                     <textarea name="text_input" placeholder="متن خود را اینجا بنویسید..."></textarea>
                     <button type="submit">تبدیل به فایل صوتی</button>
@@ -188,18 +190,20 @@
                 <div class="alert-success">{{ speech_success }}</div>
                 <p>فایل صوتی آماده دانلود و پخش:</p>
                 <audio controls>
-                    <source src="/download/{{ speech_file }}" type="audio/mpeg">
+                    <source src="/download/{{ speech_file }}" type="audio/wav">
                     مرورگر شما از پخش صوت پشتیبانی نمی‌کند.
                 </audio>
                 <br><br>
-                <a href="/download/{{ speech_file }}" class="download-btn">دانلود فایل صوتی (MP3)</a>
+                <div style="text-align: center;">
+                    <a href="/download/{{ speech_file }}" class="download-btn">دانلود فایل صوتی (WAV)</a>
+                </div>
             {% endif %}
 
             {% if success %}
                 <div class="alert-success">{{ success }}</div>
                 <p>می‌توانید فایل‌های خروجی تفکیک‌شده را از زیر دانلود کنید:</p>
-                <div style="margin-top: 15px;">
-                    <a href="/download/{{ instrumental }}" class="download-btn">دانلود موزیک (بی‌با کلام)</a>
+                <div style="margin-top: 15px; text-align: center;">
+                    <a href="/download/{{ instrumental }}" class="download-btn">دانلود موزیک (بی‌کلام)</a>
                     <a href="/download/{{ vocals }}" class="download-btn">دانلود صدای خواننده (Vocals)</a>
                 </div>
             {% endif %}
