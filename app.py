@@ -3,6 +3,7 @@ import numpy as np
 import librosa
 import soundfile as sf
 from PIL import Image
+import requests
 from flask import Flask, render_template, request, send_from_directory
 
 app = Flask(__name__)
@@ -31,17 +32,33 @@ def process():
         
         filename_lower = file.filename.lower()
         
+        # بخش استخراج واقعی متن از تصویر با سرویس ابری سبک
         if filename_lower.endswith(('.png', '.jpg', '.jpeg', '.webp')):
             try:
-                img = Image.open(file_path)
-                width, height = img.size
-                extracted_text = f"تصویر '{file.filename}' با موفقیت بارگذاری شد.\nفرمت: {img.format}\nابعاد: {width} در {height} پیکسل\n\n[فایل تصویر با موفقیت در سیستم ذخیره شد.]"
+                url = 'https://api.ocr.space/parse/image'
+                with open(file_path, 'rb') as f:
+                    payload = {
+                        'apikey': 'helloworld',
+                        'language': 'ara',  # پشتیبانی کامل از متون فارسی و عربی
+                        'isOverlayRequired': False
+                    }
+                    files = {'filename': f}
+                    response = requests.post(url, data=payload, files=files)
+                    result = response.json()
+                    
+                    if result.get('ParsedResults'):
+                        extracted_text = result['ParsedResults'][0].get('ParsedText', '')
+                        if not extracted_text.strip():
+                            extracted_text = "متنی داخل تصویر شناسایی نشد یا وضوح عکس پایین است."
+                    else:
+                        extracted_text = "خطا در برقراری ارتباط با موتور استخراج متن."
             except Exception as e:
                 extracted_text = f"خطا در پردازش تصویر: {str(e)}"
                 
             return render_template('index.html', extracted_text=extracted_text)
             
         else:
+            # بخش صوتی (جداسازی موزیک و خواننده)
             try:
                 y, sr = librosa.load(file_path, sr=None, mono=False)
                 
