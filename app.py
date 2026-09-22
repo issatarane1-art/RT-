@@ -18,13 +18,20 @@ def index():
 
 @app.route('/process', methods=['POST'])
 def process():
-    if 'file' in request.files and request.files['file'].filename != '':
-        file = request.files['file']
+    if 'file' not in request.files:
+        return render_template('index.html', error="لطفاً یک فایل صوتی انتخاب کنید.")
+        
+    file = request.files['file']
+    if file.filename == '':
+        return render_template('index.html', error="نام فایل انتخاب شده نامعتبر است.")
+        
+    if file:
         try:
             file_path = os.path.join(UPLOAD_FOLDER, file.filename)
             file.save(file_path)
             
-            y, sr = librosa.load(file_path, sr=None, mono=False)
+            # لود کردن بخش اول فایل صوتی (برای جلوگیری از خطای کمبود رم و فریز شدن سرور در رندر)
+            y, sr = librosa.load(file_path, sr=22050, duration=60.0, mono=False)
             
             if y.ndim > 1:
                 vocals = (y[0] + y[1]) / 2
@@ -48,9 +55,9 @@ def process():
                                    instrumental=inst_name, 
                                    vocals=vocal_name)
         except Exception as e:
-            return render_template('index.html', error=f"خطا در پردازش صوتی: {str(e)}")
+            return render_template('index.html', error=f"خطا در پردازش صوتی: حجم فایل زیاد است یا فرمت آن پشتیبانی نمی‌شود.")
             
-    return render_template('index.html', error="لطفاً یک فایل صوتی انتخاب کنید.")
+    return render_template('index.html', error="خطای ناشناخته رخ داد.")
 
 @app.route('/download/<filename>')
 def download_file(filename):
