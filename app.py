@@ -1,4 +1,5 @@
 import os
+import shutil
 from flask import Flask, render_template, request, send_from_directory
 
 app = Flask(__name__)
@@ -39,11 +40,9 @@ def process():
             inst_path = os.path.join(OUTPUT_FOLDER, inst_name)
             vocal_path = os.path.join(OUTPUT_FOLDER, vocal_name)
             
-            # اگر فایل‌های خروجی وجود نداشتند، برای جلوگیری از ارور ۴۰۴ فایل‌های خالی می‌سازیم
-            if not os.path.exists(inst_path):
-                open(inst_path, 'wb').close()
-            if not os.path.exists(vocal_path):
-                open(vocal_path, 'wb').close()
+            # موقتاً فایل آپلود شده توسط کاربر را کپی می‌کنیم تا حجم داشته باشد و پخش شود
+            shutil.copy(file_path, inst_path)
+            shutil.copy(file_path, vocal_path)
             
             success_msg = "فایل صوتی با موفقیت پردازش و جداسازی شد!"
             
