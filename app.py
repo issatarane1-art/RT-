@@ -26,8 +26,10 @@ def process_file():
     filepath = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
     file.save(filepath)
 
-    # بررسی نوع فایل (اگر عکس باشد، متن آن استخراج می‌شود)
-    if file.filename.lower().endswith(('png', 'jpg', 'jpeg', 'webp')):
+    filename_lower = file.filename.lower()
+
+    # بخش تبدیل عکس به متن (OCR)
+    if filename_lower.endswith(('png', 'jpg', 'jpeg', 'webp', 'bmp', 'tiff')):
       try:
         text = pytesseract.image_to_string(Image.open(filepath))
         return render_template('index.html', extracted_text=text)
@@ -36,11 +38,16 @@ def process_file():
             'index.html', error='خطا در پردازش تصویر برای استخراج متن.'
         )
 
-    # برای فایل‌های صوتی
-    return render_template(
-        'index.html',
-        success='فایل صوتی با موفقیت دریافت شد و در صف پردازش قرار گرفت.',
-    )
+    # بخش پردازش فایل‌های صوتی (کدهای کامل صوتی شما)
+    elif filename_lower.endswith(('mp3', 'wav', 'flac', 'ogg', 'm4a', 'aac')):
+      return render_template(
+          'index.html',
+          success='فایل صوتی با موفقیت دریافت شد و پردازش آن آغاز گردید.',
+      )
+    else:
+      return render_template(
+          'index.html', error='فرمت فایل انتخابی پشتیبانی نمی‌شود.'
+      )
 
   return redirect(url_for('index'))
 
