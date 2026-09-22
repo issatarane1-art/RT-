@@ -4,26 +4,49 @@
     <meta charset="UTF-8">
     <title>سامانه پیشرفته هوش مصنوعی</title>
     <style>
-        body { font-family: Tahoma, sans-serif; background: #090d16; color: #f8fafc; margin: 0; padding: 0; text-align: center; }
+        body { 
+            font-family: Tahoma, sans-serif; 
+            /* تنظیم عکس به عنوان بک‌گراند با پوشش کامل صفحه */
+            background-image: url("{{ url_for('static', filename='bg.jpg') }}");
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+            color: #f8fafc; 
+            margin: 0; 
+            padding: 0; 
+            text-align: center; 
+        }
         
-        /* منوی بالا */
-        nav { background: #111827; padding: 15px; border-bottom: 1px solid #0284c7; box-shadow: 0 0 15px rgba(2, 132, 199, 0.2); display: flex; justify-content: center; gap: 30px; }
+        /* منوی بالا با پس‌زمینه نیمه‌شفاف برای زیبایی بیشتر */
+        nav { 
+            background: rgba(17, 24, 39, 0.85); 
+            backdrop-filter: blur(10px);
+            padding: 15px; 
+            border-bottom: 1px solid #0284c7; 
+            box-shadow: 0 0 15px rgba(2, 132, 199, 0.3); 
+            display: flex; 
+            justify-content: center; 
+            gap: 30px; 
+        }
         nav a { color: #38bdf8; text-decoration: none; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.3s; text-shadow: 0 0 8px rgba(56, 189, 248, 0.4); }
         nav a:hover, nav a.active { color: #fff; text-shadow: 0 0 15px #38bdf8; }
 
         .container { max-width: 900px; margin: 40px auto; padding: 0 20px; }
-        h2 { color: #38bdf8; margin-bottom: 35px; font-size: 26px; text-shadow: 0 0 15px rgba(56, 189, 248, 0.5); }
+        h2 { color: #38bdf8; margin-bottom: 35px; font-size: 26px; text-shadow: 0 0 15px rgba(56, 189, 248, 0.7); }
         
         .tab-content { display: none; }
         .tab-content.active { display: block; }
 
         .grid { display: flex; gap: 25px; justify-content: center; flex-wrap: wrap; }
         
+        /* کارت‌ها با حالت شیشه‌ای و نیمه‌شفاف که بک‌گراند از پشت آن‌ها جلوه زیبایی داشته باشد */
         .card { 
-            background: #111827; 
+            background: rgba(17, 24, 39, 0.85); 
+            backdrop-filter: blur(10px);
             padding: 30px; 
             border-radius: 16px; 
-            box-shadow: 0 0 20px rgba(2, 132, 199, 0.15); 
+            box-shadow: 0 0 20px rgba(2, 132, 199, 0.25); 
             flex: 1; 
             min-width: 350px; 
             border: 1px solid #0284c7; 
@@ -31,7 +54,7 @@
             transition: all 0.3s ease;
         }
         .card:hover {
-            box-shadow: 0 0 30px rgba(56, 189, 248, 0.4);
+            box-shadow: 0 0 35px rgba(56, 189, 248, 0.6);
             border-color: #38bdf8;
         }
         
@@ -45,7 +68,7 @@
             border-radius: 8px; 
             width: 100%; 
             box-sizing: border-box; 
-            background: #0b0f19; 
+            background: rgba(11, 15, 25, 0.9); 
             color: #fff; 
             outline: none;
         }
@@ -68,58 +91,22 @@
             box-shadow: 0 0 25px rgba(56, 189, 248, 0.8);
         }
 
-        /* استایل نوار پیشرفت نئونی */
-        #progress-container { display: none; margin-top: 25px; background: #111827; padding: 20px; border-radius: 12px; border: 1px solid #0284c7; box-shadow: 0 0 20px rgba(2, 132, 199, 0.2); }
+        #progress-container { display: none; margin-top: 25px; background: rgba(17, 24, 39, 0.9); backdrop-filter: blur(10px); padding: 20px; border-radius: 12px; border: 1px solid #0284c7; box-shadow: 0 0 20px rgba(2, 132, 199, 0.3); }
         .progress-bar-bg { background: #0b0f19; border-radius: 8px; height: 20px; width: 100%; border: 1px solid #334155; overflow: hidden; margin-top: 10px; }
         .progress-bar-fill { background: linear-gradient(90deg, #0284c7, #38bdf8); height: 100%; width: 0%; transition: width 0.1s ease; box-shadow: 0 0 10px #38bdf8; }
         #progress-text { color: #38bdf8; font-weight: bold; margin-top: 8px; display: block; }
 
-        .info-box { background: #111827; padding: 30px; border-radius: 16px; border: 1px solid #0284c7; box-shadow: 0 0 20px rgba(2, 132, 199, 0.15); text-align: right; line-height: 1.8; color: #94a3b8; }
+        .info-box { background: rgba(17, 24, 39, 0.85); backdrop-filter: blur(10px); padding: 30px; border-radius: 16px; border: 1px solid #0284c7; box-shadow: 0 0 20px rgba(2, 132, 199, 0.25); text-align: right; line-height: 1.8; color: #94a3b8; }
         .info-box h3 { color: #38bdf8; text-shadow: 0 0 10px rgba(56, 189, 248, 0.4); }
         .info-box span { color: #38bdf8; font-weight: bold; }
 
-        .result-box { margin-top: 30px; background: #111827; padding: 20px; border-radius: 16px; text-align: left; direction: ltr; white-space: pre-wrap; border: 1px solid #0284c7; color: #38bdf8; box-shadow: 0 0 20px rgba(2, 132, 199, 0.2); }
-<script>
-        function switchTab(tabName) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('nav a').forEach(el => el.classList.remove('active'));
-            
-            document.getElementById('tab-' + tabName).classList.add('active');
-            document.getElementById('nav-' + tabName).classList.add('active');
-        }
-
-        function startProgress(event) {
-            event.preventDefault(); // موقتاً ارسال فرم را نگه می‌داریم تا انیمیشن نشان داده شود
-            const form = event.target;
-            
-            document.getElementById('forms-grid').style.display = 'none';
-            document.getElementById('progress-container').style.display = 'block';
-            
-            let width = 0;
-            const fill = document.getElementById('progress-fill');
-            const text = document.getElementById('progress-text');
-            
-            let interval = setInterval(() => {
-                if (width >= 95) {
-                    clearInterval(interval);
-                    form.submit(); // ارسال واقعی فرم بعد از پر شدن نوار
-                } else {
-                    width += 2;
-                    fill.style.width = width + '%';
-                    text.innerText = width + '%';
-                }
-            }, 40);
-        }
-    </script>
-</body>
-</html>
-.alert-success { color: #4ade80; margin-top: 20px; font-weight: bold; background: #111827; padding: 15px; border-radius: 8px; border: 1px solid #16a34a; box-shadow: 0 0 15px rgba(74, 222, 128, 0.2); }
-        .alert-error { color: #f87171; margin-top: 20px; font-weight: bold; background: #111827; padding: 15px; border-radius: 8px; border: 1px solid #dc2626; box-shadow: 0 0 15px rgba(248, 113, 113, 0.2); }
+        .result-box { margin-top: 30px; background: rgba(17, 24, 39, 0.9); backdrop-filter: blur(10px); padding: 20px; border-radius: 16px; text-align: left; direction: ltr; white-space: pre-wrap; border: 1px solid #0284c7; color: #38bdf8; box-shadow: 0 0 20px rgba(2, 132, 199, 0.3); }
+        .alert-success { color: #4ade80; margin-top: 20px; font-weight: bold; background: rgba(17, 24, 39, 0.9); padding: 15px; border-radius: 8px; border: 1px solid #16a34a; box-shadow: 0 0 15px rgba(74, 222, 128, 0.3); }
+        .alert-error { color: #f87171; margin-top: 20px; font-weight: bold; background: rgba(17, 24, 39, 0.9); padding: 15px; border-radius: 8px; border: 1px solid #dc2626; box-shadow: 0 0 15px rgba(248, 113, 113, 0.3); }
     </style>
 </head>
 <body>
 
-    <!-- منوی ناوبری -->
     <nav>
         <a onclick="switchTab('home')" id="nav-home" class="active">صفحه اصلی</a>
         <a onclick="switchTab('about')" id="nav-about">درباره ما</a>
@@ -127,12 +114,10 @@
     </nav>
 
     <div class="container">
-        <!-- تب صفحه اصلی -->
         <div id="tab-home" class="tab-content active">
             <h2>سامانه هوشمند پردازش صوت و تصویر</h2>
             
             <div class="grid" id="forms-grid">
-                <!-- بخش اول: پردازش صوت -->
                 <div class="card">
                     <h3>جداسازی و پردازش صوت</h3>
                     <p>فایل صوتی خود را انتخاب کرده و دکمه پردازش صوت را بزنید:</p>
@@ -142,7 +127,6 @@
                     </form>
                 </div>
 
-                <!-- بخش دوم: تبدیل عکس به متن (OCR) -->
                 <div class="card">
                     <h3>تبدیل عکس به متن (OCR)</h3>
                     <p>تصویر حاوی متن را انتخاب کرده و دکمه استخراج را بزنید:</p>
@@ -153,7 +137,6 @@
                 </div>
             </div>
 
-            <!-- نوار پیشرفت درصدی نئونی -->
             <div id="progress-container">
                 <span>در حال آپلود و پردازش فایل...</span>
                 <div class="progress-bar-bg">
@@ -178,7 +161,6 @@
             {% endif %}
         </div>
 
-        <!-- تب درباره ما -->
         <div id="tab-about" class="tab-content">
             <div class="info-box">
                 <h3>درباره سامانه هوشمند</h3>
@@ -186,12 +168,46 @@
             </div>
         </div>
 
-        <!-- تب تماس با ما -->
         <div id="tab-contact" class="tab-content">
             <div class="info-box">
                 <h3>ارتباط با پشتیبانی</h3>
                 <p>جهت پشتیبانی، انتقادات و پیشنهادات یا ارتباط مستقیم با مدیریت سامانه، می‌توانید از طریق شماره تلفن زیر با ما در ارتباط باشید:</p>
-                <p>شماره تماس: <span dir="ltr">09123456789</span></p> <!-- 09362281999 -->
+                <p>شماره تماس: <span dir="ltr">09123456789</span></p>
             </div>
         </div>
     </div>
+
+    <script>
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('nav a').forEach(el => el.classList.remove('active'));
+            
+            document.getElementById('tab-' + tabName).classList.add('active');
+            document.getElementById('nav-' + tabName).classList.add('active');
+        }
+
+        function startProgress(event) {
+            event.preventDefault();
+            const form = event.target;
+            
+            document.getElementById('forms-grid').style.display = 'none';
+            document.getElementById('progress-container').style.display = 'block';
+            
+            let width = 0;
+            const fill = document.getElementById('progress-fill');
+            const text = document.getElementById('progress-text');
+            
+            let interval = setInterval(() => {
+                if (width >= 95) {
+                    clearInterval(interval);
+                    form.submit();
+                } else {
+                    width += 2;
+                    fill.style.width = width + '%';
+                    text.innerText = width + '%';
+                }
+            }, 40);
+        }
+    </script>
+</body>
+</html>
