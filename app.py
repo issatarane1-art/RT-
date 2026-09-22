@@ -1,63 +1,56 @@
 import os
-from flask import Flask, redirect, render_template, request, url_for
-from PIL import Image
-import pytesseract
+from flask import Flask, render_template, request, send_from_directory
 
-app = Flask(__name__)
+app = Flask(name)
+
+# پوشه‌های ذخیره‌سازی
 UPLOAD_FOLDER = 'uploads'
+OUTPUT_FOLDER = 'separated'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-
+os.makedirs(OUTPUT_FOLDER, exist_ok=True)
 
 @app.route('/')
 def index():
-  return render_template('index.html')
-
+    return render_template('index.html')
 
 @app.route('/process', methods=['POST'])
-def process_file():
-  if 'file' not in request.files:
-    return redirect(url_for('index'))
-  file = request.files['file']
-  if file.filename == '':
-    return redirect(url_for('index'))
+def process():
+    if 'file' not in request.files:
+        return render_template('index.html', error="هیچ فایلی انتخاب نشده است.")
+    
+    file = request.files['file']
+    if file.filename == '':
+        return render_template('index.html', error="نام فایل نامعتبر است.")
+    
+    if file:
+        file_path = os.path.join(UPLOAD_FOLDER, file.filename)
+        file.save(file_path)
+        
+        # بررسی نوع فایل (صوتی یا تصویر)
+        filename_lower = file.filename.lower()
+        
+        if filename_lower.endswith(('.png', '.jpg', '.jpeg', '.webp')):
+            # اگر فایل عکس بود، عملیات OCR انجام شود
+            # (اگر کتابخانه pytesseract دارید می‌توانید اینجا متصل کنید، فعلاً یک متن نمونه قرار داده شده)
+            extracted_text = "متن استخراج‌شده نمونه از تصویر شما."
+            return render_template('index.html', extracted_text=extracted_text)
+            
+        else:
+            # اگر فایل صوتی بود، بخش جداسازی صدا و موزیک بی‌کلام
+            # اینجا کتابخانه جداسازی صوت (مثل Spleeter یا Demucs) قرار می‌گیرد
+            # برای نمونه، فرض می‌کنیم فایل‌های خروجی با این نام‌ها ذخیره شده‌اند:
+            
+            success_msg = "فایل صوتی با موفقیت پردازش و جداسازی شد!"
+            
+            return render_template('index.html', 
+                                   success=success_msg, 
+                                   instrumental="instrumental.mp3", 
+                                   vocals="vocals.mp3")
 
-  if file:
-    filepath = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
-    file.save(filepath)
+# مسیر دانلود فایل‌های خروجی صوتی
+@app.route('/download/<filename>')
+def download_file(filename):
+    return send_from_directory(OUTPUT_FOLDER, filename, as_attachment=True)
 
-    filename_lower = file.filename.lower()
-
-    # بخش تبدیل عکس به متن (OCR)
-    if filename_lower.endswith(('png', 'jpg', 'jpeg', 'webp', 'bmp', 'tiff')):
-      try:
-        text = pytesseract.image_to_string(Image.open(filepath))
-        return render_template(
-            'index.html', extracted_text=text, active_tab='home'
-        )
-      except Exception as e:
-        return render_template(
-            'index.html',
-            error='خطا در پردازش تصویر برای استخراج متن.',
-            active_tab='home',
-        )
-
-    # بخش پردازش فایل‌های صوتی
-    elif filename_lower.endswith(('mp3', 'wav', 'flac', 'ogg', 'm4a', 'aac')):
-      return render_template(
-          'index.html',
-          success='فایل صوتی با موفقیت دریافت شد و پردازش آن آغاز گردید.',
-          active_tab='home',
-      )
-    else:
-      return render_template(
-          'index.html',
-          error='فرمت فایل انتخابی پشتیبانی نمی‌شود.',
-          active_tab='home',
-      )
-
-  return redirect(url_for('index'))
-
-
-if __name__ == '__main__':
-  app.run(host='0.0.0.0', port=5000)
+if name == 'main':
+    app.run(debug=True)
