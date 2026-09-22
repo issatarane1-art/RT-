@@ -2,7 +2,7 @@ import os
 import numpy as np
 import librosa
 import soundfile as sf
-from PIL import Image
+import easyocr
 from flask import Flask, render_template, request, send_from_directory
 
 app = Flask(__name__)
@@ -11,6 +11,10 @@ UPLOAD_FOLDER = 'uploads'
 OUTPUT_FOLDER = 'separated'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(OUTPUT_FOLDER, exist_ok=True)
+
+# راه‌اندازی خواننده OCR (پشتیبانی از زبان فارسی و انگلیسی)
+# این خط در اولین اجرا مدل هوش مصنوعی را بارگذاری می‌کند
+reader = easyocr.Reader(['fa', 'en'], gpu=False)
 
 @app.route('/')
 def index():
@@ -31,23 +35,22 @@ def process():
         
         filename_lower = file.filename.lower()
         
-        # اگر فایل تصویر بود، بخش استخراج متن
+        # اگر فایل تصویر بود، استخراج واقعی متن با EasyOCR
         if filename_lower.endswith(('.png', '.jpg', '.jpeg', '.webp')):
             try:
-                # بررسی ابعاد و مشخصات تصویر برای پردازش ایمن روی هاست
-                img = Image.open(file_path)
-                width, height = img.size
-                
-                # از آنجا که tesseract روی هاست رایگان رندر نصب نیست، 
-                # یک خروجی تمیز و اطلاعات تصویر را نمایش می‌دهیم تا سایت ارور ندهد
-                extracted_text = f"تصویر با موفقیت پردازش شد.\nنام فایل: {file.filename}\nابعاد تصویر: {width} در {height} پیکسل\nوضعیت: تصویر دریافت شد و آماده پردازش متن است."
+                # خواندن متن از روی عکس
+                results = reader.readtext(file_path, detail=0)
+                if results:
+                    extracted_text = "\n".join(results)
+                else:
+                    extracted_text = "متنی درون این تصویر شناسایی نشد."
             except Exception as e:
-                extracted_text = f"خطا در خواندن تصویر: {str(e)}"
+                extracted_text = f"خطا در پردازش OCR تصویر: {str(e)}"
                 
             return render_template('index.html', extracted_text=extracted_text)
             
         else:
-            # بخش صوتی (مثل قبل با کتابخانه librosa)
+            # بخش صوتی (جداسازی موزیک و خواننده)
             try:
                 y, sr = librosa.load(file_path, sr=None, mono=False)
                 
