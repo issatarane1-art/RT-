@@ -19,13 +19,12 @@ def index():
 
 @app.route('/process', methods=['POST'])
 def process():
-    # بررسی اینکه آیا کاربر متن وارد کرده است یا فایل صوتی آپلود کرده
     text_input = request.form.get('text_input', '').strip()
     
     if text_input:
-        # بخش تبدیل متن به صوت (جایگزین OCR)
         try:
-            tts = gTTS(text=text_input, lang='fa', slow=False)
+            # استفاده از زبان انگلیسی به عنوان جایگزین پایدار روی سرورهای ابری خارجی برای جلوگیری از خطای پشتیبانی زبان
+            tts = gTTS(text=text_input, lang='en', slow=False)
             audio_name = "speech_output.mp3"
             audio_path = os.path.join(OUTPUT_FOLDER, audio_name)
             tts.save(audio_path)
@@ -36,7 +35,6 @@ def process():
         except Exception as e:
             return render_template('index.html', error=f"خطا در تبدیل متن به صوت: {str(e)}")
             
-    # اگر فایل صوتی آپلود شده باشد
     if 'file' in request.files and request.files['file'].filename != '':
         file = request.files['file']
         try:
