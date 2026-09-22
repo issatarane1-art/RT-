@@ -4,19 +4,80 @@
     <meta charset="UTF-8">
     <title>سامانه پیشرفته هوش مصنوعی</title>
     <style>
-        body { font-family: Tahoma, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 40px; text-align: center; }
+        body { font-family: Tahoma, sans-serif; background: #090d16; color: #f8fafc; margin: 0; padding: 40px; text-align: center; }
         .container { max-width: 900px; margin: auto; }
-        h2 { color: #38bdf8; margin-bottom: 30px; font-size: 24px; }
+        h2 { color: #38bdf8; margin-bottom: 35px; font-size: 26px; text-shadow: 0 0 15px rgba(56, 189, 248, 0.5); }
         .grid { display: flex; gap: 25px; justify-content: center; flex-wrap: wrap; }
-        .card { background: #1e293b; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.4); flex: 1; min-width: 350px; border: 1px solid #334155; text-align: right; }
-        .card h3 { color: #38bdf8; margin-top: 0; border-bottom: 1px solid #334155; padding-bottom: 10px; }
+        
+        .card { 
+            background: #111827; 
+            padding: 30px; 
+            border-radius: 16px; 
+            box-shadow: 0 0 20px rgba(2, 132, 199, 0.15); 
+            flex: 1; 
+            min-width: 350px; 
+            border: 1px solid #0284c7; 
+            text-align: right; 
+            transition: all 0.3s ease;
+        }
+        .card:hover {
+            box-shadow: 0 0 30px rgba(56, 189, 248, 0.4);
+            border-color: #38bdf8;
+        }
+        
+        .card h3 { color: #38bdf8; margin-top: 0; border-bottom: 1px solid #1e3a8a; padding-bottom: 12px; text-shadow: 0 0 10px rgba(56, 189, 248, 0.4); }
         .card p { color: #94a3b8; font-size: 14px; }
-        input[type="file"] { margin: 15px 0; padding: 10px; border: 1px solid #475569; border-radius: 6px; width: 100%; box-sizing: border-box; background: #0f172a; color: #fff; }
-        button { background: #0284c7; color: white; border: none; padding: 12px 20px; border-radius: 6px; cursor: pointer; font-size: 15px; font-weight: bold; width: 100%; transition: 0.2s; }
-        button:hover { background: #0369a1; }
-        .result-box { margin-top: 30px; background: #1e293b; padding: 20px; border-radius: 12px; text-align: left; direction: ltr; white-space: pre-wrap; border: 1px solid #334155; color: #38bdf8; box-shadow: 0 4px 20px rgba(0,0,0,0.4); }
-        .alert-success { color: #4ade80; margin-top: 20px; font-weight: bold; background: #1e293b; padding: 15px; border-radius: 8px; border: 1px solid #334155; }
-        .alert-error { color: #f87171; margin-top: 20px; font-weight: bold; background: #1e293b; padding: 15px; border-radius: 8px; border: 1px solid #334155; }
+        
+        input[type="file"] { 
+            margin: 15px 0; 
+            padding: 12px; 
+            border: 1px solid #0284c7; 
+            border-radius: 8px; 
+            width: 100%; 
+            box-sizing: border-box; 
+            background: #0b0f19; 
+            color: #fff; 
+            outline: none;
+            transition: 0.3s;
+        }
+        input[type="file"]:focus {
+            border-color: #38bdf8;
+            box-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
+        }
+        
+        button { 
+            background: linear-gradient(135deg, #0284c7, #2563eb); 
+            color: white; 
+            border: none; 
+            padding: 12px 20px; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-size: 15px; 
+            font-weight: bold; 
+            width: 100%; 
+            transition: 0.3s; 
+            box-shadow: 0 0 15px rgba(37, 99, 235, 0.4);
+        }
+        button:hover { 
+            background: linear-gradient(135deg, #0369a1, #1d4ed8); 
+            box-shadow: 0 0 25px rgba(56, 189, 248, 0.8);
+        }
+        
+        .result-box { 
+            margin-top: 30px; 
+            background: #111827; 
+            padding: 20px; 
+            border-radius: 16px; 
+            text-align: left; 
+            direction: ltr; 
+            white-space: pre-wrap; 
+            border: 1px solid #0284c7; 
+            color: #38bdf8; 
+            box-shadow: 0 0 20px rgba(2, 132, 199, 0.2); 
+        }
+        
+        .alert-success { color: #4ade80; margin-top: 20px; font-weight: bold; background: #111827; padding: 15px; border-radius: 8px; border: 1px solid #16a34a; box-shadow: 0 0 15px rgba(74, 222, 128, 0.2); }
+        .alert-error { color: #f87171; margin-top: 20px; font-weight: bold; background: #111827; padding: 15px; border-radius: 8px; border: 1px solid #dc2626; box-shadow: 0 0 15px rgba(248, 113, 113, 0.2); }
     </style>
 </head>
 <body>
@@ -26,7 +87,7 @@
         <div class="grid">
             <!-- بخش اول: پردازش و جداسازی صوت -->
             <div class="card">
-                <h3>جاسازی و پردازش صوت</h3>
+                <h3>جداسازی و پردازش صوت</h3>
                 <p>فایل صوتی خود را انتخاب کرده و دکمه پردازش صوت را بزنید:</p>
                 <form action="/process" method="POST" enctype="multipart/form-data">
                     <input type="file" name="file" accept="audio/*" required>
@@ -35,7 +96,7 @@
             </div>
 
             <!-- بخش دوم: تبدیل عکس به متن (OCR) -->
-            <div class="card">
+<div class="card">
                 <h3>تبدیل عکس به متن (OCR)</h3>
                 <p>تصویر حاوی متن را انتخاب کرده و دکمه استخراج را بزنید:</p>
                 <form action="/process" method="POST" enctype="multipart/form-data">
