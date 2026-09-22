@@ -3,6 +3,7 @@ import numpy as np
 import librosa
 import soundfile as sf
 from PIL import Image
+import pytesseract
 from flask import Flask, render_template, request, send_from_directory
 
 app = Flask(__name__)
@@ -31,14 +32,17 @@ def process():
         
         filename_lower = file.filename.lower()
         
-        # بخش بررسی تصویر
+        # بخش استخراج واقعی متن از تصویر (OCR)
         if filename_lower.endswith(('.png', '.jpg', '.jpeg', '.webp')):
             try:
                 img = Image.open(file_path)
-                width, height = img.size
-                extracted_text = f"فایل تصویر '{file.filename}' با موفقیت پردازش شد.\nابعاد تصویر: {width}x{height} پیکسل\nوضعیت: تصویر دریافت شد و آماده کپی و استفاده است."
+                # استخراج متن با پشتیبانی از زبان فارسی (fas) و انگلیسی (eng)
+                extracted_text = pytesseract.image_to_string(img, lang='fas+eng')
+                
+                if not extracted_text.strip():
+                    extracted_text = "متنی داخل این تصویر شناسایی نشد یا وضوح آن پایین است."
             except Exception as e:
-                extracted_text = f"خطا در پردازش تصویر: {str(e)}"
+                extracted_text = f"خطا در پردازش تصویر: لطفاً مطمئن شوید ابزار tesseract روی هاست فعال است. ({str(e)})"
                 
             return render_template('index.html', extracted_text=extracted_text)
             
