@@ -1,12 +1,7 @@
-from flask import Flask, render_template
+from audio_separator.separator import Separator
 
-app = Flask(__name__)
-
-
-@app.route('/')
-def index():
-  return render_template('index.html')
-
-
-if __name__ == '__main__':
-  app.run()
+# استفاده از مدل سبک‌تر و سریع‌تر برای اجرا روی CPU
+separator = Separator()
+separator.load_model(
+    'uvr_net_pertoire.onnx'
+)  # یا مدل‌های سبک دیگر مثل MDX-Net سبک
