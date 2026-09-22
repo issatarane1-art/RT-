@@ -18,30 +18,6 @@ def index():
 
 @app.route('/process', methods=['POST'])
 def process():
-    text_input = request.form.get('text_input', '').strip()
-    
-    if text_input:
-        try:
-            sr = 22050
-            duration = max(3.0, len(text_input) * 0.3)  # محاسبه دقیق زمان بر اساس طول متن
-            t = np.linspace(0, duration, int(sr * duration), endpoint=False)
-            
-            # تولید موج صوتی استاندارد با فرکانس مشخص
-            audio_data = 0.4 * np.sin(2 * np.pi * 440 * t)
-            
-            # استفاده از یک نامتاگ (Timestamp) یکتا برای جلوگیری از کش شدن در مرورگر
-            unique_id = int(time.time())
-            audio_name = f"speech_{unique_id}.wav"
-            audio_path = os.path.join(OUTPUT_FOLDER, audio_name)
-            
-            sf.write(audio_path, audio_data, sr)
-            
-            return render_template('index.html', 
-                                   speech_success="متن شما با موفقیت به فایل صوتی تبدیل شد!", 
-                                   speech_file=audio_name)
-        except Exception as e:
-            return render_template('index.html', error=f"خطا در تبدیل متن به صوت: {str(e)}")
-            
     if 'file' in request.files and request.files['file'].filename != '':
         file = request.files['file']
         try:
@@ -74,7 +50,7 @@ def process():
         except Exception as e:
             return render_template('index.html', error=f"خطا در پردازش صوتی: {str(e)}")
             
-    return render_template('index.html', error="لطفاً یک فایل صوتی انتخاب کنید یا متنی برای تبدیل وارد نمایید.")
+    return render_template('index.html', error="لطفاً یک فایل صوتی انتخاب کنید.")
 
 @app.route('/download/<filename>')
 def download_file(filename):
