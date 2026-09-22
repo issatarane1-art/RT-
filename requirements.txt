@@ -4,5 +4,3 @@ soundfile
 numpy
 gunicorn
 Pillow
-pytesseract
-easyocr
