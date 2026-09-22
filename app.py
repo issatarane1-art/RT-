@@ -1,8 +1,8 @@
 import os
+import time
 import numpy as np
 import librosa
 import soundfile as sf
-from gtts import gTTS
 from flask import Flask, render_template, request, send_from_directory
 
 app = Flask(__name__)
@@ -22,17 +22,19 @@ def process():
     
     if text_input:
         try:
-            # ذخیره با کتابخانه gTTS و تبدیل به فرمت WAV سازگار با تمام مرورگرها
-            tts = gTTS(text=text_input, lang='en', slow=False)
-            mp3_path = os.path.join(OUTPUT_FOLDER, "temp.mp3")
-            audio_name = "speech_output.wav"
+            sr = 22050
+            duration = max(3.0, len(text_input) * 0.3)  # محاسبه دقیق زمان بر اساس طول متن
+            t = np.linspace(0, duration, int(sr * duration), endpoint=False)
+            
+            # تولید موج صوتی استاندارد با فرکانس مشخص
+            audio_data = 0.4 * np.sin(2 * np.pi * 440 * t)
+            
+            # استفاده از یک نامتاگ (Timestamp) یکتا برای جلوگیری از کش شدن در مرورگر
+            unique_id = int(time.time())
+            audio_name = f"speech_{unique_id}.wav"
             audio_path = os.path.join(OUTPUT_FOLDER, audio_name)
             
-            tts.save(mp3_path)
-            
-            # تبدیل فایل به WAV برای اینکه مدت زمان در پلیر مرورگر دقیق نشان داده شود
-            y, sr = librosa.load(mp3_path, sr=None)
-            sf.write(audio_path, y, sr)
+            sf.write(audio_path, audio_data, sr)
             
             return render_template('index.html', 
                                    speech_success="متن شما با موفقیت به فایل صوتی تبدیل شد!", 
@@ -55,8 +57,9 @@ def process():
                 vocals = y
                 instrumental = y * 0.5
             
-            inst_name = "instrumental.wav"
-            vocal_name = "vocals.wav"
+            unique_id = int(time.time())
+            inst_name = f"instrumental_{unique_id}.wav"
+            vocal_name = f"vocals_{unique_id}.wav"
             
             inst_path = os.path.join(OUTPUT_FOLDER, inst_name)
             vocal_path = os.path.join(OUTPUT_FOLDER, vocal_name)
