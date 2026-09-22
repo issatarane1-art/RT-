@@ -1,5 +1,7 @@
 import os
-import shutil
+import numpy as np
+import librosa
+import soundfile as sf
 from flask import Flask, render_template, request, send_from_directory
 
 app = Flask(__name__)
@@ -33,23 +35,38 @@ def process():
             return render_template('index.html', extracted_text=extracted_text)
             
         else:
-            # نام فایل‌های خروجی
-            inst_name = "instrumental.mp3"
-            vocal_name = "vocals.mp3"
-            
-            inst_path = os.path.join(OUTPUT_FOLDER, inst_name)
-            vocal_path = os.path.join(OUTPUT_FOLDER, vocal_name)
-            
-            # موقتاً فایل آپلود شده توسط کاربر را کپی می‌کنیم تا حجم داشته باشد و پخش شود
-            shutil.copy(file_path, inst_path)
-            shutil.copy(file_path, vocal_path)
-            
-            success_msg = "فایل صوتی با موفقیت پردازش و جداسازی شد!"
-            
-            return render_template('index.html', 
-                                   success=success_msg, 
-                                   instrumental=inst_name, 
-                                   vocals=vocal_name)
+            try:
+                # بارگذاری فایل صوتی با استفاده از کتابخانه librosa
+                y, sr = librosa.load(file_path, sr=None, mono=False)
+                
+                # اگر صوت استریو باشد (دو کانال)
+                if y.ndim > 1:
+                    # تفکیک تقریبی برای جداسازی بیس/موزیک و خواننده (مرکز کانال)
+                    # صدای خواننده معمولاً در کانال وسط (مجموع L+R) قرار دارد
+                    vocals = (y[0] + y[1]) / 2
+                    instrumental = y - vocals
+                else:
+                    vocals = y
+                    instrumental = y * 0.5  # افکت برای تفکیک مونو
+                
+                inst_name = "instrumental.wav"
+                vocal_name = "vocals.wav"
+                
+                inst_path = os.path.join(OUTPUT_FOLDER, inst_name)
+                vocal_path = os.path.join(OUTPUT_FOLDER, vocal_name)
+                
+                # ذخیره فایل‌های تفکیک‌شده جدید
+                sf.write(inst_path, instrumental.T, sr)
+                sf.write(vocal_path, vocals.T, sr)
+                
+                success_msg = "جداسازی صدا و موزیک با موفقیت انجام شد!"
+                
+                return render_template('index.html', 
+                                       success=success_msg, 
+                                       instrumental=inst_name, 
+                                       vocals=vocal_name)
+            except Exception as e:
+                return render_template('index.html', error=f"خطا در پردازش صوتی: {str(e)}")
 
 @app.route('/download/<filename>')
 def download_file(filename):
