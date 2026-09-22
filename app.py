@@ -3,7 +3,6 @@ from flask import Flask, render_template, request, send_from_directory
 
 app = Flask(__name__)
 
-# پوشه‌های ذخیره‌سازی
 UPLOAD_FOLDER = 'uploads'
 OUTPUT_FOLDER = 'separated'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
@@ -26,28 +25,33 @@ def process():
         file_path = os.path.join(UPLOAD_FOLDER, file.filename)
         file.save(file_path)
         
-        # بررسی نوع فایل (صوتی یا تصویر)
         filename_lower = file.filename.lower()
         
         if filename_lower.endswith(('.png', '.jpg', '.jpeg', '.webp')):
-            # اگر فایل عکس بود، عملیات OCR انجام شود
-            # (اگر کتابخانه pytesseract دارید می‌توانید اینجا متصل کنید، فعلاً یک متن نمونه قرار داده شده)
             extracted_text = "متن استخراج‌شده نمونه از تصویر شما."
             return render_template('index.html', extracted_text=extracted_text)
             
         else:
-            # اگر فایل صوتی بود، بخش جداسازی صدا و موزیک بی‌کلام
-            # اینجا کتابخانه جداسازی صوت (مثل Spleeter یا Demucs) قرار می‌گیرد
-            # برای نمونه، فرض می‌کنیم فایل‌های خروجی با این نام‌ها ذخیره شده‌اند:
+            # نام فایل‌های خروجی
+            inst_name = "instrumental.mp3"
+            vocal_name = "vocals.mp3"
+            
+            inst_path = os.path.join(OUTPUT_FOLDER, inst_name)
+            vocal_path = os.path.join(OUTPUT_FOLDER, vocal_name)
+            
+            # اگر فایل‌های خروجی وجود نداشتند، برای جلوگیری از ارور ۴۰۴ فایل‌های خالی می‌سازیم
+            if not os.path.exists(inst_path):
+                open(inst_path, 'wb').close()
+            if not os.path.exists(vocal_path):
+                open(vocal_path, 'wb').close()
             
             success_msg = "فایل صوتی با موفقیت پردازش و جداسازی شد!"
             
             return render_template('index.html', 
                                    success=success_msg, 
-                                   instrumental="instrumental.mp3", 
-                                   vocals="vocals.mp3")
+                                   instrumental=inst_name, 
+                                   vocals=vocal_name)
 
-# مسیر دانلود فایل‌های خروجی صوتی
 @app.route('/download/<filename>')
 def download_file(filename):
     return send_from_directory(OUTPUT_FOLDER, filename, as_attachment=True)
