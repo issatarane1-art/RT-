@@ -1,7 +1,7 @@
 import os
 from flask import Flask, render_template, request, send_from_directory
 
-app = Flask(name)
+app = Flask(__name__)
 
 # پوشه‌های ذخیره‌سازی
 UPLOAD_FOLDER = 'uploads'
@@ -52,5 +52,5 @@ def process():
 def download_file(filename):
     return send_from_directory(OUTPUT_FOLDER, filename, as_attachment=True)
 
-if name == 'main':
+if __name__ == '__main__':
     app.run(debug=True)
