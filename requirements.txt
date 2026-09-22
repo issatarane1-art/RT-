@@ -5,3 +5,4 @@ numpy
 gunicorn
 Pillow
 pytesseract
+easyocr
