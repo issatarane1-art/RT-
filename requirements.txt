@@ -4,4 +4,4 @@ soundfile
 numpy
 gunicorn
 Pillow
-requests
+gTTS
