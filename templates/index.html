@@ -23,6 +23,7 @@
             text-decoration: none;
             margin: 0 15px;
             font-size: 14px;
+            cursor: pointer;
         }
         nav a:hover {
             color: #00ffff;
@@ -138,19 +139,19 @@
     <header>
         <nav>
             <a href="/">صفحه اصلی</a>
-            <a href="#">درباره ما</a>
-            <a href="#">تماس با ما</a>
+            <a onclick="showAbout()">درباره ما</a>
+            <a onclick="showContact()">تماس با ما</a>
         </nav>
     </header>
 
     <div class="container">
         <h1>سامانه هوشمند پردازش صوت و تبدیل متن</h1>
-
-        {% if error %}
+{% if error %}
             <div class="alert-error">{{ error }}</div>
         {% endif %}
+
         <div class="grid">
-            <!-- کارت تبدیل متن به صوت (مبتنی بر مرورگر - بدون خطا و بدون بوق) -->
+            <!-- کارت تبدیل متن به صوت -->
             <div class="card">
                 <h3>تبدیل متن به صوت (Text-to-Speech)</h3>
                 <p class="desc">متن فارسی خود را بنویسید تا گوشی شما آن را به صورت صوتی بخواند.</p>
@@ -193,13 +194,19 @@
                 alert('مرورگر شما از قابلیت پخش صوتی پشتیبانی نمی‌کند.');
                 return;
             }
-            // متوقف کردن صحبت‌های قبلی اگر در حال پخش بود
             window.speechSynthesis.cancel();
-            
             const utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = 'fa-IR'; // تنظیم زبان روی فارسی
-            utterance.rate = 1.0; // سرعت خواندن
+            utterance.lang = 'fa-IR';
+            utterance.rate = 1.0;
             window.speechSynthesis.speak(utterance);
+        }
+
+        function showAbout() {
+            alert('سامانه هوشمند پردازش صوت\nطراحی شده برای جداسازی موزیک و تبدیل متن به گفتار به صورت پایدار و سریع.');
+        }
+
+        function showContact() {
+            alert('پشتیبانی و ارتباط:\nبرای استفاده بهتر، فایل‌های صوتی خود را با حجم مناسب بارگذاری کنید.');
         }
     </script>
 
