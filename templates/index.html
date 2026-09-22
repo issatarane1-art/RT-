@@ -102,11 +102,6 @@
             padding: 20px;
             text-align: right;
         }
-        .result-box h3 {
-            color: #00ffcc;
-            margin-top: 0;
-            font-size: 16px;
-        }
         .alert-success {
             color: #00ff88;
             background: rgba(0, 255, 136, 0.1);
@@ -136,14 +131,11 @@
         .download-btn:hover {
             background: #0091ea;
         }
-        audio {
-            width: 100%;
-            margin-top: 10px;
-        }
     </style>
 </head>
 <body>
-<header>
+
+    <header>
         <nav>
             <a href="/">صفحه اصلی</a>
             <a href="#">درباره ما</a>
@@ -154,20 +146,16 @@
     <div class="container">
         <h1>سامانه هوشمند پردازش صوت و تبدیل متن</h1>
 
-        <!-- نمایش پیام‌های خطا یا موفقیت کلی -->
         {% if error %}
             <div class="alert-error">{{ error }}</div>
         {% endif %}
-
         <div class="grid">
-            <!-- کارت تبدیل متن به صوت -->
+            <!-- کارت تبدیل متن به صوت (مبتنی بر مرورگر - بدون خطا و بدون بوق) -->
             <div class="card">
                 <h3>تبدیل متن به صوت (Text-to-Speech)</h3>
-                <p class="desc">متن خود را وارد کنید تا به فایل صوتی تبدیل شود.</p>
-                <form action="/process" method="POST">
-                    <textarea name="text_input" placeholder="متن خود را اینجا بنویسید..."></textarea>
-                    <button type="submit">تبدیل به فایل صوتی</button>
-                </form>
+                <p class="desc">متن فارسی خود را بنویسید تا گوشی شما آن را به صورت صوتی بخواند.</p>
+                <textarea id="text_input" placeholder="متن خود را اینجا بنویسید..."></textarea>
+                <button type="button" onclick="speakText()">پخش صوتی متن</button>
             </div>
 
             <!-- کارت جداسازی صدا و موزیک -->
@@ -181,35 +169,39 @@
             </div>
         </div>
 
-        <!-- بخش نمایش خروجی‌ها -->
-        {% if success or speech_success %}
+        {% if success %}
         <div class="result-box">
-            <h3>نتیجه پردازش:</h3>
-            
-            {% if speech_success %}
-                <div class="alert-success">{{ speech_success }}</div>
-                <p>فایل صوتی آماده دانلود و پخش:</p>
-                <audio controls>
-                    <source src="/download/{{ speech_file }}" type="audio/wav">
-                    مرورگر شما از پخش صوت پشتیبانی نمی‌کند.
-                </audio>
-                <br><br>
-                <div style="text-align: center;">
-                    <a href="/download/{{ speech_file }}" class="download-btn">دانلود فایل صوتی (WAV)</a>
-                </div>
-            {% endif %}
-
-            {% if success %}
-                <div class="alert-success">{{ success }}</div>
-                <p>می‌توانید فایل‌های خروجی تفکیک‌شده را از زیر دانلود کنید:</p>
-                <div style="margin-top: 15px; text-align: center;">
-                    <a href="/download/{{ instrumental }}" class="download-btn">دانلود موزیک (بی‌کلام)</a>
-                    <a href="/download/{{ vocals }}" class="download-btn">دانلود صدای خواننده (Vocals)</a>
-                </div>
-            {% endif %}
+            <h3>نتیجه پردازش صوت:</h3>
+            <div class="alert-success">{{ success }}</div>
+            <p>می‌توانید فایل‌های خروجی تفکیک‌شده را از زیر دانلود کنید:</p>
+            <div style="margin-top: 15px; text-align: center;">
+                <a href="/download/{{ instrumental }}" class="download-btn">دانلود موزیک (بی‌کلام)</a>
+                <a href="/download/{{ vocals }}" class="download-btn">دانلود صدای خواننده (Vocals)</a>
+            </div>
         </div>
         {% endif %}
     </div>
+
+    <script>
+        function speakText() {
+            const text = document.getElementById('text_input').value;
+            if (!text.trim()) {
+                alert('لطفاً ابتدا متنی را وارد کنید.');
+                return;
+            }
+            if (!('speechSynthesis' in window)) {
+                alert('مرورگر شما از قابلیت پخش صوتی پشتیبانی نمی‌کند.');
+                return;
+            }
+            // متوقف کردن صحبت‌های قبلی اگر در حال پخش بود
+            window.speechSynthesis.cancel();
+            
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'fa-IR'; // تنظیم زبان روی فارسی
+            utterance.rate = 1.0; // سرعت خواندن
+            window.speechSynthesis.speak(utterance);
+        }
+    </script>
 
 </body>
 </html>
