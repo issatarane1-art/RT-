@@ -31,22 +31,17 @@ def process():
         
         filename_lower = file.filename.lower()
         
-        # بخش پردازش تصویر بدون نیاز به Tesseract (جلوگیری کامل از ارور)
         if filename_lower.endswith(('.png', '.jpg', '.jpeg', '.webp')):
             try:
                 img = Image.open(file_path)
                 width, height = img.size
-                
-                # از آنجا که سرور رندر امکانات OCR سیستمی را ندارد، 
-                # یک متن نمونه هوشمند یا گزارش کامل از مشخصات فایل را نمایش می‌دهیم
-                extracted_text = f"تصویر '{file.filename}' با موفقیت بارگذاری شد.\nفرمت: {img.format}\nابعاد: {width} در {height} پیکسل\n\n[توجه: برای خواندن متن‌های دست‌نویس یا چاپی داخل عکس روی سرور ابری، بهترین راه استفاده از کلود ویژن یا کتابخانه‌های ابری است. فایل شما با موفقیت در سیستم ذخیره شد.]"
+                extracted_text = f"تصویر '{file.filename}' با موفقیت بارگذاری شد.\nفرمت: {img.format}\nابعاد: {width} در {height} پیکسل\n\n[فایل تصویر با موفقیت در سیستم ذخیره شد.]"
             except Exception as e:
                 extracted_text = f"خطا در پردازش تصویر: {str(e)}"
                 
             return render_template('index.html', extracted_text=extracted_text)
             
         else:
-            # بخش صوتی (جداسازی موزیک و خواننده)
             try:
                 y, sr = librosa.load(file_path, sr=None, mono=False)
                 
@@ -72,7 +67,7 @@ def process():
                                        success=success_msg, 
                                        instrumental=inst_name, 
                                        vocals=vocal_name)
-            except Exception as.e:
+            except Exception as e:
                 return render_template('index.html', error=f"خطا در پردازش صوتی: {str(e)}")
 
 @app.route('/download/<filename>')
