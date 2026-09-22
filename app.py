@@ -3,6 +3,7 @@ import numpy as np
 import librosa
 import soundfile as sf
 from PIL import Image
+from gtts import gTTS
 from flask import Flask, render_template, request, send_from_directory
 
 app = Flask(__name__)
@@ -18,61 +19,56 @@ def index():
 
 @app.route('/process', methods=['POST'])
 def process():
-    if 'file' not in request.files:
-        return render_template('index.html', error="هیچ فایلی انتخاب نشده است.")
+    # بررسی اینکه آیا کاربر متن وارد کرده است یا فایل صوتی آپلود کرده
+    text_input = request.form.get('text_input', '').strip()
     
-    file = request.files['file']
-    if file.filename == '':
-        return render_template('index.html', error="نام فایل نامعتبر است.")
-    
-    if file:
-        file_path = os.path.join(UPLOAD_FOLDER, file.filename)
-        file.save(file_path)
-        
-        filename_lower = file.filename.lower()
-        
-        # بخش پردازش تصویر پایدار و بدون خطای شبکه
-        if filename_lower.endswith(('.png', '.jpg', '.jpeg', '.webp')):
-            try:
-                img = Image.open(file_path)
-                width, height = img.size
-                
-                # تحلیل رنگ و محتوای تصویر برای استخراج هوشمند اطلاعات
-                extracted_text = f"تصویر '{file.filename}' با موفقیت پردازش شد.\n\nاطلاعات تصویر:\n- فرمت فایل: {img.format}\n- رزولوشن: {width} در {height} پیکسل\n- حالت رنگی: {img.mode}\n\nوضعیت: تصویر با موفقیت در سیستم تحلیل و بارگذاری شد."
-            except Exception as e:
-                extracted_text = f"خطا در پردازش تصویر: {str(e)}"
-                
-            return render_template('index.html', extracted_text=extracted_text)
+    if text_input:
+        # بخش تبدیل متن به صوت (جایگزین OCR)
+        try:
+            tts = gTTS(text=text_input, lang='fa', slow=False)
+            audio_name = "speech_output.mp3"
+            audio_path = os.path.join(OUTPUT_FOLDER, audio_name)
+            tts.save(audio_path)
             
-        else:
-            # بخش صوتی (جداسازی موزیک و خواننده)
-            try:
-                y, sr = librosa.load(file_path, sr=None, mono=False)
-                
-                if y.ndim > 1:
-                    vocals = (y[0] + y[1]) / 2
-                    instrumental = y - vocals
-                else:
-                    vocals = y
-                    instrumental = y * 0.5
-                
-                inst_name = "instrumental.wav"
-                vocal_name = "vocals.wav"
-                
-                inst_path = os.path.join(OUTPUT_FOLDER, inst_name)
-                vocal_path = os.path.join(OUTPUT_FOLDER, vocal_name)
-                
-                sf.write(inst_path, instrumental.T, sr)
-                sf.write(vocal_path, vocals.T, sr)
-                
-                success_msg = "جداسازی صدا و موزیک با موفقیت انجام شد!"
-                
-                return render_template('index.html', 
-                                       success=success_msg, 
-                                       instrumental=inst_name, 
-                                       vocals=vocal_name)
-            except Exception as e:
-                return render_template('index.html', error=f"خطا در پردازش صوتی: {str(e)}")
+            return render_template('index.html', 
+                                   speech_success="متن شما با موفقیت به فایل صوتی تبدیل شد!", 
+                                   speech_file=audio_name)
+        except Exception as e:
+            return render_template('index.html', error=f"خطا در تبدیل متن به صوت: {str(e)}")
+            
+    # اگر فایل صوتی آپلود شده باشد
+    if 'file' in request.files and request.files['file'].filename != '':
+        file = request.files['file']
+        try:
+            file_path = os.path.join(UPLOAD_FOLDER, file.filename)
+            file.save(file_path)
+            
+            y, sr = librosa.load(file_path, sr=None, mono=False)
+            
+            if y.ndim > 1:
+                vocals = (y[0] + y[1]) / 2
+                instrumental = y - vocals
+            else:
+                vocals = y
+                instrumental = y * 0.5
+            
+            inst_name = "instrumental.wav"
+            vocal_name = "vocals.wav"
+            
+            inst_path = os.path.join(OUTPUT_FOLDER, inst_name)
+            vocal_path = os.path.join(OUTPUT_FOLDER, vocal_name)
+            
+            sf.write(inst_path, instrumental.T, sr)
+            sf.write(vocal_path, vocals.T, sr)
+            
+            return render_template('index.html', 
+                                   success="جداسازی صدا و موزیک با موفقیت انجام شد!", 
+                                   instrumental=inst_name, 
+                                   vocals=vocal_name)
+        except Exception as e:
+            return render_template('index.html', error=f"خطا در پردازش صوتی: {str(e)}")
+            
+    return render_template('index.html', error="لطفاً یک فایل صوتی انتخاب کنید یا متنی برای تبدیل وارد نمایید.")
 
 @app.route('/download/<filename>')
 def download_file(filename):
