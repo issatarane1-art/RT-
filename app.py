@@ -2,6 +2,8 @@ import os
 import numpy as np
 import librosa
 import soundfile as sf
+from PIL import Image
+import pytesseract
 from flask import Flask, render_template, request, send_from_directory
 
 app = Flask(__name__)
@@ -30,24 +32,31 @@ def process():
         
         filename_lower = file.filename.lower()
         
+        # اگر فایل تصویر بود، عملیات OCR انجام شود
         if filename_lower.endswith(('.png', '.jpg', '.jpeg', '.webp')):
-            extracted_text = "متن استخراج‌شده نمونه از تصویر شما."
+            try:
+                # خواندن تصویر با پایتون و استخراج متن با tesseract
+                img = Image.open(file_path)
+                # استفاده از زبان‌های انگلیسی و فارسی (در صورت نیاز به فارسی)
+                extracted_text = pytesseract.image_to_string(img, lang='eng+fas')
+                if not extracted_text.strip():
+                    extracted_text = "متنی درون تصویر تشخیص داده نشد یا کیفیت تصویر پایین است."
+            except Exception as e:
+                extracted_text = f"خطا در پردازش تصویر یا عدم نصب tesseract روی سرور: {str(e)}"
+                
             return render_template('index.html', extracted_text=extracted_text)
             
         else:
+            # بخش صوتی (مثل قبل)
             try:
-                # بارگذاری فایل صوتی با استفاده از کتابخانه librosa
                 y, sr = librosa.load(file_path, sr=None, mono=False)
                 
-                # اگر صوت استریو باشد (دو کانال)
                 if y.ndim > 1:
-                    # تفکیک تقریبی برای جداسازی بیس/موزیک و خواننده (مرکز کانال)
-                    # صدای خواننده معمولاً در کانال وسط (مجموع L+R) قرار دارد
                     vocals = (y[0] + y[1]) / 2
                     instrumental = y - vocals
                 else:
                     vocals = y
-                    instrumental = y * 0.5  # افکت برای تفکیک مونو
+                    instrumental = y * 0.5
                 
                 inst_name = "instrumental.wav"
                 vocal_name = "vocals.wav"
@@ -55,7 +64,6 @@ def process():
                 inst_path = os.path.join(OUTPUT_FOLDER, inst_name)
                 vocal_path = os.path.join(OUTPUT_FOLDER, vocal_name)
                 
-                # ذخیره فایل‌های تفکیک‌شده جدید
                 sf.write(inst_path, instrumental.T, sr)
                 sf.write(vocal_path, vocals.T, sr)
                 
