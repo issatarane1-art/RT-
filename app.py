@@ -43,47 +43,45 @@ def contact():
     </html>
     """
 
-@app.route('/process', methods=['POST'])
-def process():
-    # بخش تبدیل متن به صوت (Text to Speech سروری)
+@app.route('/process-text', methods=['POST'])
+def process_text():
     text_input = request.form.get('text_input', '').strip()
-    if text_input:
-        try:
-            # استفاده از زبان عربی/فارسی برای تولید صوت واقعی روی سرور
-            tts = gTTS(text=text_input, lang='ar', slow=False)
-            unique_id = int(time.time())
-            temp_mp3 = os.path.join(OUTPUT_FOLDER, f"temp_{unique_id}.mp3")
-            speech_name = f"speech_{unique_id}.wav"
-            speech_path = os.path.join(OUTPUT_FOLDER, speech_name)
+    if not text_input:
+        return render_template('index.html', error_text="لطفاً متنی برای تبدیل وارد کنید.")
+    try:
+        tts = gTTS(text=text_input, lang='ar', slow=False)
+        unique_id = int(time.time())
+        temp_mp3 = os.path.join(OUTPUT_FOLDER, f"temp_{unique_id}.mp3")
+        speech_name = f"speech_{unique_id}.wav"
+        speech_path = os.path.join(OUTPUT_FOLDER, speech_name)
+        
+        tts.save(temp_mp3)
+        y, sr = librosa.load(temp_mp3, sr=22050)
+        sf.write(speech_path, y, sr)
+        
+        if os.path.exists(temp_mp3):
+            os.remove(temp_mp3)
             
-            tts.save(temp_mp3)
-            
-            # تبدیل به فرمت استاندارد wav برای پخش پایدار
-            y, sr = librosa.load(temp_mp3, sr=22050)
-            sf.write(speech_path, y, sr)
-            
-            if os.path.exists(temp_mp3):
-                os.remove(temp_mp3)
-                
-            return render_template('index.html', 
-                                   speech_success="متن شما با موفقیت به فایل صوتی تبدیل شد!", 
-                                   speech_file=speech_name)
-        except Exception as e:
-            return render_template('index.html', error="خطا در تولید فایل صوتی از متن. لطفاً دوباره تلاش کنید.")
+        return render_template('index.html', 
+                               success_text="تبدیل متن به صوت با موفقیت انجام شد!", 
+                               speech_file=speech_name)
+    except Exception as e:
+        return render_template('index.html', error_text="خطا در تبدیل متن به صوت.")
 
-    # بخش جداسازی موزیک و صوت
+@app.route('/process-audio', methods=['POST'])
+def process_audio():
     if 'file' not in request.files:
-        return render_template('index.html', error="لطفاً یک فایل صوتی انتخاب کنید یا متنی بنویسید.")
+        return render_template('index.html', error_audio="لطفاً یک فایل صوتی انتخاب کنید.")
         
     file = request.files['file']
     if file.filename == '':
-        return render_template('index.html', error="فایلی انتخاب نشده است.")
+        return render_template('index.html', error_audio="فایلی انتخاب نشده است.")
         
     try:
         file_path = os.path.join(UPLOAD_FOLDER, file.filename)
         file.save(file_path)
         
-        y, sr = librosa.load(file_path, sr=22050, duration=30.0, mono=False)
+        y, sr = librosa.load(file_path, sr=22050, duration=25.0, mono=False)
         
         if y.ndim > 1:
             vocals = (y[0] + y[1]) / 2
@@ -103,11 +101,12 @@ def process():
         sf.write(vocal_path, vocals.T, sr)
         
         return render_template('index.html', 
-                               success="جداسازی صدا و موزیک با موفقیت انجام شد!", 
+                               success_audio="جداسازی صدا و موزیک با موفقیت انجام شد!", 
                                instrumental=inst_name, 
                                vocals=vocal_name)
     except Exception as e:
-        return render_template('index.html', error="خطا در پردازش فایل. لطفاً فایل صوتی کوچکتری انتخاب کنید.")
+        return render_template('index.html', error_audio="خطا در پردازش فایل صوتی.")
+
 @app.route('/download/<filename>')
 def download_file(filename):
     return send_from_directory(OUTPUT_FOLDER, filename, as_attachment=True)
