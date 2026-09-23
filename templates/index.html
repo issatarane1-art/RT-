@@ -8,10 +8,8 @@
         body {
             margin: 0;
             padding: 0;
-            /* اگر عکس پس‌زمینه دارید، نام فایل آن را به جای background.jpg قرار دهید */
-            background: linear-gradient(rgba(5, 11, 20, 0.85), rgba(5, 11, 20, 0.85)), url('background.jpg') no-repeat center center fixed;
+            background: linear-gradient(rgba(5, 11, 20, 0.85), rgba(5, 11, 20, 0.85)), #050b14;
             background-size: cover;
-            background-color: #050b14;
             color: #ffffff;
             font-family: Tahoma, sans-serif;
             text-align: center;
@@ -57,16 +55,19 @@
             max-width: 400px;
             box-sizing: border-box;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            text-align: right;
         }
         .card h3 {
             font-size: 18px;
             color: #00ffff;
             margin-top: 0;
+            text-align: center;
         }
         p.desc {
             font-size: 12px;
             color: #aaa;
             margin-bottom: 15px;
+            text-align: center;
         }
         input[type="file"], textarea {
             width: 100%;
@@ -100,35 +101,35 @@
             box-shadow: 0 0 10px rgba(0, 198, 255, 0.5);
         }
         .result-box {
-            margin-top: 30px;
+            margin-top: 20px;
             background: rgba(13, 27, 42, 0.9);
             border: 1px solid #00d2ff;
-            border-radius: 12px;
-            padding: 20px;
-            text-align: right;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
         }
         .alert-success {
             color: #00ff88;
             background: rgba(0, 255, 136, 0.1);
-            padding: 10px;
+            padding: 8px;
             border-radius: 6px;
-            margin-bottom: 15px;
-            text-align: center;
+            margin-bottom: 10px;
+            font-size: 13px;
         }
         .alert-error {
             color: #ff4d4d;
             background: rgba(255, 77, 77, 0.1);
-            padding: 10px;
+            padding: 8px;
             border-radius: 6px;
-            margin-bottom: 15px;
-            text-align: center;
+            margin-bottom: 10px;
+            font-size: 13px;
         }
         .download-btn {
             display: inline-block;
             background: #00b0ff;
             color: white;
             padding: 8px 15px;
-border-radius: 6px;
+            border-radius: 6px;
             text-decoration: none;
             margin: 5px;
             font-size: 13px;
@@ -136,36 +137,46 @@ border-radius: 6px;
         .download-btn:hover {
             background: #0091ea;
         }
+        /* استایل نوار پیشرفت درصددار */
         #loading-overlay {
             display: none;
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(5, 11, 20, 0.85);
+            background: rgba(5, 11, 20, 0.9);
             z-index: 9999;
             justify-content: center;
             align-items: center;
             flex-direction: column;
         }
-        .spinner {
-            border: 4px solid rgba(255,255,255,0.1);
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            border-left-color: #00ffff;
-            animation: spin 1s linear infinite;
-            margin-bottom: 15px;
+        .progress-bar-container {
+            width: 80%;
+            max-width: 350px;
+            background: #0b1622;
+            border: 1px solid #1e3a5f;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 15px;
         }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        .progress-bar {
+            width: 0%;
+            height: 22px;
+            background: linear-gradient(135deg, #0072ff, #00ffff);
+            text-align: center;
+            line-height: 22px;
+            color: #000;
+            font-weight: bold;
+            font-size: 12px;
+            transition: width 0.2s ease;
         }
     </style>
 </head>
 <body>
 
     <div id="loading-overlay">
-        <div class="spinner"></div>
-        <p style="color: #00ffff; font-size: 16px;">در حال پردازش و تفکیک صوت، لطفاً صبور باشید...</p>
+        <p id="loading-text" style="color: #00ffff; font-size: 16px; margin-bottom: 10px;">در حال پردازش...</p>
+        <div class="progress-bar-container">
+            <div id="progress" class="progress-bar">0%</div>
+        </div>
     </div>
 
     <header>
@@ -179,63 +190,70 @@ border-radius: 6px;
     <div class="container">
         <h1>سامانه هوشمند پردازش صوت و تبدیل متن</h1>
 
-        {% if error %}
-            <div class="alert-error">{{ error }}</div>
-        {% endif %}
-
         <div class="grid">
-            <!-- کارت تبدیل متن به صوت -->
             <div class="card">
                 <h3>تبدیل متن به صوت (Text-to-Speech)</h3>
-                <p class="desc">متن فارسی خود را بنویسید تا گوشی شما آن را به صورت صوتی بخواند.</p>
-                <textarea id="text_input" placeholder="متن خود را اینجا بنویسید..."></textarea>
-                <button type="button" onclick="speakText()">پخش صوتی متن</button>
+                <p class="desc">متن خود را بنویسید تا فایل صوتی آن ساخته شود.</p>
+                
+                {% if error_text %}
+                    <div class="alert-error">{{ error_text }}</div>
+                {% endif %}
+
+                <form action="/process-text" method="POST" onsubmit="startProgress('در حال تبدیل متن به صوت...')">
+                    <textarea name="text_input" placeholder="متن خود را اینجا بنویسید..." required></textarea>
+                    <button type="submit">تولید فایل صوتی</button>
+                </form>
+
+                {% if speech_success %}
+                <div class="result-box">
+                    <div class="alert-success">{{ speech_success }}</div>
+                    <a href="/download/{{ speech_file }}" class="download-btn">دانلود صوت ساخته شده</a>
+                </div>
+                {% endif %}
             </div>
 
-            <!-- کارت جداسازی صدا و موزیک -->
             <div class="card">
                 <h3>جداسازی و پردازش صوت</h3>
-                <p class="desc">فایل صوتی خود را انتخاب کرده و دکمه پردازش را بزنید.</p>
-                <form action="/process" method="POST" enctype="multipart/form-data" onsubmit="showLoader()">
+                <p class="desc">فایل صوتی خود را انتخاب کرده و پردازش را بزنید.</p>
+                
+                {% if error_audio %}
+                    <div class="alert-error">{{ error_audio }}</div>
+                {% endif %}
+
+                <form action="/process-audio" method="POST" enctype="multipart/form-data" onsubmit="startProgress('در حال جداسازی صدا و موزیک...')">
                     <input type="file" name="file" accept="audio/*" required>
                     <button type="submit">شروع پردازش صوت</button>
                 </form>
-            </div>
-        </div>
 
-        {% if success %}
-        <div class="result-box">
-            <h3>نتیجه پردازش صوت:</h3>
-            <div class="alert-success">{{ success }}</div>
-            <p>می‌توانید فایل‌های خروجی تفکیک‌شده را از زیر دانلود کنید:</p>
-            <div style="margin-top: 15px; text-align: center;">
-                <a href="/download/{{ instrumental }}" class="download-btn">دانلود موزیک (بی‌کلام)</a>
-                <a href="/download/{{ vocals }}" class="download-btn">دانلود صدای خواننده (Vocals)</a>
+                {% if success_audio %}
+                <div class="result-box">
+                    <div class="alert-success">{{ success_audio }}</div>
+                    <div style="text-align: center;">
+                        <a href="/download/{{ instrumental }}" class="download-btn">دانلود بی‌کلام</a>
+                        <a href="/download/{{ vocals }}" class="download-btn">دانلود باکلام</a>
+                    </div>
+                </div>
+                {% endif %}
             </div>
         </div>
-        {% endif %}
     </div>
 
     <script>
-        function showLoader() {
+        function startProgress(message) {
+            document.getElementById('loading-text').innerText = message;
             document.getElementById('loading-overlay').style.display = 'flex';
-        }
-
-        function speakText() {
-            const text = document.getElementById('text_input').value;
-            if (!text || text.trim() === "") {
-                alert('لطفاً ابتدا متنی را در کادر بنویسید.');
-                return;
-            }
-            if (!('speechSynthesis' in window)) {
-                alert('مرورگر شما از تبدیل متن به صوت پشتیبانی نمی‌کند.');
-                return;
-            }
-            window.speechSynthesis.cancel();
-            const utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = 'fa-IR';
-            utterance.rate = 1.0;
-            window.speechSynthesis.speak(utterance);
+            
+            let percent = 0;
+            const progressBar = document.getElementById('progress');
+            
+            // پر شدن روان نوار پیشرفت تا ۹5٪ تا زمان دریافت پاسخ سرور
+            let interval = setInterval(function() {
+                if (percent < 95) {
+                    percent += 2;
+                    progressBar.style.width = percent + '%';
+                    progressBar.innerText = percent + '%';
+                }
+            }, 100);
         }
     </script>
 
