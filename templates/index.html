@@ -8,8 +8,10 @@
         body {
             margin: 0;
             padding: 0;
-            background: linear-gradient(rgba(5, 11, 20, 0.85), rgba(5, 11, 20, 0.85)), #050b14;
+            /* اگر عکس پس‌زمینه دارید، نام فایل آن را به جای background.jpg قرار دهید */
+            background: linear-gradient(rgba(5, 11, 20, 0.85), rgba(5, 11, 20, 0.85)), url('background.jpg') no-repeat center center fixed;
             background-size: cover;
+            background-color: #050b14;
             color: #ffffff;
             font-family: Tahoma, sans-serif;
             text-align: center;
@@ -126,13 +128,13 @@
             background: #00b0ff;
             color: white;
             padding: 8px 15px;
-            border-radius: 6px;
+border-radius: 6px;
             text-decoration: none;
             margin: 5px;
             font-size: 13px;
         }
         .download-btn:hover {
-background: #0091ea;
+            background: #0091ea;
         }
         #loading-overlay {
             display: none;
@@ -220,24 +222,19 @@ background: #0091ea;
         }
 
         function speakText() {
-            const textElement = document.getElementById('text_input');
-            const text = textElement ? textElement.value : '';
-            
-            if (!text.trim()) {
-                alert('لطفاً ابتدا متنی را وارد کنید.');
+            const text = document.getElementById('text_input').value;
+            if (!text || text.trim() === "") {
+                alert('لطفاً ابتدا متنی را در کادر بنویسید.');
                 return;
             }
             if (!('speechSynthesis' in window)) {
-                alert('مرورگر شما از قابلیت پخش صوتی پشتیبانی نمی‌کند.');
+                alert('مرورگر شما از تبدیل متن به صوت پشتیبانی نمی‌کند.');
                 return;
             }
-            
             window.speechSynthesis.cancel();
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.lang = 'fa-IR';
             utterance.rate = 1.0;
-            
-            // رفع مشکل قطع شدن صدا در برخی مرورگرهای موبایل
             window.speechSynthesis.speak(utterance);
         }
     </script>
