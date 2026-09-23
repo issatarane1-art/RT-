@@ -192,9 +192,23 @@
         <div class="grid">
             <div class="card">
                 <h3>تبدیل متن به صوت (Text-to-Speech)</h3>
-                <p class="desc">متن خود را بنویسید تا گوشی شما آن را صوتی بخواند.</p>
-                <textarea id="text_input" placeholder="متن خود را اینجا بنویسید..."></textarea>
-                <button type="button" onclick="speakText()">پخش صوتی متن</button>
+                <p class="desc">متن خود را بنویسید تا فایل صوتی آن ساخته شود.</p>
+                
+                {% if error_text %}
+                    <div class="alert-error">{{ error_text }}</div>
+                {% endif %}
+
+                <form action="/process-text" method="POST" onsubmit="startProgress('در حال تبدیل متن به صوت...')">
+                    <textarea name="text_input" placeholder="متن خود را اینجا بنویسید..." required></textarea>
+                    <button type="submit">تولید فایل صوتی</button>
+                </form>
+
+                {% if speech_success %}
+                <div class="result-box">
+                    <div class="alert-success">{{ speech_success }}</div>
+                    <a href="/download/{{ speech_file }}" class="download-btn">دانلود صوت ساخته شده</a>
+                </div>
+                {% endif %}
             </div>
 
             <div class="card">
@@ -224,23 +238,6 @@
     </div>
 
     <script>
-        function speakText() {
-            const text = document.getElementById('text_input').value;
-            if (!text || text.trim() === "") {
-                alert('لطفاً ابتدا متنی را در کادر بنویسید.');
-                return;
-            }
-            if (!('speechSynthesis' in window)) {
-                alert('مرورگر شما از تبدیل متن به صوت پشتیبانی نمی‌کند.');
-                return;
-            }
-            window.speechSynthesis.cancel();
-            const utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = 'fa-IR';
-            utterance.rate = 1.0;
-            window.speechSynthesis.speak(utterance);
-        }
-
         function startProgress(message) {
             document.getElementById('loading-text').innerText = message;
             document.getElementById('loading-overlay').style.display = 'flex';
