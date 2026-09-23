@@ -54,6 +54,7 @@ def process_text():
     speech_path = os.path.join(OUTPUT_FOLDER, speech_name)
     
     try:
+        # تبدیل متن به صوت به زبان فارسی با gTTS
         tts = gTTS(text=text_input, lang='fa', slow=False)
         temp_mp3 = os.path.join(OUTPUT_FOLDER, f"temp_{unique_id}.mp3")
         tts.save(temp_mp3)
@@ -64,6 +65,7 @@ def process_text():
         if os.path.exists(temp_mp3):
             os.remove(temp_mp3)
     except Exception as e:
+        # فایل صوتی ایمن پشتیبان در صورت خطای اینترنت
         dummy_audio = np.random.uniform(-0.1, 0.1, 22050 * 2)
         sf.write(speech_path, dummy_audio, 22050)
         
