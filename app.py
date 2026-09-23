@@ -108,7 +108,7 @@ def process():
                                vocals=vocal_name)
     except Exception as e:
         return render_template('index.html', error="خطا در پردازش فایل. لطفاً فایل صوتی کوچکتری انتخاب کنید.")
-        @app.route('/download/<filename>')
+@app.route('/download/<filename>')
 def download_file(filename):
     return send_from_directory(OUTPUT_FOLDER, filename, as_attachment=True)
 
