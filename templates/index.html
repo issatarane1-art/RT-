@@ -4,9 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+    <!-- SEO -->
+    <title>تبدیل متن به صدا و حذف صدای خواننده از آهنگ | آنلاین</title>
+
+    <meta name="description" content="ابزار آنلاین تبدیل متن به صدا و پردازش فایل صوتی. متن خود را به صوت تبدیل کنید و صدای خواننده و موسیقی را پردازش کنید.">
+
+    <meta name="keywords" content="تبدیل متن به صدا, تبدیل متن فارسی به صدا, تبدیل نوشته به صدا, تبدیل متن به صوت, حذف صدای خواننده از آهنگ, جداسازی صدای خواننده, حذف وکال از آهنگ">
+
+    <meta name="robots" content="index, follow">
+
+    <!-- Google Search Console -->
     <meta name="google-site-verification" content="HKNJ-ewUE5WanEYFXDrVnH_oHmhafRa9F90Br7B1glw" />
 
-    <title>سامانه هوشمند پردازش صوت</title>
+    <!-- Open Graph -->
+    <meta property="og:title" content="تبدیل متن به صدا و حذف صدای خواننده از آهنگ">
+    <meta property="og:description" content="ابزار آنلاین تبدیل متن به صدا و پردازش فایل‌های صوتی">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://rt-k9g5.onrender.com/">
 
     <style>
         body {
@@ -83,7 +97,8 @@
             text-align: center;
         }
 
-        input[type="file"], textarea {
+        input[type="file"],
+        textarea {
             width: 100%;
             background: #0b1622;
             color: #fff;
@@ -220,16 +235,19 @@
 
     <div class="container">
 
-        <h1>سامانه هوشمند پردازش صوت و تبدیل متن</h1>
+        <!-- عنوان اصلی برای SEO -->
+        <h1>تبدیل متن به صدا و حذف صدای خواننده از آهنگ</h1>
 
         <div class="grid">
 
+            <!-- تبدیل متن به صدا -->
             <div class="card">
 
-                <h3>تبدیل متن به صوت (Text-to-Speech)</h3>
+                <h3>تبدیل متن به صدا</h3>
 
                 <p class="desc">
-                    متن خود را بنویسید تا فایل صوتی آن ساخته شود.
+                    متن خود را وارد کنید تا فایل صوتی ساخته شود.
+                    این ابزار برای تبدیل نوشته و متن فارسی به فایل صوتی طراحی شده است.
                 </p>
 
                 {% if error_text %}
@@ -251,7 +269,7 @@
                     ></textarea>
 
                     <button type="submit">
-                        تولید فایل صوتی
+                        تبدیل متن به صدا
                     </button>
 
                 </form>
@@ -268,7 +286,7 @@
                         href="/download/{{ speech_file }}"
                         class="download-btn"
                     >
-                        دانلود صوت ساخته شده
+                        دانلود فایل صوتی
                     </a>
 
                 </div>
@@ -278,12 +296,14 @@
             </div>
 
 
+            <!-- حذف / جداسازی صدای خواننده -->
             <div class="card">
 
-                <h3>جداسازی و پردازش صوت</h3>
+                <h3>حذف صدای خواننده از آهنگ</h3>
 
                 <p class="desc">
-                    فایل صوتی خود را انتخاب کرده و پردازش را بزنید.
+                    فایل صوتی خود را انتخاب کنید و آن را برای پردازش و جداسازی
+                    صدای خواننده و موسیقی ارسال کنید.
                 </p>
 
                 {% if error_audio %}
@@ -298,7 +318,7 @@
                     action="/process-audio"
                     method="POST"
                     enctype="multipart/form-data"
-                    onsubmit="startProgress('در حال جداسازی صدا و موزیک...')"
+                    onsubmit="startProgress('در حال پردازش فایل صوتی...')"
                 >
 
                     <input
@@ -376,6 +396,7 @@
                 }
 
             }, 50);
+
         }
 
     </script>
