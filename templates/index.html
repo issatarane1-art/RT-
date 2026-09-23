@@ -8,8 +8,7 @@
         body {
             margin: 0;
             padding: 0;
-            /* اگر عکس پس‌زمینه دارید، مسیر آن را در background قرار دهید یا از گرادینت قبلی همراه با عکس استفاده کنید */
-            background: linear-gradient(rgba(5, 11, 20, 0.85), rgba(5, 11, 20, 0.85)), url('آدرس_عکس_یا_نام_تصویر_شما') no-repeat center center fixed;
+            background: linear-gradient(rgba(5, 11, 20, 0.85), rgba(5, 11, 20, 0.85)), #050b14;
             background-size: cover;
             color: #ffffff;
             font-family: Tahoma, sans-serif;
@@ -118,7 +117,6 @@
             color: #ff4d4d;
             background: rgba(255, 77, 77, 0.1);
             padding: 10px;
-            border-sec: 6px;
             border-radius: 6px;
             margin-bottom: 15px;
             text-align: center;
@@ -134,11 +132,44 @@
             font-size: 13px;
         }
         .download-btn:hover {
-            background: #0091ea;
+</body>
+</html>
+background: #0091ea;
+        }
+        /* استایل لودینگ پیشرفت */
+        #loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(5, 11, 20, 0.85);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+        .spinner {
+            border: 4px solid rgba(255,255,255,0.1);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border-left-color: #00ffff;
+            animation: spin 1s linear infinite;
+            margin-bottom: 15px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
     </style>
 </head>
 <body>
+
+    <!-- صفحه لودینگ هنگام پردازش -->
+    <div id="loading-overlay">
+        <div class="spinner"></div>
+        <p style="color: #00ffff; font-size: 16px;">در حال پردازش و تفکیک صوت، لطفاً صبور باشید...</p>
+    </div>
+
     <header>
         <nav>
             <a href="/">صفحه اصلی</a>
@@ -167,7 +198,7 @@
             <div class="card">
                 <h3>جداسازی و پردازش صوت</h3>
                 <p class="desc">فایل صوتی خود را انتخاب کرده و دکمه پردازش را بزنید.</p>
-                <form action="/process" method="POST" enctype="multipart/form-data">
+                <form action="/process" method="POST" enctype="multipart/form-data" onsubmit="showLoader()">
                     <input type="file" name="file" accept="audio/*" required>
                     <button type="submit">شروع پردازش صوت</button>
                 </form>
@@ -188,6 +219,10 @@
     </div>
 
     <script>
+        function showLoader() {
+            document.getElementById('loading-overlay').style.display = 'flex';
+        }
+
         function speakText() {
             const text = document.getElementById('text_input').value;
             if (!text.trim()) {
@@ -213,6 +248,5 @@
             alert('پشتیبانی و ارتباط:\nبرای دریافت بهترین نتیجه، فایل‌های صوتی خود را با حجم مناسب بارگذاری کنید.');
         }
     </script>
-
 </body>
 </html>
