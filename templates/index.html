@@ -203,9 +203,9 @@
                     <button type="submit">تولید فایل صوتی</button>
                 </form>
 
-                {% if speech_success %}
+                {% if speech_file %}
                 <div class="result-box">
-                    <div class="alert-success">{{ speech_success }}</div>
+                    <div class="alert-success">{{ success_text }}</div>
                     <a href="/download/{{ speech_file }}" class="download-btn">دانلود صوت ساخته شده</a>
                 </div>
                 {% endif %}
@@ -251,7 +251,7 @@
                     progressBar.style.width = percent + '%';
                     progressBar.innerText = percent + '%';
                 }
-            }, 80);
+            }, 50);
         }
     </script>
 
