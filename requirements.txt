@@ -3,3 +3,4 @@ numpy==1.26.4
 soundfile==0.12.1
 librosa==0.10.1
 gTTS==2.5.1
+gunicorn==21.2.0
