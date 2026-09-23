@@ -132,11 +132,8 @@
             font-size: 13px;
         }
         .download-btn:hover {
-</body>
-</html>
 background: #0091ea;
         }
-        /* استایل لودینگ پیشرفت */
         #loading-overlay {
             display: none;
             position: fixed;
@@ -164,7 +161,6 @@ background: #0091ea;
 </head>
 <body>
 
-    <!-- صفحه لودینگ هنگام پردازش -->
     <div id="loading-overlay">
         <div class="spinner"></div>
         <p style="color: #00ffff; font-size: 16px;">در حال پردازش و تفکیک صوت، لطفاً صبور باشید...</p>
@@ -173,8 +169,8 @@ background: #0091ea;
     <header>
         <nav>
             <a href="/">صفحه اصلی</a>
-            <a onclick="showAbout()">درباره ما</a>
-            <a onclick="showContact()">تماس با ما</a>
+            <a href="/about" target="_blank">درباره ما</a>
+            <a href="/contact" target="_blank">تماس با ما</a>
         </nav>
     </header>
 
@@ -224,7 +220,9 @@ background: #0091ea;
         }
 
         function speakText() {
-            const text = document.getElementById('text_input').value;
+            const textElement = document.getElementById('text_input');
+            const text = textElement ? textElement.value : '';
+            
             if (!text.trim()) {
                 alert('لطفاً ابتدا متنی را وارد کنید.');
                 return;
@@ -233,20 +231,16 @@ background: #0091ea;
                 alert('مرورگر شما از قابلیت پخش صوتی پشتیبانی نمی‌کند.');
                 return;
             }
+            
             window.speechSynthesis.cancel();
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.lang = 'fa-IR';
             utterance.rate = 1.0;
+            
+            // رفع مشکل قطع شدن صدا در برخی مرورگرهای موبایل
             window.speechSynthesis.speak(utterance);
         }
-
-        function showAbout() {
-            alert('سامانه هوشمند پردازش صوت\nطراحی شده برای جداسازی موزیک و تبدیل متن به گفتار.');
-        }
-
-        function showContact() {
-            alert('پشتیبانی و ارتباط:\nبرای دریافت بهترین نتیجه، فایل‌های صوتی خود را با حجم مناسب بارگذاری کنید.');
-        }
     </script>
+
 </body>
 </html>
