@@ -8,14 +8,17 @@
         body {
             margin: 0;
             padding: 0;
-            background-color: #050b14;
+            /* اگر عکس پس‌زمینه دارید، مسیر آن را در background قرار دهید یا از گرادینت قبلی همراه با عکس استفاده کنید */
+            background: linear-gradient(rgba(5, 11, 20, 0.85), rgba(5, 11, 20, 0.85)), url('آدرس_عکس_یا_نام_تصویر_شما') no-repeat center center fixed;
+            background-size: cover;
             color: #ffffff;
             font-family: Tahoma, sans-serif;
             text-align: center;
+            min-height: 100vh;
         }
         header {
             padding: 15px;
-            background: rgba(0, 0, 0, 0.5);
+            background: rgba(0, 0, 0, 0.7);
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
         nav a {
@@ -45,7 +48,7 @@
             justify-content: center;
         }
         .card {
-            background: rgba(13, 27, 42, 0.8);
+            background: rgba(13, 27, 42, 0.9);
             border: 1px solid rgba(0, 210, 255, 0.3);
             border-radius: 12px;
             padding: 20px;
@@ -115,6 +118,7 @@
             color: #ff4d4d;
             background: rgba(255, 77, 77, 0.1);
             padding: 10px;
+            border-sec: 6px;
             border-radius: 6px;
             margin-bottom: 15px;
             text-align: center;
@@ -135,7 +139,6 @@
     </style>
 </head>
 <body>
-
     <header>
         <nav>
             <a href="/">صفحه اصلی</a>
@@ -146,7 +149,8 @@
 
     <div class="container">
         <h1>سامانه هوشمند پردازش صوت و تبدیل متن</h1>
-{% if error %}
+
+        {% if error %}
             <div class="alert-error">{{ error }}</div>
         {% endif %}
 
@@ -164,7 +168,7 @@
                 <h3>جداسازی و پردازش صوت</h3>
                 <p class="desc">فایل صوتی خود را انتخاب کرده و دکمه پردازش را بزنید.</p>
                 <form action="/process" method="POST" enctype="multipart/form-data">
-                    <input type="file" name="file" accept="audio/*">
+                    <input type="file" name="file" accept="audio/*" required>
                     <button type="submit">شروع پردازش صوت</button>
                 </form>
             </div>
@@ -202,11 +206,11 @@
         }
 
         function showAbout() {
-            alert('سامانه هوشمند پردازش صوت\nطراحی شده برای جداسازی موزیک و تبدیل متن به گفتار به صورت پایدار و سریع.');
+            alert('سامانه هوشمند پردازش صوت\nطراحی شده برای جداسازی موزیک و تبدیل متن به گفتار.');
         }
 
         function showContact() {
-            alert('پشتیبانی و ارتباط:\nبرای استفاده بهتر، فایل‌های صوتی خود را با حجم مناسب بارگذاری کنید.');
+            alert('پشتیبانی و ارتباط:\nبرای دریافت بهترین نتیجه، فایل‌های صوتی خود را با حجم مناسب بارگذاری کنید.');
         }
     </script>
 
