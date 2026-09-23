@@ -137,7 +137,6 @@
         .download-btn:hover {
             background: #0091ea;
         }
-        /* استایل نوار پیشرفت درصددار */
         #loading-overlay {
             display: none;
             position: fixed;
@@ -246,14 +245,13 @@
             let percent = 0;
             const progressBar = document.getElementById('progress');
             
-            // پر شدن روان نوار پیشرفت تا ۹5٪ تا زمان دریافت پاسخ سرور
             let interval = setInterval(function() {
-                if (percent < 95) {
+                if (percent < 98) {
                     percent += 2;
                     progressBar.style.width = percent + '%';
                     progressBar.innerText = percent + '%';
                 }
-            }, 100);
+            }, 80);
         }
     </script>
 
