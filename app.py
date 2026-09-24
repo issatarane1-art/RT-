@@ -21,8 +21,13 @@ from faster_whisper import WhisperModel
 # Flask
 # =========================================================
 
-app = Flask(__name__)
+import os
+from flask import Flask, render_template
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+TEMPLATES_DIR = os.path.join(BASE_DIR, "templates")
+
+app = Flask(__name__, template_folder=TEMPLATES_DIR)
 app.config["MAX_CONTENT_LENGTH"] = 50 * 1024 * 1024
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
