@@ -49,11 +49,13 @@
                     #32105c 0%,
                     transparent 35%
                 ),
+
                 radial-gradient(
                     circle at bottom left,
                     #160b35 0%,
                     transparent 40%
                 ),
+
                 #090614;
 
             color: white;
@@ -660,7 +662,6 @@
                 به فایل صوتی تبدیل شود.
             </p>
 
-
             <form
                 action="/process-text"
                 method="POST"
@@ -1155,6 +1156,17 @@
             را دریافت و دانلود کنید.
         </p>
 
+        <!-- لینک جدید برای صفحه اختصاصی تبدیل متن به صدا -->
+        <p style="text-align:center; margin-top:15px;">
+            <a
+                href="/text-to-speech"
+                style="color:#c084fc; text-decoration:none; font-weight:bold;">
+
+                🔊 صفحه اختصاصی تبدیل متن به صدا آنلاین
+
+            </a>
+        </p>
+
 
         <h3>
             تبدیل صوت به متن
@@ -1415,6 +1427,7 @@ function startProgress(
 
                 }
 
+
                 else {
 
                     clearInterval(
@@ -1487,6 +1500,7 @@ function copyImageText() {
 
     }
 
+
     else {
 
         fallbackCopy(
@@ -1548,6 +1562,7 @@ function copySpeechText() {
 
     }
 
+
     else {
 
         fallbackCopy(
@@ -1589,6 +1604,7 @@ function fallbackCopy(
         );
 
     }
+
 
     catch (error) {
 
