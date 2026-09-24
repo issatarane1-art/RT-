@@ -1,0 +1,749 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<meta name="google-site-verification" content="HKNJ-ewUE5WanEYFXDrVnH_oHmhafRa9F90Br7B1glw">
+
+<title>ابزارهای آنلاین همه‌کاره | متن، صدا و عکس</title>
+
+<meta name="description" content="مجموعه ابزارهای آنلاین فارسی برای تبدیل متن به صدا، تبدیل صوت به متن، استخراج متن از عکس و پردازش فایل صوتی.">
+<meta name="robots" content="index,follow">
+<link rel="canonical" href="https://rt-k9g5.onrender.com/">
+
+<meta property="og:type" content="website">
+<meta property="og:title" content="ابزارهای آنلاین همه‌کاره">
+<meta property="og:description" content="ابزارهای کاربردی متن، صوت و تصویر برای کاربران فارسی‌زبان.">
+
+<style>
+:root{
+--bg:#080611;
+--panel:#151026;
+--panel2:#1c1430;
+--text:#fff;
+--muted:#bdb4cf;
+--p:#a855f7;
+--p2:#7c3aed;
+--border:#3b2560
+}
+
+*{box-sizing:border-box}
+
+html{
+scroll-behavior:smooth
+}
+
+body{
+margin:0;
+background:
+radial-gradient(circle at top right,#2b1050,transparent 35%),
+var(--bg);
+color:var(--text);
+font-family:Tahoma,Arial,sans-serif;
+line-height:1.9
+}
+
+a{
+color:#d8b4fe
+}
+
+.nav{
+position:sticky;
+top:0;
+z-index:10;
+background:#080611dd;
+backdrop-filter:blur(15px);
+border-bottom:1px solid var(--border)
+}
+
+.navin{
+width:92%;
+max-width:1180px;
+margin:auto;
+min-height:64px;
+display:flex;
+align-items:center;
+justify-content:space-between;
+gap:15px
+}
+
+.brand{
+text-decoration:none;
+font-weight:900;
+color:#fff
+}
+
+.links{
+display:flex;
+gap:8px;
+flex-wrap:wrap
+}
+
+.links a{
+text-decoration:none;
+color:var(--muted);
+padding:6px 9px;
+border-radius:9px
+}
+
+.links a:hover{
+background:#a855f722;
+color:#fff
+}
+
+.hero{
+width:92%;
+max-width:1180px;
+margin:auto;
+text-align:center;
+padding:70px 0 35px
+}
+
+.badge{
+display:inline-block;
+padding:4px 12px;
+border:1px solid var(--border);
+border-radius:999px;
+color:#e9d5ff;
+background:#a855f711
+}
+
+.hero h1{
+font-size:clamp(30px,5vw,52px);
+line-height:1.3;
+margin:15px 0
+}
+
+.hero p{
+max-width:800px;
+margin:auto;
+color:var(--muted);
+font-size:17px
+}
+
+.wrap{
+width:92%;
+max-width:1180px;
+margin:auto
+}
+
+.grid{
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:22px
+}
+
+.card{
+background:#151026dd;
+border:1px solid var(--border);
+border-radius:22px;
+padding:24px;
+box-shadow:0 15px 50px #0005
+}
+
+.icon{
+font-size:42px
+}
+
+.card h2{
+margin:5px 0
+}
+
+.card p{
+color:var(--muted)
+}
+
+textarea,
+input[type=file]{
+width:100%;
+margin-top:12px;
+padding:13px;
+border-radius:13px;
+border:1px solid #4c3175;
+background:#0c0915;
+color:#fff;
+font:inherit
+}
+
+textarea{
+min-height:145px;
+resize:vertical
+}
+
+button,
+.btn{
+width:100%;
+display:block;
+margin-top:12px;
+padding:13px;
+border:0;
+border-radius:12px;
+background:linear-gradient(135deg,var(--p2),var(--p));
+color:#fff;
+font:inherit;
+font-weight:bold;
+text-align:center;
+text-decoration:none;
+cursor:pointer
+}
+
+.result{
+margin-top:15px;
+padding:15px;
+border-radius:14px;
+background:#4ade8010;
+border:1px solid #4ade8030
+}
+
+.result audio{
+width:100%;
+margin-top:10px
+}
+
+.notice{
+width:92%;
+max-width:900px;
+margin:18px auto;
+padding:12px;
+border-radius:13px;
+text-align:center
+}
+
+.ok{
+background:#4ade8010;
+border:1px solid #4ade8030;
+color:#bbf7d0
+}
+
+.err{
+background:#fb718510;
+border:1px solid #fb718530;
+color:#fecdd3
+}
+
+.seo{
+margin:55px 0;
+padding:30px;
+border-radius:22px;
+background:var(--panel2);
+border:1px solid var(--border)
+}
+
+.seo p,
+.seo li{
+color:var(--muted)
+}
+
+details{
+margin:10px 0;
+padding:13px;
+border:1px solid var(--border);
+border-radius:13px;
+background:#a855f708
+}
+
+summary{
+cursor:pointer;
+font-weight:bold
+}
+
+footer{
+margin-top:60px;
+padding:30px;
+text-align:center;
+color:var(--muted);
+border-top:1px solid var(--border)
+}
+
+@media(max-width:780px){
+
+.navin{
+align-items:flex-start;
+flex-direction:column;
+padding:10px 0
+}
+
+.grid{
+grid-template-columns:1fr
+}
+
+.hero{
+padding-top:45px
+}
+
+}
+</style>
+</head>
+
+<body>
+
+<nav class="nav">
+<div class="navin">
+
+<a class="brand" href="/">
+🛠️ ابزارهای آنلاین
+</a>
+
+<div class="links">
+<a href="/">خانه</a>
+<a href="/text-to-speech">متن به صدا</a>
+<a href="/about">درباره ما</a>
+<a href="/contact">تماس</a>
+</div>
+
+</div>
+</nav>
+
+<header class="hero">
+
+<span class="badge">
+ابزارهای آنلاین فارسی
+</span>
+
+<h1>
+یک سایت، چندین ابزار کاربردی
+</h1>
+
+<p>
+ابزارهای ساده و کاربردی برای متن، صوت و تصویر؛
+با تمرکز بر استفاده راحت کاربران فارسی‌زبان.
+</p>
+
+</header>
+
+{% if success_text %}
+<div class="notice ok">
+✅ {{ success_text }}
+</div>
+{% endif %}
+
+{% if error_text %}
+<div class="notice err">
+❌ {{ error_text }}
+</div>
+{% endif %}
+
+<main class="wrap">
+
+<section class="grid">
+
+<article class="card">
+
+<div class="icon">🔊</div>
+
+<h2>
+تبدیل متن به صدا
+</h2>
+
+<p>
+متن فارسی را وارد کنید و فایل صوتی دریافت کنید.
+</p>
+
+<form action="/process-text" method="post">
+
+<textarea
+name="text_input"
+maxlength="12000"
+placeholder="متن فارسی خود را اینجا بنویسید..."
+required></textarea>
+
+<button>
+🔊 ساخت صدا
+</button>
+
+</form>
+
+{% if speech_file %}
+
+<div class="result">
+
+<strong>
+فایل آماده است
+</strong>
+
+<audio
+controls
+src="/download/{{ speech_file }}">
+</audio>
+
+<a
+class="btn"
+href="/download/{{ speech_file }}">
+⬇️ دانلود
+</a>
+
+</div>
+
+{% endif %}
+
+<a href="/text-to-speech">
+صفحه اختصاصی تبدیل متن به صدا ←
+</a>
+
+</article>
+
+
+<article class="card">
+
+<div class="icon">
+📝
+</div>
+
+<h2>
+تبدیل صوت به متن
+</h2>
+
+<p>
+فایل صوتی فارسی را ارسال کنید تا گفتار به متن تبدیل شود.
+</p>
+
+<form
+action="/speech-to-text"
+method="post"
+enctype="multipart/form-data">
+
+<input
+type="file"
+name="speech_file"
+accept="audio/*"
+required>
+
+<button>
+📝 استخراج متن
+</button>
+
+</form>
+
+{% if transcribed_text %}
+
+<div class="result">
+
+<textarea
+id="speechResult"
+readonly>{{ transcribed_text }}</textarea>
+
+<button
+type="button"
+onclick="copyText('speechResult')">
+📋 کپی متن
+</button>
+
+</div>
+
+{% endif %}
+
+</article>
+
+
+<article class="card">
+
+<div class="icon">
+🎵
+</div>
+
+<h2>
+پردازش فایل صوتی
+</h2>
+
+<p>
+پردازش تقریبی کانال‌های استریو و دریافت دو خروجی صوتی.
+</p>
+
+<form
+action="/process-audio"
+method="post"
+enctype="multipart/form-data">
+
+<input
+type="file"
+name="audio_file"
+accept="audio/*"
+required>
+
+<button>
+🎵 پردازش صوت
+</button>
+
+</form>
+
+{% if vocals_file or instrumental_file %}
+
+<div class="result">
+
+{% if vocals_file %}
+
+<a
+class="btn"
+href="/download/{{ vocals_file }}">
+🎤 دانلود خروجی اول
+</a>
+
+{% endif %}
+
+{% if instrumental_file %}
+
+<a
+class="btn"
+href="/download/{{ instrumental_file }}">
+🎼 دانلود خروجی دوم
+</a>
+
+{% endif %}
+
+</div>
+
+{% endif %}
+
+</article>
+
+
+<article class="card">
+
+<div class="icon">
+🖼️
+</div>
+
+<h2>
+تبدیل عکس به متن
+</h2>
+
+<p>
+متن فارسی و انگلیسی داخل تصویر را استخراج کنید.
+</p>
+
+<form
+action="/image-to-text"
+method="post"
+enctype="multipart/form-data">
+
+<input
+type="file"
+name="image_file"
+accept="image/*"
+required>
+
+<button>
+🖼️ استخراج متن
+</button>
+
+</form>
+
+{% if image_text %}
+
+<div class="result">
+
+<textarea
+id="imageResult"
+readonly>{{ image_text }}</textarea>
+
+<button
+type="button"
+onclick="copyText('imageResult')">
+📋 کپی متن
+</button>
+
+</div>
+
+{% endif %}
+
+</article>
+
+</section>
+
+
+<section class="seo">
+
+<h2>
+مجموعه ابزارهای آنلاین متن، صوت و تصویر
+</h2>
+
+<p>
+این صفحه مجموعه‌ای از ابزارهای کاربردی را
+در یک محیط ساده در اختیار شما قرار می‌دهد.
+</p>
+
+
+<h3>
+تبدیل متن به صدا
+</h3>
+
+<p>
+برای توضیحات و استفاده از صفحه اختصاصی به
+<a href="/text-to-speech">
+تبدیل متن به صدا آنلاین
+</a>
+بروید.
+</p>
+
+
+<h3>
+تبدیل صوت به متن
+</h3>
+
+<p>
+فایل صوتی فارسی را ارسال کنید تا متن گفتار استخراج شود.
+</p>
+
+
+<h3>
+تبدیل عکس به متن
+</h3>
+
+<p>
+تصاویر دارای نوشته را ارسال کنید و نتیجه OCR را کپی کنید.
+</p>
+
+
+<h3>
+پردازش صوت
+</h3>
+
+<p>
+ابزار فعلی برای جداسازی تقریبی کانال‌های استریو است
+و نباید با سرویس‌های حرفه‌ای جداسازی منبع صوتی اشتباه گرفته شود.
+</p>
+
+
+<h2>
+سؤالات متداول
+</h2>
+
+
+<details>
+
+<summary>
+آیا متن فارسی به صدا تبدیل می‌شود؟
+</summary>
+
+<p>
+بله، Backend از صدای فارسی پشتیبانی‌شده استفاده می‌کند.
+</p>
+
+</details>
+
+
+<details>
+
+<summary>
+آیا خروجی‌ها قابل دانلود هستند؟
+</summary>
+
+<p>
+بله، بعد از پردازش لینک دانلود نتیجه نمایش داده می‌شود.
+</p>
+
+</details>
+
+
+<details>
+
+<summary>
+حداکثر حجم فایل چقدر است؟
+</summary>
+
+<p>
+محدودیت فعلی آپلود ۵۰ مگابایت است.
+</p>
+
+</details>
+
+</section>
+
+</main>
+
+
+<footer>
+
+<a href="/">
+خانه
+</a>
+
+·
+
+<a href="/text-to-speech">
+متن به صدا
+</a>
+
+·
+
+<a href="/about">
+درباره ما
+</a>
+
+·
+
+<a href="/contact">
+تماس
+</a>
+
+<br>
+
+© تمامی حقوق محفوظ است.
+
+</footer>
+
+
+<script>
+
+function copyText(id){
+
+const el=document.getElementById(id);
+
+if(!el)return;
+
+const text=el.value||el.textContent||"";
+
+if(
+navigator.clipboard &&
+window.isSecureContext
+){
+
+navigator.clipboard
+.writeText(text)
+.then(
+()=>{
+alert("✅ متن کپی شد.")
+}
+)
+.catch(
+()=>{
+fallback(el)
+}
+);
+
+}else{
+
+fallback(el);
+
+}
+
+}
+
+
+function fallback(el){
+
+el.focus();
+
+el.select();
+
+try{
+
+document.execCommand("copy");
+
+alert("✅ متن کپی شد.");
+
+}
+
+catch(e){
+
+alert("❌ کپی انجام نشد.");
+
+}
+
+}
+
+</script>
+
+</body>
+</html>
