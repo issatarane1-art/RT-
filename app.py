@@ -3,7 +3,6 @@ import time
 import asyncio
 import shutil
 
-import numpy as np
 import librosa
 import soundfile as sf
 import pytesseract
@@ -17,7 +16,6 @@ from faster_whisper import WhisperModel
 
 app = Flask(__name__)
 
-
 # =========================================================
 # FOLDERS
 # =========================================================
@@ -30,18 +28,20 @@ os.makedirs(SEPARATED_FOLDER, exist_ok=True)
 
 
 # =========================================================
-# WHISPER
+# WHISPER MODEL
 # =========================================================
 
 whisper_model = None
 
 
 def get_whisper_model():
+
     global whisper_model
 
     if whisper_model is None:
+
         whisper_model = WhisperModel(
-            "base",
+            "tiny",
             device="cpu",
             compute_type="int8"
         )
@@ -50,16 +50,18 @@ def get_whisper_model():
 
 
 # =========================================================
-# TESSERACT OCR
+# TESSERACT
 # =========================================================
 
 TESSERACT_PATH = shutil.which("tesseract")
 
 if TESSERACT_PATH:
+
     pytesseract.pytesseract.tesseract_cmd = TESSERACT_PATH
-else:
-    if os.path.exists("/usr/bin/tesseract"):
-        pytesseract.pytesseract.tesseract_cmd = "/usr/bin/tesseract"
+
+elif os.path.exists("/usr/bin/tesseract"):
+
+    pytesseract.pytesseract.tesseract_cmd = "/usr/bin/tesseract"
 
 
 # =========================================================
@@ -68,6 +70,7 @@ else:
 
 @app.route("/")
 def home():
+
     return render_template("index.html")
 
 
@@ -77,15 +80,24 @@ def home():
 
 @app.route("/about")
 def about():
+
     return """
     <!DOCTYPE html>
     <html lang="fa" dir="rtl">
+
     <head>
+
         <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <meta name="viewport"
+              content="width=device-width, initial-scale=1.0">
+
         <title>درباره ما</title>
+
     </head>
+
     <body>
+
         <h1>درباره ما</h1>
 
         <p>
@@ -96,7 +108,9 @@ def about():
         </p>
 
         <a href="/">بازگشت به صفحه اصلی</a>
+
     </body>
+
     </html>
     """
 
@@ -107,14 +121,22 @@ def about():
 
 @app.route("/contact")
 def contact():
+
     return """
     <!DOCTYPE html>
     <html lang="fa" dir="rtl">
+
     <head>
+
         <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <meta name="viewport"
+              content="width=device-width, initial-scale=1.0">
+
         <title>تماس با ما</title>
+
     </head>
+
     <body>
 
         <h1>تماس با ما</h1>
@@ -126,6 +148,7 @@ def contact():
         <a href="/">بازگشت به صفحه اصلی</a>
 
     </body>
+
     </html>
     """
 
@@ -155,12 +178,15 @@ def process_text():
     ).strip()
 
     if not text:
+
         return render_template(
             "index.html",
             error_text="لطفاً ابتدا متن را وارد کنید."
         )
 
-    filename = f"speech_{int(time.time())}.mp3"
+    filename = (
+        f"speech_{int(time.time())}.mp3"
+    )
 
     filepath = os.path.join(
         UPLOAD_FOLDER,
@@ -186,7 +212,9 @@ def process_text():
 
         return render_template(
             "index.html",
-            error_text=f"خطا در تبدیل متن به صدا: {str(e)}"
+            error_text=(
+                f"خطا در تبدیل متن به صدا: {str(e)}"
+            )
         )
 
 
@@ -198,6 +226,7 @@ def process_text():
 def process_audio():
 
     if "audio_file" not in request.files:
+
         return render_template(
             "index.html",
             error_text="فایل صوتی انتخاب نشده است."
@@ -206,14 +235,19 @@ def process_audio():
     file = request.files["audio_file"]
 
     if file.filename == "":
+
         return render_template(
             "index.html",
             error_text="فایل صوتی انتخاب نشده است."
         )
 
-    safe_name = os.path.basename(file.filename)
+    safe_name = os.path.basename(
+        file.filename
+    )
 
-    filename = f"{int(time.time())}_{safe_name}"
+    filename = (
+        f"{int(time.time())}_{safe_name}"
+    )
 
     filepath = os.path.join(
         UPLOAD_FOLDER,
@@ -235,20 +269,27 @@ def process_audio():
             return render_template(
                 "index.html",
                 error_text=(
-                    "برای پردازش فعلی، فایل صوتی باید استریو باشد."
+                    "برای پردازش فعلی، "
+                    "فایل صوتی باید استریو باشد."
                 )
             )
 
         left = y[0]
         right = y[1]
 
-        vocals = (left + right) / 2
+        vocals = (
+            left + right
+        ) / 2
 
-        instrumental = (left - right) / 2
+        instrumental = (
+            left - right
+        ) / 2
 
         timestamp = int(time.time())
 
-        vocals_file = f"vocals_{timestamp}.wav"
+        vocals_file = (
+            f"vocals_{timestamp}.wav"
+        )
 
         instrumental_file = (
             f"instrumental_{timestamp}.wav"
@@ -278,7 +319,9 @@ def process_audio():
 
         return render_template(
             "index.html",
-            success_text="پردازش فایل با موفقیت انجام شد.",
+            success_text=(
+                "پردازش فایل با موفقیت انجام شد."
+            ),
             vocals_file=vocals_file,
             instrumental_file=instrumental_file
         )
@@ -287,7 +330,9 @@ def process_audio():
 
         return render_template(
             "index.html",
-            error_text=f"خطا در پردازش فایل صوتی: {str(e)}"
+            error_text=(
+                f"خطا در پردازش فایل صوتی: {str(e)}"
+            )
         )
 
     finally:
@@ -296,6 +341,7 @@ def process_audio():
 
             try:
                 os.remove(filepath)
+
             except Exception:
                 pass
 
@@ -340,17 +386,15 @@ def speech_to_text():
 
     try:
 
-        # دریافت مدل Whisper
         model = get_whisper_model()
 
-        # تبدیل صوت به متن فارسی
         segments, info = model.transcribe(
             input_path,
             language="fa",
             task="transcribe",
-            beam_size=5,
+            beam_size=1,
             vad_filter=True,
-            condition_on_previous_text=True
+            condition_on_previous_text=False
         )
 
         all_text = []
@@ -360,6 +404,7 @@ def speech_to_text():
             text = segment.text.strip()
 
             if text:
+
                 all_text.append(text)
 
         final_text = " ".join(
@@ -399,6 +444,7 @@ def speech_to_text():
 
             try:
                 os.remove(input_path)
+
             except Exception:
                 pass
 
@@ -509,7 +555,9 @@ def image_to_text():
             config="--psm 6"
         )
 
-        extracted_text = extracted_text.strip()
+        extracted_text = (
+            extracted_text.strip()
+        )
 
         if not extracted_text:
 
@@ -545,6 +593,7 @@ def image_to_text():
 
             try:
                 os.remove(image_path)
+
             except Exception:
                 pass
 
