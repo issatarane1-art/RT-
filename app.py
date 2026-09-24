@@ -3,30 +3,18 @@ import time
 import asyncio
 import shutil
 
-import numpy as np
 import librosa
 import soundfile as sf
 import pytesseract
 import edge_tts
 
 from PIL import Image, ImageEnhance, ImageFilter
-from flask import (
-    Flask,
-    render_template,
-    request,
-    send_from_directory,
-    Response
-)
+from flask import Flask, render_template, request, send_from_directory, Response
 
 from faster_whisper import WhisperModel
 
 
 app = Flask(__name__)
-
-
-# =========================================================
-# FOLDERS
-# =========================================================
 
 UPLOAD_FOLDER = "uploads"
 SEPARATED_FOLDER = "separated"
@@ -36,12 +24,10 @@ os.makedirs(SEPARATED_FOLDER, exist_ok=True)
 
 
 # =========================================================
-# WHISPER MODEL
+# WHISPER
 # =========================================================
 
-# مدل base برای مصرف مناسب‌تر RAM و CPU روی Render
 WHISPER_MODEL_SIZE = "base"
-
 whisper_model = None
 
 
@@ -59,18 +45,15 @@ def get_whisper_model():
 
 
 # =========================================================
-# TESSERACT OCR
+# TESSERACT
 # =========================================================
 
 TESSERACT_PATH = shutil.which("tesseract")
 
 if TESSERACT_PATH:
     pytesseract.pytesseract.tesseract_cmd = TESSERACT_PATH
-else:
-    possible_path = "/usr/bin/tesseract"
-
-    if os.path.exists(possible_path):
-        pytesseract.pytesseract.tesseract_cmd = possible_path
+elif os.path.exists("/usr/bin/tesseract"):
+    pytesseract.pytesseract.tesseract_cmd = "/usr/bin/tesseract"
 
 
 # =========================================================
@@ -91,17 +74,12 @@ def about():
     return """
     <!DOCTYPE html>
     <html lang="fa" dir="rtl">
-
     <head>
         <meta charset="UTF-8">
-        <meta name="viewport"
-              content="width=device-width, initial-scale=1.0">
-
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>درباره ما</title>
     </head>
-
     <body>
-
         <h1>درباره ما</h1>
 
         <p>
@@ -112,7 +90,6 @@ def about():
         </p>
 
         <a href="/">بازگشت به صفحه اصلی</a>
-
     </body>
     </html>
     """
@@ -127,17 +104,12 @@ def contact():
     return """
     <!DOCTYPE html>
     <html lang="fa" dir="rtl">
-
     <head>
         <meta charset="UTF-8">
-        <meta name="viewport"
-              content="width=device-width, initial-scale=1.0">
-
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>تماس با ما</title>
     </head>
-
     <body>
-
         <h1>تماس با ما</h1>
 
         <p>
@@ -145,7 +117,6 @@ def contact():
         </p>
 
         <a href="/">بازگشت به صفحه اصلی</a>
-
     </body>
     </html>
     """
@@ -176,7 +147,6 @@ def process_text():
     ).strip()
 
     if not text:
-
         return render_template(
             "index.html",
             error_text="لطفاً ابتدا متن را وارد کنید."
@@ -220,7 +190,6 @@ def process_text():
 def process_audio():
 
     if "audio_file" not in request.files:
-
         return render_template(
             "index.html",
             error_text="فایل صوتی انتخاب نشده است."
@@ -229,15 +198,12 @@ def process_audio():
     file = request.files["audio_file"]
 
     if file.filename == "":
-
         return render_template(
             "index.html",
             error_text="فایل صوتی انتخاب نشده است."
         )
 
-    safe_name = os.path.basename(
-        file.filename
-    )
+    safe_name = os.path.basename(file.filename)
 
     filename = f"{int(time.time())}_{safe_name}"
 
@@ -257,7 +223,6 @@ def process_audio():
         )
 
         if y.ndim != 2 or y.shape[0] < 2:
-
             return render_template(
                 "index.html",
                 error_text=(
@@ -268,23 +233,13 @@ def process_audio():
         left = y[0]
         right = y[1]
 
-        vocals = (
-            left + right
-        ) / 2
-
-        instrumental = (
-            left - right
-        ) / 2
+        vocals = (left + right) / 2
+        instrumental = (left - right) / 2
 
         timestamp = int(time.time())
 
-        vocals_file = (
-            f"vocals_{timestamp}.wav"
-        )
-
-        instrumental_file = (
-            f"instrumental_{timestamp}.wav"
-        )
+        vocals_file = f"vocals_{timestamp}.wav"
+        instrumental_file = f"instrumental_{timestamp}.wav"
 
         vocals_path = os.path.join(
             SEPARATED_FOLDER,
@@ -325,7 +280,6 @@ def process_audio():
     finally:
 
         if os.path.exists(filepath):
-
             try:
                 os.remove(filepath)
             except Exception:
@@ -333,14 +287,13 @@ def process_audio():
 
 
 # =========================================================
-# SPEECH TO TEXT - FASTER WHISPER
+# SPEECH TO TEXT
 # =========================================================
 
 @app.route("/speech-to-text", methods=["POST"])
 def speech_to_text():
 
     if "speech_file" not in request.files:
-
         return render_template(
             "index.html",
             error_text="فایل صوتی انتخاب نشده است."
@@ -349,7 +302,6 @@ def speech_to_text():
     file = request.files["speech_file"]
 
     if file.filename == "":
-
         return render_template(
             "index.html",
             error_text="فایل صوتی انتخاب نشده است."
@@ -372,16 +324,10 @@ def speech_to_text():
 
     try:
 
-        # ---------------------------------------------
-        # دریافت مدل Whisper
-        # ---------------------------------------------
-
+        # گرفتن مدل Whisper
         model = get_whisper_model()
 
-        # ---------------------------------------------
-        # تبدیل صوت به متن
-        # ---------------------------------------------
-
+        # تبدیل صوت به متن فارسی
         segments, info = model.transcribe(
             input_path,
             language="fa",
@@ -398,16 +344,11 @@ def speech_to_text():
             text = segment.text.strip()
 
             if text:
-
                 all_text.append(text)
 
         final_text = " ".join(
             all_text
         ).strip()
-
-        # ---------------------------------------------
-        # اگر متن پیدا نشد
-        # ---------------------------------------------
 
         if not final_text:
 
@@ -418,10 +359,6 @@ def speech_to_text():
                     "لطفاً فایل صوتی واضح‌تری امتحان کنید."
                 )
             )
-
-        # ---------------------------------------------
-        # نتیجه
-        # ---------------------------------------------
 
         return render_template(
             "index.html",
@@ -451,7 +388,7 @@ def speech_to_text():
 
 
 # =========================================================
-# IMAGE TO TEXT - OCR
+# IMAGE TO TEXT
 # =========================================================
 
 @app.route("/image-to-text", methods=["POST"])
@@ -490,10 +427,7 @@ def image_to_text():
 
     try:
 
-        # ---------------------------------------------
         # بررسی Tesseract
-        # ---------------------------------------------
-
         tesseract_path = shutil.which(
             "tesseract"
         )
@@ -503,13 +437,10 @@ def image_to_text():
             if os.path.exists(
                 "/usr/bin/tesseract"
             ):
-
                 tesseract_path = (
                     "/usr/bin/tesseract"
                 )
-
             else:
-
                 return render_template(
                     "index.html",
                     error_text=(
@@ -521,10 +452,7 @@ def image_to_text():
             tesseract_path
         )
 
-        # ---------------------------------------------
         # باز کردن تصویر
-        # ---------------------------------------------
-
         image = Image.open(
             image_path
         )
@@ -535,10 +463,7 @@ def image_to_text():
 
         width, height = image.size
 
-        # ---------------------------------------------
-        # افزایش اندازه برای OCR
-        # ---------------------------------------------
-
+        # بزرگ‌تر کردن عکس‌های کوچک
         if width < 1600:
 
             ratio = 1600 / width
@@ -550,10 +475,7 @@ def image_to_text():
                 )
             )
 
-        # ---------------------------------------------
-        # پردازش تصویر
-        # ---------------------------------------------
-
+        # آماده‌سازی برای OCR
         image = image.convert(
             "L"
         )
@@ -566,10 +488,7 @@ def image_to_text():
             ImageFilter.SHARPEN
         )
 
-        # ---------------------------------------------
-        # OCR فارسی + انگلیسی
-        # ---------------------------------------------
-
+        # OCR فارسی و انگلیسی
         extracted_text = pytesseract.image_to_string(
             image,
             lang="fas+eng",
@@ -579,10 +498,6 @@ def image_to_text():
         extracted_text = (
             extracted_text.strip()
         )
-
-        # ---------------------------------------------
-        # نتیجه خالی
-        # ---------------------------------------------
 
         if not extracted_text:
 
@@ -594,10 +509,6 @@ def image_to_text():
                     "انتخاب کنید."
                 )
             )
-
-        # ---------------------------------------------
-        # نمایش نتیجه
-        # ---------------------------------------------
 
         return render_template(
             "index.html",
@@ -669,9 +580,7 @@ def download(filename):
 @app.route("/sitemap.xml")
 def sitemap():
 
-    base_url = (
-        "https://rt-k9g5.onrender.com"
-    )
+    base_url = "https://rt-k9g5.onrender.com"
 
     xml = f"""<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
@@ -704,9 +613,7 @@ def sitemap():
 @app.route("/robots.txt")
 def robots():
 
-    base_url = (
-        "https://rt-k9g5.onrender.com"
-    )
+    base_url = "https://rt-k9g5.onrender.com"
 
     robots_txt = f"""User-agent: *
 Allow: /
@@ -721,7 +628,7 @@ Sitemap: {base_url}/sitemap.xml
 
 
 # =========================================================
-# RUN
+# START SERVER
 # =========================================================
 
 if __name__ == "__main__":
