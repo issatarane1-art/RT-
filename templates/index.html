@@ -3,34 +3,31 @@
 
 <head>
     <meta charset="UTF-8">
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>تبدیل متن به صدا و حذف صدای خواننده از آهنگ | آنلاین</title>
 
     <meta name="description"
-          content="ابزار آنلاین تبدیل متن فارسی به صدا، تبدیل صوت به متن و پردازش فایل صوتی.">
+        content="ابزار آنلاین تبدیل متن به صدا، پردازش فایل صوتی، تبدیل صوت به متن فارسی و تبدیل عکس به متن.">
 
     <meta name="keywords"
-          content="تبدیل متن به صدا, تبدیل متن به صوت, تبدیل صوت به متن, تبدیل صدا به متن, حذف صدای خواننده, پردازش صوت">
+        content="تبدیل متن به صدا, متن به گفتار, تبدیل صوت به متن, تبدیل عکس به متن, OCR فارسی, حذف صدای خواننده, پردازش صوت">
 
     <meta name="robots" content="index, follow">
 
     <meta name="google-site-verification"
-          content="HKNJ-ewUE5WanEYFXDrVnH_oHmhafRa9F90Br7B1glw">
+        content="HKNJ-ewUE5WanEYFXDrVnH_oHmhafRa9F90Br7B1glw">
 
     <meta property="og:title"
-          content="تبدیل متن به صدا و پردازش فایل صوتی">
+        content="تبدیل متن به صدا و پردازش فایل صوتی">
 
     <meta property="og:description"
-          content="تبدیل متن فارسی به صدای طبیعی، تبدیل صوت به متن و پردازش فایل صوتی آنلاین.">
+        content="تبدیل متن به صدای فارسی، تبدیل صوت به متن و استخراج متن از تصاویر به صورت آنلاین.">
 
     <meta property="og:type" content="website">
 
-    <meta property="og:url"
-          content="https://rt-k9g5.onrender.com/">
-
     <style>
-
         * {
             box-sizing: border-box;
         }
@@ -38,280 +35,290 @@
         body {
             margin: 0;
             font-family: Tahoma, Arial, sans-serif;
-            background: linear-gradient(135deg, #f5f7ff, #eef1ff);
-            color: #222;
+            background:
+                radial-gradient(circle at top right, #32105c 0%, transparent 35%),
+                radial-gradient(circle at bottom left, #160b35 0%, transparent 40%),
+                #090614;
+            color: white;
+            min-height: 100vh;
         }
 
         header {
-            background: linear-gradient(135deg, #4f46e5, #7c3aed);
-            color: white;
-            padding: 45px 20px;
             text-align: center;
+            padding: 45px 20px 25px;
         }
 
         header h1 {
             margin: 0 0 15px;
             font-size: 32px;
+            color: #ffffff;
+            text-shadow:
+                0 0 10px #a855f7,
+                0 0 25px #7c3aed;
         }
 
         header p {
-            margin: 0;
-            font-size: 17px;
+            max-width: 850px;
+            margin: auto;
             line-height: 2;
+            color: #d8d2e8;
+            font-size: 16px;
         }
 
         .container {
-            max-width: 1100px;
-            margin: 40px auto;
-            padding: 0 20px;
-        }
-
-        .intro {
-            text-align: center;
-            margin-bottom: 35px;
-        }
-
-        .intro h2 {
-            font-size: 27px;
-        }
-
-        .intro p {
-            color: #666;
-            line-height: 2;
+            width: 92%;
+            max-width: 1150px;
+            margin: auto;
         }
 
         .cards {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(2, 1fr);
             gap: 25px;
+            margin-top: 25px;
+            margin-bottom: 45px;
         }
 
         .card {
-            background: white;
-            border-radius: 18px;
+            background: rgba(22, 14, 42, 0.92);
+            border: 1px solid rgba(168, 85, 247, 0.35);
+            border-radius: 22px;
             padding: 28px;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+            box-shadow:
+                0 0 25px rgba(124, 58, 237, 0.15),
+                inset 0 0 20px rgba(168, 85, 247, 0.03);
+            transition: 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(168, 85, 247, 0.75);
+            box-shadow:
+                0 0 35px rgba(124, 58, 237, 0.3);
         }
 
         .icon {
-            font-size: 48px;
+            font-size: 45px;
             text-align: center;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
         }
 
         .card h2 {
             text-align: center;
             font-size: 22px;
-            margin-bottom: 15px;
+            margin: 10px 0 12px;
+            color: #ffffff;
         }
 
         .card p {
-            color: #666;
-            line-height: 2;
+            color: #c9c1dc;
+            line-height: 1.9;
+            text-align: center;
+            font-size: 14px;
+            min-height: 55px;
+        }
+
+        textarea,
+        input[type="text"],
+        input[type="file"] {
+            width: 100%;
+            margin-top: 15px;
+            border-radius: 12px;
+            border: 1px solid #53358a;
+            background: #0d0919;
+            color: white;
+            padding: 13px;
+            font-family: inherit;
         }
 
         textarea {
-            width: 100%;
-            min-height: 140px;
-            padding: 14px;
-            border: 1px solid #ddd;
-            border-radius: 12px;
+            min-height: 120px;
             resize: vertical;
-            font-family: Tahoma, Arial, sans-serif;
-            font-size: 15px;
-            direction: rtl;
-            margin-top: 10px;
-        }
-
-        textarea:focus {
-            outline: none;
-            border-color: #6366f1;
+            line-height: 1.8;
         }
 
         input[type="file"] {
-            width: 100%;
-            padding: 12px;
-            border: 1px dashed #aaa;
-            border-radius: 12px;
-            margin: 15px 0;
-            background: #fafafa;
+            cursor: pointer;
         }
 
         button {
             width: 100%;
+            margin-top: 15px;
             border: none;
             border-radius: 12px;
-            padding: 14px 18px;
-            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            padding: 14px;
+            background: linear-gradient(135deg, #7c3aed, #a855f7);
             color: white;
-            font-size: 16px;
-            font-family: Tahoma, Arial, sans-serif;
+            font-size: 15px;
+            font-weight: bold;
+            font-family: inherit;
             cursor: pointer;
+            transition: 0.25s;
+            box-shadow: 0 0 18px rgba(168, 85, 247, 0.25);
+        }
+
+        button:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0 28px rgba(168, 85, 247, 0.45);
         }
 
         button:disabled {
-            opacity: 0.7;
-            cursor: not-allowed;
+            opacity: 0.6;
+            cursor: wait;
         }
-
-        /* =========================
-           نوار پیشرفت
-        ========================= */
 
         .progress-container {
             display: none;
-            margin-top: 20px;
-            padding: 15px;
-            background: #f8f9ff;
-            border-radius: 12px;
-            border: 1px solid #e3e5ff;
-        }
-
-        .progress-container.active {
-            display: block;
+            margin-top: 18px;
         }
 
         .progress-text {
             display: flex;
             justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            color: #ddd6ee;
             margin-bottom: 8px;
-            font-size: 14px;
-            font-weight: bold;
         }
 
         .progress-bar {
             width: 100%;
-            height: 18px;
-            background: #e5e7eb;
+            height: 12px;
+            background: #0b0714;
             border-radius: 20px;
             overflow: hidden;
+            border: 1px solid #39245e;
         }
 
         .progress-fill {
             width: 0%;
             height: 100%;
             border-radius: 20px;
-            background: linear-gradient(90deg, #4f46e5, #7c3aed);
-            transition: width 0.3s ease;
+            background: linear-gradient(
+                90deg,
+                #7c3aed,
+                #a855f7,
+                #d946ef
+            );
+            box-shadow: 0 0 15px #a855f7;
+            transition: width 0.5s ease;
         }
 
         .progress-status {
             text-align: center;
-            margin-top: 10px;
-            font-size: 13px;
-            color: #666;
+            color: #aaa0bd;
+            font-size: 12px;
+            margin-top: 8px;
         }
-
-        .progress-complete {
-            color: #16a34a;
-            font-weight: bold;
-        }
-
-        /* =========================
-           نتایج
-        ========================= */
 
         .result-box {
             margin-top: 20px;
             padding: 18px;
-            border-radius: 12px;
-            background: #f5f7ff;
-            border: 1px solid #e0e4ff;
+            border-radius: 15px;
+            background: rgba(10, 7, 20, 0.9);
+            border: 1px solid rgba(168, 85, 247, 0.3);
         }
 
         .result-box h3 {
             margin-top: 0;
-            font-size: 17px;
+            font-size: 16px;
+            color: #d8b4fe;
         }
 
-        audio {
+        .result-box audio {
             width: 100%;
             margin-top: 10px;
         }
 
-        .download-btn {
+        .download-button {
             display: block;
-            text-align: center;
             text-decoration: none;
+            text-align: center;
             margin-top: 12px;
             padding: 12px;
             border-radius: 10px;
-            background: #16a34a;
+            background: #24133e;
             color: white;
+            border: 1px solid #7040a8;
         }
 
-        .success {
-            max-width: 900px;
-            margin: 25px auto;
-            padding: 15px 20px;
-            border-radius: 12px;
-            background: #dcfce7;
-            color: #166534;
-            text-align: center;
+        .download-button:hover {
+            background: #321b55;
         }
 
-        .error {
-            max-width: 900px;
-            margin: 25px auto;
-            padding: 15px 20px;
-            border-radius: 12px;
-            background: #fee2e2;
-            color: #991b1b;
-            text-align: center;
-        }
-
-        .seo-content {
-            margin-top: 50px;
-            background: white;
+        .seo-section {
+            margin: 20px 0 45px;
             padding: 30px;
-            border-radius: 18px;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
-            line-height: 2.2;
-        }
-
-        footer {
-            margin-top: 60px;
-            background: #171717;
-            color: #ddd;
-            text-align: center;
-            padding: 30px 20px;
+            background: rgba(22, 14, 42, 0.8);
+            border-radius: 20px;
+            border: 1px solid rgba(168, 85, 247, 0.25);
             line-height: 2;
         }
 
-        footer a {
-            color: #a5b4fc;
-            text-decoration: none;
-            margin: 0 8px;
+        .seo-section h2 {
+            color: #d8b4fe;
         }
 
-        @media (max-width: 900px) {
+        .seo-section h3 {
+            color: #c084fc;
+            margin-top: 25px;
+        }
 
+        .seo-section p {
+            color: #c9c1dc;
+        }
+
+        .links {
+            text-align: center;
+            margin: 25px 0;
+        }
+
+        .links a {
+            color: #c084fc;
+            text-decoration: none;
+            margin: 0 12px;
+        }
+
+        .links a:hover {
+            text-decoration: underline;
+        }
+
+        footer {
+            text-align: center;
+            padding: 25px;
+            color: #8f869e;
+            border-top: 1px solid rgba(168, 85, 247, 0.15);
+            font-size: 13px;
+        }
+
+        @media (max-width: 800px) {
             .cards {
                 grid-template-columns: 1fr;
             }
 
             header h1 {
-                font-size: 26px;
+                font-size: 25px;
             }
 
+            .card {
+                padding: 22px;
+            }
         }
-
     </style>
 </head>
 
-
 <body>
-
 
 <header>
 
     <h1>
-        تبدیل متن به صدا و پردازش فایل صوتی
+        تبدیل متن به صدا و حذف صدای خواننده از آهنگ
     </h1>
 
     <p>
-        ابزار آنلاین تبدیل متن فارسی به صدا،
-        تبدیل صوت به متن و پردازش فایل‌های صوتی
+        ابزار آنلاین برای تبدیل متن به صدای فارسی،
+        پردازش فایل صوتی، تبدیل صوت به متن و استخراج
+        متن از تصاویر.
     </p>
 
 </header>
@@ -319,46 +326,12 @@
 
 <div class="container">
 
-
-    <div class="intro">
-
-        <h2>
-            ابزارهای آنلاین صوت و متن
-        </h2>
-
-        <p>
-            متن فارسی را به صدا تبدیل کنید،
-            فایل صوتی را پردازش کنید یا گفتار فارسی را به متن تبدیل نمایید.
-        </p>
-
-    </div>
-
-
-    {% if success_text %}
-
-    <div class="success">
-        {{ success_text }}
-    </div>
-
-    {% endif %}
-
-
-    {% if error_text %}
-
-    <div class="error">
-        {{ error_text }}
-    </div>
-
-    {% endif %}
-
-
-
     <div class="cards">
 
 
-        <!-- ================================= -->
-        <!-- تبدیل متن به صدا -->
-        <!-- ================================= -->
+        <!-- ========================= -->
+        <!-- TEXT TO SPEECH -->
+        <!-- ========================= -->
 
         <div class="card">
 
@@ -371,53 +344,40 @@
             </h2>
 
             <p>
-                متن فارسی خود را وارد کنید تا به صدای طبیعی فارسی تبدیل شود.
+                متن فارسی خود را وارد کنید تا با صدای طبیعی
+                به فایل صوتی تبدیل شود.
             </p>
 
-
             <form
-                id="textForm"
                 action="/process-text"
                 method="POST"
-                onsubmit="startProgress('textProgress', 'textButton')"
+                onsubmit="return startProgress('textProgress', 'textButton')"
             >
 
                 <textarea
                     name="text_input"
-                    placeholder="متن فارسی خود را اینجا بنویسید..."
+                    placeholder="متن خود را اینجا بنویسید..."
                     required></textarea>
-
-
-                <br><br>
-
 
                 <button
                     id="textButton"
                     type="submit">
-
                     🔊 تبدیل متن به صدا
-
                 </button>
-
-
-                <!-- نوار پیشرفت -->
 
                 <div
                     id="textProgress"
                     class="progress-container">
 
                     <div class="progress-text">
-
                         <span>
-                            در حال تبدیل...
+                            در حال ساخت صدا...
                         </span>
 
                         <span id="textPercent">
                             0%
                         </span>
-
                     </div>
-
 
                     <div class="progress-bar">
 
@@ -428,13 +388,10 @@
 
                     </div>
 
-
                     <div
                         id="textStatus"
                         class="progress-status">
-
                         لطفاً صبر کنید...
-
                     </div>
 
                 </div>
@@ -442,30 +399,23 @@
             </form>
 
 
-
             {% if speech_file %}
 
             <div class="result-box">
 
                 <h3>
-                    ✅ فایل آماده است
+                    ✅ صدای ساخته‌شده:
                 </h3>
 
-                <audio controls>
-
-                    <source
-                        src="{{ url_for('download', filename=speech_file) }}"
-                        type="audio/mpeg">
-
+                <audio
+                    controls
+                    src="/download/{{ speech_file }}">
                 </audio>
 
-
                 <a
-                    class="download-btn"
-                    href="{{ url_for('download', filename=speech_file) }}">
-
+                    class="download-button"
+                    href="/download/{{ speech_file }}">
                     ⬇️ دانلود فایل صوتی
-
                 </a>
 
             </div>
@@ -475,10 +425,9 @@
         </div>
 
 
-
-        <!-- ================================= -->
-        <!-- پردازش صوت -->
-        <!-- ================================= -->
+        <!-- ========================= -->
+        <!-- AUDIO PROCESSING -->
+        <!-- ========================= -->
 
         <div class="card">
 
@@ -491,16 +440,15 @@
             </h2>
 
             <p>
-                فایل صوتی خود را انتخاب کنید تا پردازش و جداسازی انجام شود.
+                فایل صوتی خود را انتخاب کنید تا پردازش شود
+                و بخش‌های صوتی جداگانه دریافت کنید.
             </p>
 
-
             <form
-                id="audioForm"
                 action="/process-audio"
                 method="POST"
                 enctype="multipart/form-data"
-                onsubmit="startProgress('audioProgress', 'audioButton')"
+                onsubmit="return startProgress('audioProgress', 'audioButton')"
             >
 
                 <input
@@ -509,17 +457,11 @@
                     accept="audio/*"
                     required>
 
-
                 <button
                     id="audioButton"
                     type="submit">
-
                     🎵 پردازش فایل صوتی
-
                 </button>
-
-
-                <!-- نوار پیشرفت -->
 
                 <div
                     id="audioProgress"
@@ -528,7 +470,7 @@
                     <div class="progress-text">
 
                         <span>
-                            در حال پردازش...
+                            در حال پردازش صدا...
                         </span>
 
                         <span id="audioPercent">
@@ -536,7 +478,6 @@
                         </span>
 
                     </div>
-
 
                     <div class="progress-bar">
 
@@ -547,13 +488,10 @@
 
                     </div>
 
-
                     <div
                         id="audioStatus"
                         class="progress-status">
-
                         لطفاً صبر کنید...
-
                     </div>
 
                 </div>
@@ -561,64 +499,31 @@
             </form>
 
 
-
             {% if vocals_file or instrumental_file %}
 
             <div class="result-box">
 
                 <h3>
-                    ✅ پردازش کامل شد
+                    ✅ فایل‌های پردازش‌شده:
                 </h3>
-
 
                 {% if vocals_file %}
 
-                <p>
-                    🎤 خروجی اول:
-                </p>
-
-                <audio controls>
-
-                    <source
-                        src="{{ url_for('download', filename=vocals_file) }}"
-                        type="audio/wav">
-
-                </audio>
-
-
                 <a
-                    class="download-btn"
-                    href="{{ url_for('download', filename=vocals_file) }}">
-
-                    ⬇️ دانلود خروجی اول
-
+                    class="download-button"
+                    href="/download/{{ vocals_file }}">
+                    🎤 دانلود صدای خواننده
                 </a>
 
                 {% endif %}
 
 
-
                 {% if instrumental_file %}
 
-                <p style="margin-top:20px;">
-                    🎶 خروجی دوم:
-                </p>
-
-                <audio controls>
-
-                    <source
-                        src="{{ url_for('download', filename=instrumental_file) }}"
-                        type="audio/wav">
-
-                </audio>
-
-
                 <a
-                    class="download-btn"
-                    href="{{ url_for('download', filename=instrumental_file) }}">
-
-                    ⬇️ دانلود خروجی دوم
-
+                    class="download-button"
+                    href="/download/{{ instrumental_file }}">
+                    🎼 دانلود موسیقی
                 </a>
 
                 {% endif %}
@@ -630,10 +535,9 @@
         </div>
 
 
-
-        <!-- ================================= -->
-        <!-- صوت به متن -->
-        <!-- ================================= -->
+        <!-- ========================= -->
+        <!-- SPEECH TO TEXT -->
+        <!-- ========================= -->
 
         <div class="card">
 
@@ -646,16 +550,15 @@
             </h2>
 
             <p>
-                فایل صوتی فارسی خود را انتخاب کنید تا گفتار آن به متن فارسی تبدیل شود.
+                فایل صوتی فارسی خود را انتخاب کنید تا گفتار
+                به متن تبدیل شود.
             </p>
 
-
             <form
-                id="speechForm"
                 action="/speech-to-text"
                 method="POST"
                 enctype="multipart/form-data"
-                onsubmit="startProgress('speechProgress', 'speechButton')"
+                onsubmit="return startProgress('speechProgress', 'speechButton')"
             >
 
                 <input
@@ -664,17 +567,11 @@
                     accept="audio/*"
                     required>
 
-
                 <button
                     id="speechButton"
                     type="submit">
-
                     📝 تبدیل صوت به متن
-
                 </button>
-
-
-                <!-- نوار پیشرفت -->
 
                 <div
                     id="speechProgress"
@@ -683,7 +580,7 @@
                     <div class="progress-text">
 
                         <span>
-                            در حال تبدیل...
+                            در حال تبدیل صوت به متن...
                         </span>
 
                         <span id="speechPercent">
@@ -691,7 +588,6 @@
                         </span>
 
                     </div>
-
 
                     <div class="progress-bar">
 
@@ -702,19 +598,15 @@
 
                     </div>
 
-
                     <div
                         id="speechStatus"
                         class="progress-status">
-
                         لطفاً صبر کنید...
-
                     </div>
 
                 </div>
 
             </form>
-
 
 
             {% if transcribed_text %}
@@ -726,8 +618,115 @@
                 </h3>
 
                 <textarea
-                    rows="8"
+                    id="speechTextResult"
+                    rows="10"
                     readonly>{{ transcribed_text }}</textarea>
+
+                <button
+                    type="button"
+                    onclick="copySpeechText()">
+                    📋 کپی کردن متن
+                </button>
+
+            </div>
+
+            {% endif %}
+
+        </div>
+
+
+        <!-- ========================= -->
+        <!-- IMAGE TO TEXT / OCR -->
+        <!-- ========================= -->
+
+        <div class="card">
+
+            <div class="icon">
+                🖼️
+            </div>
+
+            <h2>
+                تبدیل عکس به متن
+            </h2>
+
+            <p>
+                عکس خود را انتخاب کنید تا نوشته‌های داخل
+                تصویر شناسایی شوند و بتوانید متن را کپی کنید.
+            </p>
+
+            <form
+                action="/image-to-text"
+                method="POST"
+                enctype="multipart/form-data"
+                onsubmit="return startProgress('imageProgress', 'imageButton')"
+            >
+
+                <input
+                    type="file"
+                    name="image_file"
+                    accept="image/*"
+                    required>
+
+                <button
+                    id="imageButton"
+                    type="submit">
+                    🖼️ استخراج متن از عکس
+                </button>
+
+                <div
+                    id="imageProgress"
+                    class="progress-container">
+
+                    <div class="progress-text">
+
+                        <span>
+                            در حال خواندن عکس...
+                        </span>
+
+                        <span id="imagePercent">
+                            0%
+                        </span>
+
+                    </div>
+
+                    <div class="progress-bar">
+
+                        <div
+                            id="imageFill"
+                            class="progress-fill">
+                        </div>
+
+                    </div>
+
+                    <div
+                        id="imageStatus"
+                        class="progress-status">
+                        لطفاً صبر کنید...
+                    </div>
+
+                </div>
+
+            </form>
+
+
+            {% if image_text %}
+
+            <div class="result-box">
+
+                <h3>
+                    ✅ متن استخراج‌شده:
+                </h3>
+
+                <textarea
+                    id="imageTextResult"
+                    rows="10"
+                    readonly>{{ image_text }}</textarea>
+
+                <button
+                    type="button"
+                    onclick="copyImageText()">
+                    📋 کپی کردن متن
+                </button>
 
             </div>
 
@@ -738,188 +737,237 @@
     </div>
 
 
+    <!-- ========================= -->
+    <!-- SEO CONTENT -->
+    <!-- ========================= -->
 
-    <!-- ================================= -->
-    <!-- محتوای سئو -->
-    <!-- ================================= -->
-
-    <section class="seo-content">
+    <section class="seo-section">
 
         <h2>
-            تبدیل متن به صدا و صوت به متن آنلاین
+            ابزار آنلاین تبدیل متن، صوت و عکس
         </h2>
 
         <p>
-            این ابزار آنلاین برای تبدیل متن فارسی به صدا،
-            تبدیل صوت فارسی به متن و پردازش فایل‌های صوتی طراحی شده است.
+            با استفاده از این ابزار می‌توانید متن فارسی را
+            به صدای طبیعی تبدیل کنید، فایل‌های صوتی را پردازش
+            کنید، گفتار فارسی را به متن تبدیل کنید و نوشته‌های
+            موجود در تصاویر را استخراج کنید.
         </p>
 
         <h3>
-            تبدیل متن فارسی به صدا
+            تبدیل متن به صدا
         </h3>
 
         <p>
-            متن فارسی خود را وارد کنید و آن را به صدای طبیعی فارسی تبدیل نمایید.
+            متن فارسی خود را وارد کنید و فایل صوتی ساخته‌شده
+            را دریافت و دانلود کنید.
         </p>
 
         <h3>
-            تبدیل صوت به متن فارسی
+            تبدیل صوت به متن
         </h3>
 
         <p>
-            یک فایل صوتی فارسی ارسال کنید و متن گفتار موجود در آن را دریافت کنید.
+            فایل صوتی خود را انتخاب کنید تا گفتار موجود در آن
+            به متن فارسی تبدیل شود.
         </p>
 
         <h3>
-            پردازش فایل صوتی
+            تبدیل عکس به متن
         </h3>
 
         <p>
-            فایل‌های صوتی خود را ارسال کنید و خروجی‌های پردازش‌شده را دریافت نمایید.
+            با قابلیت OCR می‌توانید نوشته‌های داخل عکس،
+            اسناد و تصاویر را استخراج کرده و متن به‌دست‌آمده
+            را کپی کنید.
         </p>
 
     </section>
 
-</div>
 
-
-
-<footer>
-
-    <p>
-        تمامی حقوق محفوظ است.
-    </p>
-
-    <p>
-
-        <a href="/">
-            صفحه اصلی
-        </a>
-
-        |
+    <div class="links">
 
         <a href="/about">
             درباره ما
         </a>
 
-        |
-
         <a href="/contact">
             تماس با ما
         </a>
 
-    </p>
+    </div>
+
+</div>
+
+
+<footer>
+
+    © تمامی حقوق محفوظ است.
 
 </footer>
 
 
-
 <script>
 
-function startProgress(progressId, buttonId) {
+    function startProgress(progressId, buttonId) {
 
-    const progressBox =
-        document.getElementById(progressId);
+        const progress =
+            document.getElementById(progressId);
 
-    const button =
-        document.getElementById(buttonId);
+        const button =
+            document.getElementById(buttonId);
 
+        let fillId = "";
+        let percentId = "";
+        let statusId = "";
 
-    progressBox.classList.add("active");
+        if (progressId === "textProgress") {
 
-    button.disabled = true;
+            fillId = "textFill";
+            percentId = "textPercent";
+            statusId = "textStatus";
 
-    button.innerText = "⏳ در حال پردازش...";
+        } else if (progressId === "audioProgress") {
 
+            fillId = "audioFill";
+            percentId = "audioPercent";
+            statusId = "audioStatus";
 
-    let percent = 0;
+        } else if (progressId === "speechProgress") {
 
+            fillId = "speechFill";
+            percentId = "speechPercent";
+            statusId = "speechStatus";
 
-    let fillId;
-    let percentId;
-    let statusId;
+        } else if (progressId === "imageProgress") {
 
-
-    if (progressId === "textProgress") {
-
-        fillId = "textFill";
-        percentId = "textPercent";
-        statusId = "textStatus";
-
-    }
-
-
-    else if (progressId === "audioProgress") {
-
-        fillId = "audioFill";
-        percentId = "audioPercent";
-        statusId = "audioStatus";
-
-    }
-
-
-    else if (progressId === "speechProgress") {
-
-        fillId = "speechFill";
-        percentId = "speechPercent";
-        statusId = "speechStatus";
-
-    }
-
-
-    const fill =
-        document.getElementById(fillId);
-
-    const percentText =
-        document.getElementById(percentId);
-
-    const status =
-        document.getElementById(statusId);
-
-
-    /*
-       نوار پیشرفت نمایشی است.
-       تا زمانی که سرور پاسخ بدهد،
-       به صورت تدریجی جلو می‌رود ولی روی 95٪ متوقف می‌شود.
-    */
-
-    const timer = setInterval(function() {
-
-        if (percent < 95) {
-
-            percent += Math.floor(Math.random() * 4) + 1;
-
-            if (percent > 95) {
-                percent = 95;
-            }
-
-            fill.style.width =
-                percent + "%";
-
-            percentText.innerText =
-                percent + "%";
+            fillId = "imageFill";
+            percentId = "imagePercent";
+            statusId = "imageStatus";
 
         }
 
-    }, 500);
+        const fill =
+            document.getElementById(fillId);
+
+        const percent =
+            document.getElementById(percentId);
+
+        const status =
+            document.getElementById(statusId);
 
 
-    /*
-       هنگام ارسال فرم صفحه منتظر پاسخ سرور می‌ماند.
-       وقتی پاسخ رسید، صفحه دوباره بارگذاری می‌شود
-       و نتیجه توسط Flask نمایش داده می‌شود.
-    */
+        progress.style.display = "block";
 
-    window.addEventListener("beforeunload", function() {
+        button.disabled = true;
 
-        clearInterval(timer);
 
-    });
+        let value = 5;
 
-}
+        fill.style.width = value + "%";
+
+        percent.textContent = value + "%";
+
+
+        const timer = setInterval(function () {
+
+            if (value < 95) {
+
+                value += 2;
+
+                fill.style.width =
+                    value + "%";
+
+                percent.textContent =
+                    value + "%";
+
+                if (value < 30) {
+
+                    status.textContent =
+                        "در حال آماده‌سازی...";
+
+                } else if (value < 60) {
+
+                    status.textContent =
+                        "در حال پردازش...";
+
+                } else if (value < 85) {
+
+                    status.textContent =
+                        "تقریباً آماده است...";
+
+                } else {
+
+                    status.textContent =
+                        "در حال تکمیل...";
+                }
+
+            } else {
+
+                clearInterval(timer);
+
+            }
+
+        }, 500);
+
+
+        return true;
+    }
+
+
+    function copyImageText() {
+
+        const text =
+            document.getElementById(
+                "imageTextResult"
+            ).value;
+
+        navigator.clipboard.writeText(text)
+            .then(function () {
+
+                alert(
+                    "✅ متن با موفقیت کپی شد."
+                );
+
+            })
+            .catch(function () {
+
+                alert(
+                    "❌ کپی کردن انجام نشد."
+                );
+
+            });
+
+    }
+
+
+    function copySpeechText() {
+
+        const text =
+            document.getElementById(
+                "speechTextResult"
+            ).value;
+
+        navigator.clipboard.writeText(text)
+            .then(function () {
+
+                alert(
+                    "✅ متن با موفقیت کپی شد."
+                );
+
+            })
+            .catch(function () {
+
+                alert(
+                    "❌ کپی کردن انجام نشد."
+                );
+
+            });
+
+    }
 
 </script>
 
-
 </body>
+
 </html>
