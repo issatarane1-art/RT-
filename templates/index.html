@@ -1,405 +1,564 @@
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
+
 <head>
     <meta charset="UTF-8">
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <!-- SEO -->
     <title>تبدیل متن به صدا و حذف صدای خواننده از آهنگ | آنلاین</title>
 
-    <meta name="description" content="ابزار آنلاین تبدیل متن به صدا و پردازش فایل صوتی. متن خود را به صوت تبدیل کنید و صدای خواننده و موسیقی را پردازش کنید.">
+    <meta name="description"
+          content="ابزار آنلاین تبدیل متن به صدا، تبدیل صوت فارسی به متن و پردازش فایل صوتی. متن خود را به صدای فارسی تبدیل کنید و فایل‌های صوتی خود را پردازش کنید.">
 
-    <meta name="keywords" content="تبدیل متن به صدا, تبدیل متن فارسی به صدا, تبدیل نوشته به صدا, تبدیل متن به صوت, حذف صدای خواننده از آهنگ, جداسازی صدای خواننده, حذف وکال از آهنگ">
+    <meta name="keywords"
+          content="تبدیل متن به صدا, تبدیل متن به صوت, تبدیل متن فارسی به صدا, تبدیل صوت به متن, تبدیل صدا به متن, تبدیل فایل صوتی به متن, حذف صدای خواننده, جداسازی صدای خواننده, پردازش صوت">
 
     <meta name="robots" content="index, follow">
 
-    <!-- Google Search Console -->
-    <meta name="google-site-verification" content="HKNJ-ewUE5WanEYFXDrVnH_oHmhafRa9F90Br7B1glw" />
+    <meta name="google-site-verification"
+          content="HKNJ-ewUE5WanEYFXDrVnH_oHmhafRa9F90Br7B1glw">
 
-    <!-- Open Graph -->
-    <meta property="og:title" content="تبدیل متن به صدا و حذف صدای خواننده از آهنگ">
-    <meta property="og:description" content="ابزار آنلاین تبدیل متن به صدا و پردازش فایل‌های صوتی">
+    <meta property="og:title"
+          content="تبدیل متن به صدا و پردازش فایل صوتی">
+
+    <meta property="og:description"
+          content="تبدیل متن فارسی به صدای طبیعی، تبدیل صوت به متن و پردازش فایل‌های صوتی به صورت آنلاین.">
+
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://rt-k9g5.onrender.com/">
+
+    <meta property="og:url"
+          content="https://rt-k9g5.onrender.com/">
 
     <style>
+        * {
+            box-sizing: border-box;
+        }
+
         body {
             margin: 0;
-            padding: 0;
-            background: linear-gradient(rgba(5, 11, 20, 0.85), rgba(5, 11, 20, 0.85)), #050b14;
-            background-size: cover;
-            color: #ffffff;
-            font-family: Tahoma, sans-serif;
-            text-align: center;
-            min-height: 100vh;
+            font-family: Tahoma, Arial, sans-serif;
+            background: linear-gradient(135deg, #f5f7ff, #eef1ff);
+            color: #222;
         }
 
         header {
-            padding: 15px;
-            background: rgba(0, 0, 0, 0.7);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            color: white;
+            padding: 45px 20px;
+            text-align: center;
         }
 
-        nav a {
-            color: #ccc;
-            text-decoration: none;
-            margin: 0 15px;
-            font-size: 14px;
-            cursor: pointer;
+        header h1 {
+            margin: 0 0 15px;
+            font-size: 32px;
         }
 
-        nav a:hover {
-            color: #00ffff;
+        header p {
+            margin: 0;
+            font-size: 17px;
+            line-height: 2;
         }
 
         .container {
-            max-width: 900px;
-            margin: 30px auto;
-            padding: 20px;
+            max-width: 1100px;
+            margin: 40px auto;
+            padding: 0 20px;
         }
 
-        h1 {
-            font-size: 22px;
-            margin-bottom: 30px;
-            color: #00d2ff;
+        .intro {
+            text-align: center;
+            margin-bottom: 35px;
         }
 
-        .grid {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-            justify-content: center;
+        .intro h2 {
+            font-size: 27px;
+            margin-bottom: 12px;
+        }
+
+        .intro p {
+            color: #666;
+            line-height: 2;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 25px;
         }
 
         .card {
-            background: rgba(13, 27, 42, 0.9);
-            border: 1px solid rgba(0, 210, 255, 0.3);
+            background: white;
+            border-radius: 18px;
+            padding: 28px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.12);
+        }
+
+        .icon {
+            font-size: 48px;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .card h2 {
+            text-align: center;
+            font-size: 22px;
+            margin-bottom: 15px;
+        }
+
+        .card p {
+            color: #666;
+            line-height: 2;
+            min-height: 80px;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 140px;
+            padding: 14px;
+            border: 1px solid #ddd;
             border-radius: 12px;
-            padding: 20px;
-            width: 100%;
-            max-width: 400px;
-            box-sizing: border-box;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
-            text-align: right;
-        }
-
-        .card h3 {
-            font-size: 18px;
-            color: #00ffff;
-            margin-top: 0;
-            text-align: center;
-        }
-
-        p.desc {
-            font-size: 12px;
-            color: #aaa;
-            margin-bottom: 15px;
-            text-align: center;
-        }
-
-        input[type="file"],
-        textarea {
-            width: 100%;
-            background: #0b1622;
-            color: #fff;
-            border: 1px solid #1e3a5f;
-            padding: 10px;
-            border-radius: 8px;
-            box-sizing: border-box;
-            margin-bottom: 15px;
-            font-family: Tahoma, sans-serif;
-        }
-
-        textarea {
             resize: vertical;
-            height: 90px;
+            font-family: Tahoma, Arial, sans-serif;
+            font-size: 15px;
+            direction: rtl;
+            margin-top: 10px;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #6366f1;
+        }
+
+        input[type="file"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px dashed #aaa;
+            border-radius: 12px;
+            margin: 15px 0;
+            background: #fafafa;
         }
 
         button {
-            background: linear-gradient(135deg, #0072ff, #00c6ff);
-            color: #fff;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
             width: 100%;
-            font-family: Tahoma, sans-serif;
-            transition: 0.3s;
+            border: none;
+            border-radius: 12px;
+            padding: 14px 18px;
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            color: white;
+            font-size: 16px;
+            font-family: Tahoma, Arial, sans-serif;
+            cursor: pointer;
+            transition: opacity 0.2s ease, transform 0.2s ease;
         }
 
         button:hover {
             opacity: 0.9;
-            box-shadow: 0 0 10px rgba(0, 198, 255, 0.5);
+            transform: translateY(-1px);
         }
 
         .result-box {
             margin-top: 20px;
-            background: rgba(13, 27, 42, 0.9);
-            border: 1px solid #00d2ff;
-            border-radius: 8px;
-            padding: 15px;
-            text-align: center;
+            padding: 18px;
+            border-radius: 12px;
+            background: #f5f7ff;
+            border: 1px solid #e0e4ff;
         }
 
-        .alert-success {
-            color: #00ff88;
-            background: rgba(0, 255, 136, 0.1);
-            padding: 8px;
-            border-radius: 6px;
-            margin-bottom: 10px;
-            font-size: 13px;
+        .result-box h3 {
+            margin-top: 0;
+            font-size: 17px;
         }
 
-        .alert-error {
-            color: #ff4d4d;
-            background: rgba(255, 77, 77, 0.1);
-            padding: 8px;
-            border-radius: 6px;
-            margin-bottom: 10px;
-            font-size: 13px;
+        audio {
+            width: 100%;
+            margin-top: 10px;
         }
 
         .download-btn {
-            display: inline-block;
-            background: #00b0ff;
-            color: white;
-            padding: 8px 15px;
-            border-radius: 6px;
+            display: block;
+            text-align: center;
             text-decoration: none;
-            margin: 5px;
-            font-size: 13px;
+            margin-top: 12px;
+            padding: 12px;
+            border-radius: 10px;
+            background: #16a34a;
+            color: white;
         }
 
         .download-btn:hover {
-            background: #0091ea;
+            background: #15803d;
         }
 
-        #loading-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(5, 11, 20, 0.9);
-            z-index: 9999;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-        }
-
-        .progress-bar-container {
-            width: 80%;
-            max-width: 350px;
-            background: #0b1622;
-            border: 1px solid #1e3a5f;
-            border-radius: 10px;
-            overflow: hidden;
-            margin-top: 15px;
-        }
-
-        .progress-bar {
-            width: 0%;
-            height: 22px;
-            background: linear-gradient(135deg, #0072ff, #00ffff);
+        .success {
+            max-width: 900px;
+            margin: 25px auto;
+            padding: 15px 20px;
+            border-radius: 12px;
+            background: #dcfce7;
+            color: #166534;
             text-align: center;
-            line-height: 22px;
-            color: #000;
-            font-weight: bold;
-            font-size: 12px;
-            transition: width 0.2s ease;
+        }
+
+        .error {
+            max-width: 900px;
+            margin: 25px auto;
+            padding: 15px 20px;
+            border-radius: 12px;
+            background: #fee2e2;
+            color: #991b1b;
+            text-align: center;
+        }
+
+        .seo-content {
+            margin-top: 50px;
+            background: white;
+            padding: 30px;
+            border-radius: 18px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
+            line-height: 2.2;
+        }
+
+        .seo-content h2 {
+            margin-top: 0;
+        }
+
+        footer {
+            margin-top: 60px;
+            background: #171717;
+            color: #ddd;
+            text-align: center;
+            padding: 30px 20px;
+            line-height: 2;
+        }
+
+        footer a {
+            color: #a5b4fc;
+            text-decoration: none;
+            margin: 0 8px;
+        }
+
+        @media (max-width: 900px) {
+            .cards {
+                grid-template-columns: 1fr;
+            }
+
+            header h1 {
+                font-size: 26px;
+            }
         }
     </style>
 </head>
 
 <body>
 
-    <div id="loading-overlay">
-        <p id="loading-text" style="color: #00ffff; font-size: 16px; margin-bottom: 10px;">
-            در حال پردازش...
+<header>
+    <h1>تبدیل متن به صدا و پردازش فایل صوتی</h1>
+
+    <p>
+        ابزار آنلاین تبدیل متن فارسی به صدا،
+        تبدیل صوت به متن و پردازش فایل‌های صوتی
+    </p>
+</header>
+
+
+<div class="container">
+
+    <div class="intro">
+        <h2>ابزارهای آنلاین صوت و متن</h2>
+
+        <p>
+            با استفاده از ابزارهای زیر می‌توانید متن فارسی را به صدای طبیعی تبدیل کنید،
+            فایل صوتی خود را پردازش کنید و گفتار فارسی را به متن تبدیل نمایید.
+        </p>
+    </div>
+
+
+    {% if success_text %}
+    <div class="success">
+        {{ success_text }}
+    </div>
+    {% endif %}
+
+
+    {% if error_text %}
+    <div class="error">
+        {{ error_text }}
+    </div>
+    {% endif %}
+
+
+    <div class="cards">
+
+        <!-- ============================= -->
+        <!-- تبدیل متن به صدا -->
+        <!-- ============================= -->
+
+        <div class="card">
+
+            <div class="icon">🔊</div>
+
+            <h2>تبدیل متن به صدا</h2>
+
+            <p>
+                متن فارسی خود را وارد کنید تا به صدای طبیعی فارسی تبدیل شود.
+            </p>
+
+            <form action="/process-text" method="POST">
+
+                <textarea
+                    name="text_input"
+                    placeholder="متن فارسی خود را اینجا بنویسید..."
+                    required></textarea>
+
+                <br><br>
+
+                <button type="submit">
+                    🔊 تبدیل متن به صدا
+                </button>
+
+            </form>
+
+
+            {% if speech_file %}
+
+            <div class="result-box">
+
+                <h3>صدای تولید شده:</h3>
+
+                <audio controls>
+                    <source
+                        src="{{ url_for('download', filename=speech_file) }}"
+                        type="audio/mpeg">
+                </audio>
+
+                <a
+                    class="download-btn"
+                    href="{{ url_for('download', filename=speech_file) }}">
+                    ⬇️ دانلود فایل صوتی
+                </a>
+
+            </div>
+
+            {% endif %}
+
+        </div>
+
+
+
+        <!-- ============================= -->
+        <!-- پردازش فایل صوتی -->
+        <!-- ============================= -->
+
+        <div class="card">
+
+            <div class="icon">🎵</div>
+
+            <h2>پردازش فایل صوتی</h2>
+
+            <p>
+                فایل صوتی خود را انتخاب کنید تا پردازش و جداسازی کانال‌های صوتی انجام شود.
+            </p>
+
+            <form
+                action="/process-audio"
+                method="POST"
+                enctype="multipart/form-data">
+
+                <input
+                    type="file"
+                    name="audio_file"
+                    accept="audio/*"
+                    required>
+
+                <button type="submit">
+                    🎵 پردازش فایل صوتی
+                </button>
+
+            </form>
+
+
+            {% if vocals_file or instrumental_file %}
+
+            <div class="result-box">
+
+                <h3>نتایج پردازش:</h3>
+
+
+                {% if vocals_file %}
+
+                <p>
+                    🎤 فایل صوتی اول:
+                </p>
+
+                <audio controls>
+                    <source
+                        src="{{ url_for('download', filename=vocals_file) }}"
+                        type="audio/wav">
+                </audio>
+
+                <a
+                    class="download-btn"
+                    href="{{ url_for('download', filename=vocals_file) }}">
+                    ⬇️ دانلود فایل اول
+                </a>
+
+                {% endif %}
+
+
+                {% if instrumental_file %}
+
+                <p style="margin-top:20px;">
+                    🎶 فایل صوتی دوم:
+                </p>
+
+                <audio controls>
+                    <source
+                        src="{{ url_for('download', filename=instrumental_file) }}"
+                        type="audio/wav">
+                </audio>
+
+                <a
+                    class="download-btn"
+                    href="{{ url_for('download', filename=instrumental_file) }}">
+                    ⬇️ دانلود فایل دوم
+                </a>
+
+                {% endif %}
+
+            </div>
+
+            {% endif %}
+
+        </div>
+
+
+
+        <!-- ============================= -->
+        <!-- تبدیل صوت به متن -->
+        <!-- ============================= -->
+
+        <div class="card">
+
+            <div class="icon">📝</div>
+
+            <h2>تبدیل صوت به متن</h2>
+
+            <p>
+                فایل صوتی فارسی خود را انتخاب کنید تا گفتار موجود در آن
+                به متن فارسی تبدیل شود.
+            </p>
+
+            <form
+                action="/speech-to-text"
+                method="POST"
+                enctype="multipart/form-data">
+
+                <input
+                    type="file"
+                    name="speech_file"
+                    accept="audio/*"
+                    required>
+
+                <button type="submit">
+                    📝 تبدیل صوت به متن
+                </button>
+
+            </form>
+
+
+            {% if transcribed_text %}
+
+            <div class="result-box">
+
+                <h3>
+                    متن استخراج‌شده:
+                </h3>
+
+                <textarea
+                    rows="8"
+                    readonly>{{ transcribed_text }}</textarea>
+
+            </div>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+
+
+    <!-- ============================= -->
+    <!-- محتوای سئو -->
+    <!-- ============================= -->
+
+    <section class="seo-content">
+
+        <h2>
+            تبدیل متن به صدا و صوت به متن آنلاین
+        </h2>
+
+        <p>
+            این ابزار آنلاین برای تبدیل متن فارسی به صدا، تبدیل صوت فارسی به متن
+            و پردازش فایل‌های صوتی طراحی شده است.
         </p>
 
-        <div class="progress-bar-container">
-            <div id="progress" class="progress-bar">0%</div>
-        </div>
-    </div>
+        <h3>
+            تبدیل متن فارسی به صدا
+        </h3>
 
-    <header>
-        <nav>
-            <a href="/">صفحه اصلی</a>
-            <a href="/about" target="_blank">درباره ما</a>
-            <a href="/contact" target="_blank">تماس با ما</a>
-        </nav>
-    </header>
+        <p>
+            متن فارسی خود را وارد کنید و آن را به صدای طبیعی فارسی تبدیل نمایید.
+            این قابلیت برای تولید محتوای صوتی، خواندن متن و استفاده‌های مختلف
+            صوتی کاربرد دارد.
+        </p>
 
-    <div class="container">
+        <h3>
+            تبدیل صوت به متن فارسی
+        </h3>
 
-        <!-- عنوان اصلی برای SEO -->
-        <h1>تبدیل متن به صدا و حذف صدای خواننده از آهنگ</h1>
+        <p>
+            با ابزار تبدیل صوت به متن می‌توانید یک فایل صوتی فارسی را ارسال کنید
+            و متن گفتار موجود در فایل را دریافت کنید.
+        </p>
 
-        <div class="grid">
+        <h3>
+            پردازش فایل صوتی
+        </h3>
 
-            <!-- تبدیل متن به صدا -->
-            <div class="card">
+        <p>
+            امکان پردازش فایل‌های صوتی نیز در این سایت فراهم شده است تا بتوانید
+            فایل‌های صوتی خود را پردازش و خروجی‌های جداگانه دریافت کنید.
+        </p>
 
-                <h3>تبدیل متن به صدا</h3>
+    </section>
 
-                <p class="desc">
-                    متن خود را وارد کنید تا فایل صوتی ساخته شود.
-                    این ابزار برای تبدیل نوشته و متن فارسی به فایل صوتی طراحی شده است.
-                </p>
-
-                {% if error_text %}
-                    <div class="alert-error">
-                        {{ error_text }}
-                    </div>
-                {% endif %}
-
-                <form
-                    action="/process-text"
-                    method="POST"
-                    onsubmit="startProgress('در حال تبدیل متن به صوت...')"
-                >
-
-                    <textarea
-                        name="text_input"
-                        placeholder="متن خود را اینجا بنویسید..."
-                        required
-                    ></textarea>
-
-                    <button type="submit">
-                        تبدیل متن به صدا
-                    </button>
-
-                </form>
-
-                {% if speech_file %}
-
-                <div class="result-box">
-
-                    <div class="alert-success">
-                        {{ success_text }}
-                    </div>
-
-                    <a
-                        href="/download/{{ speech_file }}"
-                        class="download-btn"
-                    >
-                        دانلود فایل صوتی
-                    </a>
-
-                </div>
-
-                {% endif %}
-
-            </div>
+</div>
 
 
-            <!-- حذف / جداسازی صدای خواننده -->
-            <div class="card">
 
-                <h3>حذف صدای خواننده از آهنگ</h3>
+<footer>
 
-                <p class="desc">
-                    فایل صوتی خود را انتخاب کنید و آن را برای پردازش و جداسازی
-                    صدای خواننده و موسیقی ارسال کنید.
-                </p>
+    <p>
+        تمامی حقوق محفوظ است.
+    </p>
 
-                {% if error_audio %}
+    <p>
+        <a href="/">صفحه اصلی</a>
+        |
+        <a href="/about">درباره ما</a>
+        |
+        <a href="/contact">تماس با ما</a>
+    </p>
 
-                    <div class="alert-error">
-                        {{ error_audio }}
-                    </div>
-
-                {% endif %}
-
-                <form
-                    action="/process-audio"
-                    method="POST"
-                    enctype="multipart/form-data"
-                    onsubmit="startProgress('در حال پردازش فایل صوتی...')"
-                >
-
-                    <input
-                        type="file"
-                        name="file"
-                        accept="audio/*"
-                        required
-                    >
-
-                    <button type="submit">
-                        شروع پردازش صوت
-                    </button>
-
-                </form>
-
-                {% if success_audio %}
-
-                <div class="result-box">
-
-                    <div class="alert-success">
-                        {{ success_audio }}
-                    </div>
-
-                    <div style="text-align: center;">
-
-                        <a
-                            href="/download/{{ instrumental }}"
-                            class="download-btn"
-                        >
-                            دانلود بی‌کلام
-                        </a>
-
-                        <a
-                            href="/download/{{ vocals }}"
-                            class="download-btn"
-                        >
-                            دانلود باکلام
-                        </a>
-
-                    </div>
-
-                </div>
-
-                {% endif %}
-
-            </div>
-
-        </div>
-
-    </div>
-
-
-    <script>
-
-        function startProgress(message) {
-
-            document.getElementById('loading-text').innerText = message;
-
-            document.getElementById('loading-overlay').style.display = 'flex';
-
-            let percent = 0;
-
-            const progressBar = document.getElementById('progress');
-
-            let interval = setInterval(function() {
-
-                if (percent < 98) {
-
-                    percent += 2;
-
-                    progressBar.style.width = percent + '%';
-
-                    progressBar.innerText = percent + '%';
-
-                }
-
-            }, 50);
-
-        }
-
-    </script>
+</footer>
 
 </body>
 </html>
