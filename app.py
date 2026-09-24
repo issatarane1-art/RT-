@@ -4,6 +4,7 @@ import asyncio
 import numpy as np
 import librosa
 import soundfile as sf
+import speech_recognition as sr
 
 from flask import Flask, render_template, request, send_from_directory, Response
 import edge_tts
@@ -18,42 +19,57 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(SEPARATED_FOLDER, exist_ok=True)
 
 
-# =========================
+# ==========================================
 # صفحه اصلی
-# =========================
+# ==========================================
 @app.route("/")
 def home():
     return render_template("index.html")
 
 
-# =========================
+# ==========================================
 # درباره ما
-# =========================
+# ==========================================
 @app.route("/about")
 def about():
     return """
-    <h1>درباره ما</h1>
-    <p>ابزار آنلاین تبدیل متن به صدا و پردازش فایل صوتی.</p>
+    <html lang="fa" dir="rtl">
+    <head>
+        <meta charset="UTF-8">
+        <title>درباره ما</title>
+    </head>
+    <body>
+        <h1>درباره ما</h1>
+        <p>ابزار آنلاین تبدیل متن به صدا، پردازش صوت و تبدیل صوت به متن.</p>
+    </body>
+    </html>
     """
 
 
-# =========================
+# ==========================================
 # تماس با ما
-# =========================
+# ==========================================
 @app.route("/contact")
 def contact():
     return """
-    <h1>تماس با ما</h1>
-    <p>برای ارتباط با ما می‌توانید از این صفحه استفاده کنید.</p>
+    <html lang="fa" dir="rtl">
+    <head>
+        <meta charset="UTF-8">
+        <title>تماس با ما</title>
+    </head>
+    <body>
+        <h1>تماس با ما</h1>
+        <p>برای ارتباط با ما می‌توانید از این صفحه استفاده کنید.</p>
+    </body>
+    </html>
     """
 
 
-# =========================
-# تبدیل متن فارسی به صدای واقعی
-# =========================
+# ==========================================
+# تبدیل متن به صدای فارسی
+# ==========================================
 async def generate_persian_speech(text, filepath):
 
-    # صدای زن فارسی
     voice = "fa-IR-DilaraNeural"
 
     communicate = edge_tts.Communicate(
@@ -81,7 +97,6 @@ def process_text():
 
     try:
 
-        # اجرای Edge TTS
         asyncio.run(
             generate_persian_speech(
                 text,
@@ -100,9 +115,9 @@ def process_text():
         return f"خطا در تبدیل متن به صدا: {str(e)}"
 
 
-# =========================
-# پردازش فایل صوتی
-# =========================
+# ==========================================
+# پردازش و جداسازی صوت
+# ==========================================
 @app.route("/process-audio", methods=["POST"])
 def process_audio():
 
@@ -125,22 +140,18 @@ def process_audio():
 
     try:
 
-        y, sr = librosa.load(
+        y, sr_rate = librosa.load(
             filepath,
             sr=None,
             mono=False
         )
 
-        # اگر فایل استریو باشد
         if y.ndim == 2 and y.shape[0] >= 2:
 
             left = y[0]
             right = y[1]
 
-            # استخراج تقریبی وکال
             vocals = (left + right) / 2
-
-            # استخراج تقریبی موسیقی
             instrumental = (left - right) / 2
 
             vocals_file = (
@@ -164,13 +175,13 @@ def process_audio():
             sf.write(
                 vocals_path,
                 vocals,
-                sr
+                sr_rate
             )
 
             sf.write(
                 instrumental_path,
                 instrumental,
-                sr
+                sr_rate
             )
 
             return render_template(
@@ -189,13 +200,109 @@ def process_audio():
         return f"خطا در پردازش فایل: {str(e)}"
 
 
-# =========================
+# ==========================================
+# تبدیل صوت به متن فارسی
+# ==========================================
+@app.route("/speech-to-text", methods=["POST"])
+def speech_to_text():
+
+    if "speech_file" not in request.files:
+        return "فایل صوتی انتخاب نشده است."
+
+    file = request.files["speech_file"]
+
+    if file.filename == "":
+        return "فایل صوتی انتخاب نشده است."
+
+    original_filename = file.filename
+
+    input_filename = (
+        f"stt_{int(time.time())}_{original_filename}"
+    )
+
+    input_path = os.path.join(
+        UPLOAD_FOLDER,
+        input_filename
+    )
+
+    file.save(input_path)
+
+    wav_path = os.path.join(
+        UPLOAD_FOLDER,
+        f"stt_{int(time.time())}.wav"
+    )
+
+    try:
+
+        # تبدیل فایل صوتی به WAV استاندارد
+        audio_data, sample_rate = librosa.load(
+            input_path,
+            sr=16000,
+            mono=True
+        )
+
+        sf.write(
+            wav_path,
+            audio_data,
+            sample_rate,
+            subtype="PCM_16"
+        )
+
+        recognizer = sr.Recognizer()
+
+        with sr.AudioFile(wav_path) as source:
+
+            audio = recognizer.record(source)
+
+        # تشخیص گفتار فارسی
+        text = recognizer.recognize_google(
+            audio,
+            language="fa-IR"
+        )
+
+        return render_template(
+            "index.html",
+            transcribed_text=text,
+            success_text="صوت با موفقیت به متن تبدیل شد."
+        )
+
+    except sr.UnknownValueError:
+
+        return render_template(
+            "index.html",
+            error_text="صدای واضحی برای تبدیل به متن پیدا نشد."
+        )
+
+    except sr.RequestError as e:
+
+        return render_template(
+            "index.html",
+            error_text=f"خطا در ارتباط با سرویس تشخیص گفتار: {str(e)}"
+        )
+
+    except Exception as e:
+
+        return render_template(
+            "index.html",
+            error_text=f"خطا در تبدیل صوت به متن: {str(e)}"
+        )
+
+    finally:
+
+        # حذف فایل موقت WAV
+        if os.path.exists(wav_path):
+            try:
+                os.remove(wav_path)
+            except:
+                pass
+
+
+# ==========================================
 # دانلود فایل
-# =========================
+# ==========================================
 @app.route("/download/<path:filename>")
 def download(filename):
 
-    # بررسی پوشه uploads
     upload_path = os.path.join(
         UPLOAD_FOLDER,
         filename
@@ -209,7 +316,6 @@ def download(filename):
             as_attachment=True
         )
 
-    # بررسی پوشه separated
     separated_path = os.path.join(
         SEPARATED_FOLDER,
         filename
@@ -226,16 +332,15 @@ def download(filename):
     return "فایل پیدا نشد.", 404
 
 
-# =========================
+# ==========================================
 # Sitemap
-# =========================
+# ==========================================
 @app.route("/sitemap.xml")
 def sitemap():
 
     base_url = "https://rt-k9g5.onrender.com"
 
     xml = f"""<?xml version="1.0" encoding="UTF-8"?>
-
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
     <url>
@@ -259,9 +364,9 @@ def sitemap():
     )
 
 
-# =========================
-# Robots.txt
-# =========================
+# ==========================================
+# Robots
+# ==========================================
 @app.route("/robots.txt")
 def robots():
 
@@ -279,9 +384,9 @@ Sitemap: {base_url}/sitemap.xml
     )
 
 
-# =========================
+# ==========================================
 # اجرای برنامه
-# =========================
+# ==========================================
 if __name__ == "__main__":
 
     port = int(
