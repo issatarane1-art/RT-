@@ -7,7 +7,8 @@ edge-tts
 faster-whisper
 pytesseract
 Pillow
-SpeechRecognition
 reportlab
 qrcode
 pypdf
+requests
+beautifulsoup4
