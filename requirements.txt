@@ -3,4 +3,4 @@ gunicorn
 numpy
 librosa
 soundfile
-gTTS
+edge-tts
