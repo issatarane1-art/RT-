@@ -8,3 +8,6 @@ faster-whisper
 pytesseract
 Pillow
 SpeechRecognition
+reportlab
+qrcode
+pypdf
