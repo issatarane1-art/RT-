@@ -321,14 +321,13 @@ def process_audio():
     except Exception as e:
 
         return render_template(
-            "index.html",
-            audio_file=None,
-            instrumental_file=None,
-            vocal_file=None,
-            instrumental_file=None,
-            transcribed_text=None,
-            image_text=None,
-            error=f"خطا در پردازش فایل صوتی: {str(e)}"
+    "index.html",
+    audio_file=None,
+    instrumental_file=None,
+    vocal_file=None,
+    transcribed_text=None,
+    image_text=None,
+    error=f"خطا در پردازش فایل صوتی: {str(e)}"
         )
 
 
