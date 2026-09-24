@@ -6,15 +6,27 @@ import shutil
 import numpy as np
 import librosa
 import soundfile as sf
-import speech_recognition as sr
 import pytesseract
 import edge_tts
 
 from PIL import Image, ImageEnhance, ImageFilter
-from flask import Flask, render_template, request, send_from_directory, Response
+from flask import (
+    Flask,
+    render_template,
+    request,
+    send_from_directory,
+    Response
+)
+
+from faster_whisper import WhisperModel
 
 
 app = Flask(__name__)
+
+
+# =========================================================
+# FOLDERS
+# =========================================================
 
 UPLOAD_FOLDER = "uploads"
 SEPARATED_FOLDER = "separated"
@@ -24,10 +36,32 @@ os.makedirs(SEPARATED_FOLDER, exist_ok=True)
 
 
 # =========================================================
+# WHISPER MODEL
+# =========================================================
+
+# مدل base برای مصرف مناسب‌تر RAM و CPU روی Render
+WHISPER_MODEL_SIZE = "base"
+
+whisper_model = None
+
+
+def get_whisper_model():
+    global whisper_model
+
+    if whisper_model is None:
+        whisper_model = WhisperModel(
+            WHISPER_MODEL_SIZE,
+            device="cpu",
+            compute_type="int8"
+        )
+
+    return whisper_model
+
+
+# =========================================================
 # TESSERACT OCR
 # =========================================================
 
-# مسیر معمول Tesseract در Render / Linux
 TESSERACT_PATH = shutil.which("tesseract")
 
 if TESSERACT_PATH:
@@ -57,9 +91,11 @@ def about():
     return """
     <!DOCTYPE html>
     <html lang="fa" dir="rtl">
+
     <head>
         <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="viewport"
+              content="width=device-width, initial-scale=1.0">
 
         <title>درباره ما</title>
     </head>
@@ -70,7 +106,8 @@ def about():
 
         <p>
             ابزار آنلاین تبدیل متن به صدا،
-            پردازش صوت، تبدیل صوت به متن
+            پردازش صوت،
+            تبدیل صوت به متن
             و تبدیل عکس به متن.
         </p>
 
@@ -92,16 +129,11 @@ def contact():
     <html lang="fa" dir="rtl">
 
     <head>
-
         <meta charset="UTF-8">
-
-        <meta
-            name="viewport"
-            content="width=device-width, initial-scale=1.0"
-        >
+        <meta name="viewport"
+              content="width=device-width, initial-scale=1.0">
 
         <title>تماس با ما</title>
-
     </head>
 
     <body>
@@ -115,7 +147,6 @@ def contact():
         <a href="/">بازگشت به صفحه اصلی</a>
 
     </body>
-
     </html>
     """
 
@@ -230,13 +261,11 @@ def process_audio():
             return render_template(
                 "index.html",
                 error_text=(
-                    "برای پردازش فعلی، "
-                    "فایل صوتی باید استریو باشد."
+                    "برای پردازش فعلی، فایل صوتی باید استریو باشد."
                 )
             )
 
         left = y[0]
-
         right = y[1]
 
         vocals = (
@@ -299,13 +328,12 @@ def process_audio():
 
             try:
                 os.remove(filepath)
-
             except Exception:
                 pass
 
 
 # =========================================================
-# SPEECH TO TEXT
+# SPEECH TO TEXT - FASTER WHISPER
 # =========================================================
 
 @app.route("/speech-to-text", methods=["POST"])
@@ -344,105 +372,42 @@ def speech_to_text():
 
     try:
 
-        audio_data, sample_rate = librosa.load(
+        # ---------------------------------------------
+        # دریافت مدل Whisper
+        # ---------------------------------------------
+
+        model = get_whisper_model()
+
+        # ---------------------------------------------
+        # تبدیل صوت به متن
+        # ---------------------------------------------
+
+        segments, info = model.transcribe(
             input_path,
-            sr=16000,
-            mono=True
+            language="fa",
+            task="transcribe",
+            beam_size=5,
+            vad_filter=True,
+            condition_on_previous_text=True
         )
-
-        recognizer = sr.Recognizer()
-
-        chunk_seconds = 20
-
-        chunk_size = (
-            16000 * chunk_seconds
-        )
-
-        total_samples = len(audio_data)
 
         all_text = []
 
-        recognizer.operation_timeout = 30
+        for segment in segments:
 
-        for start in range(
-            0,
-            total_samples,
-            chunk_size
-        ):
+            text = segment.text.strip()
 
-            end = min(
-                start + chunk_size,
-                total_samples
-            )
+            if text:
 
-            chunk = audio_data[start:end]
-
-            chunk_filename = (
-                f"chunk_{int(time.time())}_{start}.wav"
-            )
-
-            chunk_path = os.path.join(
-                UPLOAD_FOLDER,
-                chunk_filename
-            )
-
-            try:
-
-                sf.write(
-                    chunk_path,
-                    chunk,
-                    16000,
-                    subtype="PCM_16"
-                )
-
-                with sr.AudioFile(
-                    chunk_path
-                ) as source:
-
-                    audio = recognizer.record(
-                        source
-                    )
-
-                try:
-
-                    text = recognizer.recognize_google(
-                        audio,
-                        language="fa-IR"
-                    )
-
-                    if text:
-
-                        all_text.append(
-                            text.strip()
-                        )
-
-                except sr.UnknownValueError:
-
-                    pass
-
-                except sr.RequestError:
-
-                    return render_template(
-                        "index.html",
-                        error_text=(
-                            "ارتباط با سرویس تشخیص گفتار "
-                            "برقرار نشد. لطفاً دوباره تلاش کنید."
-                        )
-                    )
-
-            finally:
-
-                if os.path.exists(chunk_path):
-
-                    try:
-                        os.remove(chunk_path)
-
-                    except Exception:
-                        pass
+                all_text.append(text)
 
         final_text = " ".join(
             all_text
         ).strip()
+
+        # ---------------------------------------------
+        # اگر متن پیدا نشد
+        # ---------------------------------------------
 
         if not final_text:
 
@@ -454,10 +419,16 @@ def speech_to_text():
                 )
             )
 
+        # ---------------------------------------------
+        # نتیجه
+        # ---------------------------------------------
+
         return render_template(
             "index.html",
             transcribed_text=final_text,
-            success_text="صوت با موفقیت به متن تبدیل شد."
+            success_text=(
+                "صوت با موفقیت به متن فارسی تبدیل شد."
+            )
         )
 
     except Exception as e:
@@ -475,13 +446,12 @@ def speech_to_text():
 
             try:
                 os.remove(input_path)
-
             except Exception:
                 pass
 
 
 # =========================================================
-# IMAGE TO TEXT / OCR
+# IMAGE TO TEXT - OCR
 # =========================================================
 
 @app.route("/image-to-text", methods=["POST"])
@@ -520,9 +490,9 @@ def image_to_text():
 
     try:
 
-        # -----------------------------------------
-        # بررسی نصب Tesseract
-        # -----------------------------------------
+        # ---------------------------------------------
+        # بررسی Tesseract
+        # ---------------------------------------------
 
         tesseract_path = shutil.which(
             "tesseract"
@@ -543,8 +513,7 @@ def image_to_text():
                 return render_template(
                     "index.html",
                     error_text=(
-                        "Tesseract OCR روی سرور نصب نیست. "
-                        "Build Command مربوط به Render را بررسی کنید."
+                        "Tesseract OCR روی سرور نصب نیست."
                     )
                 )
 
@@ -552,9 +521,9 @@ def image_to_text():
             tesseract_path
         )
 
-        # -----------------------------------------
+        # ---------------------------------------------
         # باز کردن تصویر
-        # -----------------------------------------
+        # ---------------------------------------------
 
         image = Image.open(
             image_path
@@ -564,17 +533,15 @@ def image_to_text():
             "RGB"
         )
 
-        # -----------------------------------------
-        # بزرگ کردن عکس برای OCR بهتر
-        # -----------------------------------------
-
         width, height = image.size
+
+        # ---------------------------------------------
+        # افزایش اندازه برای OCR
+        # ---------------------------------------------
 
         if width < 1600:
 
-            ratio = (
-                1600 / width
-            )
+            ratio = 1600 / width
 
             image = image.resize(
                 (
@@ -583,33 +550,25 @@ def image_to_text():
                 )
             )
 
-        # -----------------------------------------
-        # تبدیل به سیاه و سفید
-        # -----------------------------------------
+        # ---------------------------------------------
+        # پردازش تصویر
+        # ---------------------------------------------
 
         image = image.convert(
             "L"
         )
 
-        # -----------------------------------------
-        # افزایش کنتراست
-        # -----------------------------------------
-
         image = ImageEnhance.Contrast(
             image
         ).enhance(2)
-
-        # -----------------------------------------
-        # شارپ کردن
-        # -----------------------------------------
 
         image = image.filter(
             ImageFilter.SHARPEN
         )
 
-        # -----------------------------------------
-        # استخراج متن فارسی و انگلیسی
-        # -----------------------------------------
+        # ---------------------------------------------
+        # OCR فارسی + انگلیسی
+        # ---------------------------------------------
 
         extracted_text = pytesseract.image_to_string(
             image,
@@ -621,9 +580,9 @@ def image_to_text():
             extracted_text.strip()
         )
 
-        # -----------------------------------------
-        # اگر متنی پیدا نشد
-        # -----------------------------------------
+        # ---------------------------------------------
+        # نتیجه خالی
+        # ---------------------------------------------
 
         if not extracted_text:
 
@@ -636,9 +595,9 @@ def image_to_text():
                 )
             )
 
-        # -----------------------------------------
+        # ---------------------------------------------
         # نمایش نتیجه
-        # -----------------------------------------
+        # ---------------------------------------------
 
         return render_template(
             "index.html",
@@ -663,7 +622,6 @@ def image_to_text():
 
             try:
                 os.remove(image_path)
-
             except Exception:
                 pass
 
@@ -763,7 +721,7 @@ Sitemap: {base_url}/sitemap.xml
 
 
 # =========================================================
-# START SERVER
+# RUN
 # =========================================================
 
 if __name__ == "__main__":
