@@ -11,6 +11,8 @@ RUN apt-get update \
         tesseract-ocr-fas \
         libsndfile1 \
         ffmpeg \
+        gcc \
+        g++ \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
