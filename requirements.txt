@@ -5,3 +5,5 @@ librosa
 soundfile
 edge-tts
 SpeechRecognition
+pytesseract
+Pillow
