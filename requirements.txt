@@ -7,3 +7,4 @@ edge-tts
 faster-whisper
 pytesseract
 Pillow
+SpeechRecognition
