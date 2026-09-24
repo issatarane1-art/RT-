@@ -7,12 +7,10 @@ import librosa
 import soundfile as sf
 import speech_recognition as sr
 import pytesseract
+import edge_tts
 
 from PIL import Image, ImageEnhance, ImageFilter
-
 from flask import Flask, render_template, request, send_from_directory, Response
-
-import edge_tts
 
 
 app = Flask(__name__)
@@ -24,18 +22,10 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(SEPARATED_FOLDER, exist_ok=True)
 
 
-# =========================================================
-# صفحه اصلی
-# =========================================================
-
 @app.route("/")
 def home():
     return render_template("index.html")
 
-
-# =========================================================
-# درباره ما
-# =========================================================
 
 @app.route("/about")
 def about():
@@ -49,21 +39,15 @@ def about():
     </head>
     <body>
         <h1>درباره ما</h1>
-
         <p>
             ابزار آنلاین تبدیل متن به صدا،
             پردازش صوت، تبدیل صوت به متن و تبدیل عکس به متن.
         </p>
-
         <a href="/">بازگشت به صفحه اصلی</a>
     </body>
     </html>
     """
 
-
-# =========================================================
-# تماس با ما
-# =========================================================
 
 @app.route("/contact")
 def contact():
@@ -77,11 +61,7 @@ def contact():
     </head>
     <body>
         <h1>تماس با ما</h1>
-
-        <p>
-            برای ارتباط با ما می‌توانید از این صفحه استفاده کنید.
-        </p>
-
+        <p>برای ارتباط با ما می‌توانید از این صفحه استفاده کنید.</p>
         <a href="/">بازگشت به صفحه اصلی</a>
     </body>
     </html>
@@ -89,42 +69,28 @@ def contact():
 
 
 # =========================================================
-# تبدیل متن به صدا
+# TEXT TO SPEECH
 # =========================================================
 
 async def generate_persian_speech(text, filepath):
-
     voice = "fa-IR-DilaraNeural"
-
-    communicate = edge_tts.Communicate(
-        text,
-        voice
-    )
-
+    communicate = edge_tts.Communicate(text, voice)
     await communicate.save(filepath)
 
 
 @app.route("/process-text", methods=["POST"])
 def process_text():
 
-    text = request.form.get(
-        "text_input",
-        ""
-    ).strip()
+    text = request.form.get("text_input", "").strip()
 
     if not text:
-
         return render_template(
             "index.html",
             error_text="لطفاً ابتدا متن را وارد کنید."
         )
 
     filename = f"speech_{int(time.time())}.mp3"
-
-    filepath = os.path.join(
-        UPLOAD_FOLDER,
-        filename
-    )
+    filepath = os.path.join(UPLOAD_FOLDER, filename)
 
     try:
 
@@ -150,14 +116,13 @@ def process_text():
 
 
 # =========================================================
-# پردازش فایل صوتی
+# AUDIO PROCESSING
 # =========================================================
 
 @app.route("/process-audio", methods=["POST"])
 def process_audio():
 
     if "audio_file" not in request.files:
-
         return render_template(
             "index.html",
             error_text="فایل صوتی انتخاب نشده است."
@@ -166,13 +131,14 @@ def process_audio():
     file = request.files["audio_file"]
 
     if file.filename == "":
-
         return render_template(
             "index.html",
             error_text="فایل صوتی انتخاب نشده است."
         )
 
-    filename = f"{int(time.time())}_{file.filename}"
+    safe_name = os.path.basename(file.filename)
+
+    filename = f"{int(time.time())}_{safe_name}"
 
     filepath = os.path.join(
         UPLOAD_FOLDER,
@@ -193,19 +159,21 @@ def process_audio():
 
             return render_template(
                 "index.html",
-                error_text="برای این نوع جداسازی، فایل صوتی استریو لازم است."
+                error_text=(
+                    "برای پردازش فعلی، فایل صوتی باید استریو باشد."
+                )
             )
 
         left = y[0]
         right = y[1]
 
         vocals = (left + right) / 2
-
         instrumental = (left - right) / 2
 
-        vocals_file = f"vocals_{int(time.time())}.wav"
+        timestamp = int(time.time())
 
-        instrumental_file = f"instrumental_{int(time.time())}.wav"
+        vocals_file = f"vocals_{timestamp}.wav"
+        instrumental_file = f"instrumental_{timestamp}.wav"
 
         vocals_path = os.path.join(
             SEPARATED_FOLDER,
@@ -249,13 +217,12 @@ def process_audio():
 
             try:
                 os.remove(filepath)
-
             except:
                 pass
 
 
 # =========================================================
-# تبدیل صوت به متن
+# SPEECH TO TEXT
 # =========================================================
 
 @app.route("/speech-to-text", methods=["POST"])
@@ -277,8 +244,10 @@ def speech_to_text():
             error_text="فایل صوتی انتخاب نشده است."
         )
 
+    safe_name = os.path.basename(file.filename)
+
     input_filename = (
-        f"stt_{int(time.time())}_{file.filename}"
+        f"stt_{int(time.time())}_{safe_name}"
     )
 
     input_path = os.path.join(
@@ -290,7 +259,6 @@ def speech_to_text():
 
     try:
 
-        # تبدیل فایل به WAV با کیفیت مناسب
         audio_data, sample_rate = librosa.load(
             input_path,
             sr=16000,
@@ -299,8 +267,8 @@ def speech_to_text():
 
         recognizer = sr.Recognizer()
 
-        # فایل را به قطعات 30 ثانیه‌ای تقسیم می‌کنیم
-        chunk_seconds = 30
+        # قطعه‌های 20 ثانیه‌ای برای جلوگیری از درخواست‌های خیلی بزرگ
+        chunk_seconds = 20
 
         chunk_size = 16000 * chunk_seconds
 
@@ -308,7 +276,6 @@ def speech_to_text():
 
         all_text = []
 
-        # برای جلوگیری از خطای timeout
         recognizer.operation_timeout = 30
 
         for start in range(
@@ -335,7 +302,6 @@ def speech_to_text():
 
             try:
 
-                # ذخیره قطعه
                 sf.write(
                     chunk_path,
                     chunk,
@@ -343,12 +309,9 @@ def speech_to_text():
                     subtype="PCM_16"
                 )
 
-                # خواندن فایل
                 with sr.AudioFile(chunk_path) as source:
 
-                    audio = recognizer.record(
-                        source
-                    )
+                    audio = recognizer.record(source)
 
                 try:
 
@@ -365,14 +328,17 @@ def speech_to_text():
 
                 except sr.UnknownValueError:
 
-                    # اگر این قطعه قابل تشخیص نبود
-                    # قطعات دیگر ادامه پیدا می‌کنند
                     pass
 
-                except sr.RequestError:
+                except sr.RequestError as e:
 
-                    # اگر سرویس موقتاً پاسخ نداد
-                    pass
+                    return render_template(
+                        "index.html",
+                        error_text=(
+                            "ارتباط با سرویس تشخیص گفتار برقرار نشد. "
+                            "لطفاً دوباره تلاش کنید."
+                        )
+                    )
 
             finally:
 
@@ -380,15 +346,12 @@ def speech_to_text():
 
                     try:
                         os.remove(chunk_path)
-
                     except:
                         pass
-
 
         final_text = " ".join(
             all_text
         ).strip()
-
 
         if not final_text:
 
@@ -396,29 +359,15 @@ def speech_to_text():
                 "index.html",
                 error_text=(
                     "متن قابل تشخیصی پیدا نشد. "
-                    "لطفاً فایل صوتی واضح‌تر و با صدای گوینده مشخص‌تر "
-                    "امتحان کنید."
+                    "لطفاً فایل صوتی واضح‌تری امتحان کنید."
                 )
             )
-
 
         return render_template(
             "index.html",
             transcribed_text=final_text,
             success_text="صوت با موفقیت به متن تبدیل شد."
         )
-
-
-    except sr.RequestError as e:
-
-        return render_template(
-            "index.html",
-            error_text=(
-                "ارتباط با سرویس تشخیص گفتار برقرار نشد. "
-                f"جزئیات: {str(e)}"
-            )
-        )
-
 
     except Exception as e:
 
@@ -427,20 +376,18 @@ def speech_to_text():
             error_text=f"خطا در تبدیل صوت به متن: {str(e)}"
         )
 
-
     finally:
 
         if os.path.exists(input_path):
 
             try:
                 os.remove(input_path)
-
             except:
                 pass
 
 
 # =========================================================
-# تبدیل عکس به متن
+# IMAGE TO TEXT
 # =========================================================
 
 @app.route("/image-to-text", methods=["POST"])
@@ -462,9 +409,10 @@ def image_to_text():
             error_text="عکسی انتخاب نشده است."
         )
 
+    safe_name = os.path.basename(file.filename)
 
     filename = (
-        f"ocr_{int(time.time())}_{file.filename}"
+        f"ocr_{int(time.time())}_{safe_name}"
     )
 
     image_path = os.path.join(
@@ -474,23 +422,17 @@ def image_to_text():
 
     file.save(image_path)
 
-
     try:
 
-        # باز کردن عکس
         image = Image.open(
             image_path
         )
 
-        # تبدیل به RGB
         image = image.convert("RGB")
-
-        # ==========================================
-        # بزرگ کردن عکس برای OCR بهتر
-        # ==========================================
 
         width, height = image.size
 
+        # افزایش اندازه عکس‌های کوچک
         if width < 1600:
 
             ratio = 1600 / width
@@ -502,11 +444,7 @@ def image_to_text():
                 )
             )
 
-
-        # ==========================================
-        # بهبود تصویر
-        # ==========================================
-
+        # بهبود تصویر برای OCR
         image = image.convert("L")
 
         image = ImageEnhance.Contrast(
@@ -517,20 +455,13 @@ def image_to_text():
             ImageFilter.SHARPEN
         )
 
-
-        # ==========================================
-        # استخراج متن فارسی و انگلیسی
-        # ==========================================
-
         extracted_text = pytesseract.image_to_string(
             image,
             lang="fas+eng",
             config="--psm 6"
         )
 
-
         extracted_text = extracted_text.strip()
-
 
         if not extracted_text:
 
@@ -542,13 +473,11 @@ def image_to_text():
                 )
             )
 
-
         return render_template(
             "index.html",
             image_text=extracted_text,
             success_text="متن تصویر با موفقیت استخراج شد."
         )
-
 
     except Exception as e:
 
@@ -559,20 +488,18 @@ def image_to_text():
             )
         )
 
-
     finally:
 
         if os.path.exists(image_path):
 
             try:
                 os.remove(image_path)
-
             except:
                 pass
 
 
 # =========================================================
-# دانلود فایل‌ها
+# DOWNLOAD
 # =========================================================
 
 @app.route("/download/<path:filename>")
@@ -591,7 +518,6 @@ def download(filename):
             as_attachment=True
         )
 
-
     separated_path = os.path.join(
         SEPARATED_FOLDER,
         filename
@@ -605,12 +531,11 @@ def download(filename):
             as_attachment=True
         )
 
-
     return "فایل پیدا نشد.", 404
 
 
 # =========================================================
-# Sitemap
+# SITEMAP
 # =========================================================
 
 @app.route("/sitemap.xml")
@@ -619,21 +544,16 @@ def sitemap():
     base_url = "https://rt-k9g5.onrender.com"
 
     xml = f"""<?xml version="1.0" encoding="UTF-8"?>
-
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-
     <url>
         <loc>{base_url}/</loc>
     </url>
-
     <url>
         <loc>{base_url}/about</loc>
     </url>
-
     <url>
         <loc>{base_url}/contact</loc>
     </url>
-
 </urlset>
 """
 
@@ -644,7 +564,7 @@ def sitemap():
 
 
 # =========================================================
-# Robots.txt
+# ROBOTS
 # =========================================================
 
 @app.route("/robots.txt")
@@ -665,7 +585,7 @@ Sitemap: {base_url}/sitemap.xml
 
 
 # =========================================================
-# اجرای برنامه
+# RUN
 # =========================================================
 
 if __name__ == "__main__":
