@@ -1,84 +1,41 @@
 import os
 import uuid
 import threading
-import subprocess
 
-from flask import (
-    Flask,
-    request,
-    render_template,
-    send_from_directory,
-    jsonify,
-    Response,
-)
-
+from flask import Flask, render_template, request, send_from_directory, Response
 from werkzeug.utils import secure_filename
 
 import numpy as np
-import librosa
 import soundfile as sf
-
+import librosa
 import edge_tts
-
 import pytesseract
-from PIL import Image
 
+from PIL import Image, ImageOps
+
+# Whisper را فقط هنگام نیاز بارگذاری می‌کنیم
 from faster_whisper import WhisperModel
 
 
 # =========================================================
-# Flask App
+# Flask
 # =========================================================
 
 app = Flask(__name__)
+
+app.config["MAX_CONTENT_LENGTH"] = 50 * 1024 * 1024
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 UPLOAD_FOLDER = os.path.join(BASE_DIR, "uploads")
 SEPARATED_FOLDER = os.path.join(BASE_DIR, "separated")
-WHISPER_CACHE = os.path.join(BASE_DIR, "whisper_cache")
 
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(SEPARATED_FOLDER, exist_ok=True)
-os.makedirs(WHISPER_CACHE, exist_ok=True)
-
-app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
-app.config["SEPARATED_FOLDER"] = SEPARATED_FOLDER
-app.config["MAX_CONTENT_LENGTH"] = 50 * 1024 * 1024
 
 
 # =========================================================
-# Allowed Extensions
-# =========================================================
-
-ALLOWED_AUDIO = {
-    "mp3",
-    "wav",
-    "m4a",
-    "ogg",
-    "flac",
-    "aac",
-}
-
-ALLOWED_IMAGE = {
-    "jpg",
-    "jpeg",
-    "png",
-    "webp",
-    "bmp",
-    "tiff",
-}
-
-
-def allowed_file(filename, allowed_extensions):
-    return (
-        "." in filename
-        and filename.rsplit(".", 1)[1].lower() in allowed_extensions
-    )
-
-
-# =========================================================
-# Whisper - Lazy Loading
+# Whisper
 # =========================================================
 
 whisper_model = None
@@ -86,18 +43,26 @@ whisper_lock = threading.Lock()
 
 
 def get_whisper_model():
+    """
+    مدل Whisper فقط زمانی ساخته می‌شود که واقعاً
+    کاربر از قابلیت صدا به متن استفاده کند.
+    """
+
     global whisper_model
 
     if whisper_model is None:
+
         with whisper_lock:
+
             if whisper_model is None:
+
                 whisper_model = WhisperModel(
                     "tiny",
                     device="cpu",
                     compute_type="int8",
                     cpu_threads=1,
                     num_workers=1,
-                    download_root=WHISPER_CACHE,
+                    download_root=os.path.join(BASE_DIR, "whisper_cache")
                 )
 
     return whisper_model
@@ -109,16 +74,28 @@ def get_whisper_model():
 
 @app.route("/")
 def index():
-    return render_template("index.html")
+
+    return render_template(
+        "index.html",
+        audio_file=None,
+        instrumental_file=None,
+        vocal_file=None,
+        transcribed_text=None,
+        image_text=None,
+        error=None
+    )
 
 
 # =========================================================
-# Text To Speech Page
+# Text To Speech Page - SEO
 # =========================================================
 
 @app.route("/text-to-speech")
 def text_to_speech():
-    return render_template("text-to-speech.html")
+
+    return render_template(
+        "text-to-speech.html"
+    )
 
 
 # =========================================================
@@ -140,7 +117,7 @@ def contact():
 
 
 # =========================================================
-# Text To Persian Speech
+# Text To Speech
 # =========================================================
 
 @app.route("/process-text", methods=["POST"])
@@ -149,44 +126,73 @@ def process_text():
     text = request.form.get("text", "").strip()
 
     if not text:
-        return jsonify({
-            "success": False,
-            "error": "لطفاً متن را وارد کنید."
-        }), 400
+
+        return render_template(
+            "index.html",
+            error="لطفاً متنی وارد کنید.",
+            audio_file=None,
+            instrumental_file=None,
+            vocal_file=None,
+            transcribed_text=None,
+            image_text=None
+        )
+
+    # محدود کردن متن برای جلوگیری از مصرف بیش از حد منابع
+    if len(text) > 5000:
+
+        return render_template(
+            "index.html",
+            error="متن واردشده خیلی طولانی است. لطفاً حداکثر ۵۰۰۰ کاراکتر وارد کنید.",
+            audio_file=None,
+            instrumental_file=None,
+            vocal_file=None,
+            transcribed_text=None,
+            image_text=None
+        )
+
+    filename = secure_filename(
+        f"tts_{uuid.uuid4().hex}.mp3"
+    )
+
+    filepath = os.path.join(UPLOAD_FOLDER, filename)
 
     try:
 
-        filename = f"{uuid.uuid4().hex}.mp3"
-        output_path = os.path.join(
-            app.config["UPLOAD_FOLDER"],
-            filename
+        voice = "fa-IR-DilaraNeural"
+
+        communicate = edge_tts.Communicate(
+            text,
+            voice
         )
 
-        async def generate_speech():
-
-            communicate = edge_tts.Communicate(
-                text,
-                "fa-IR-DilaraNeural"
-            )
-
-            await communicate.save(output_path)
-
+        # اجرای async بدون نیاز به تغییر ساختار Flask
         import asyncio
 
-        asyncio.run(generate_speech())
+        asyncio.run(
+            communicate.save(filepath)
+        )
 
-        return jsonify({
-            "success": True,
-            "filename": filename,
-            "download_url": f"/download/{filename}"
-        })
+        return render_template(
+            "index.html",
+            audio_file=filename,
+            instrumental_file=None,
+            vocal_file=None,
+            transcribed_text=None,
+            image_text=None,
+            error=None
+        )
 
     except Exception as e:
 
-        return jsonify({
-            "success": False,
-            "error": f"خطا در تبدیل متن به صدا: {str(e)}"
-        }), 500
+        return render_template(
+            "index.html",
+            error=f"خطا در تبدیل متن به صدا: {str(e)}",
+            audio_file=None,
+            instrumental_file=None,
+            vocal_file=None,
+            transcribed_text=None,
+            image_text=None
+        )
 
 
 # =========================================================
@@ -197,136 +203,187 @@ def process_text():
 def process_audio():
 
     if "audio" not in request.files:
-        return jsonify({
-            "success": False,
-            "error": "فایل صوتی ارسال نشده است."
-        }), 400
+
+        return render_template(
+            "index.html",
+            error="فایل صوتی انتخاب نشده است.",
+            audio_file=None,
+            instrumental_file=None,
+            vocal_file=None,
+            transcribed_text=None,
+            image_text=None
+        )
 
     file = request.files["audio"]
 
-    if file.filename == "":
-        return jsonify({
-            "success": False,
-            "error": "لطفاً یک فایل صوتی انتخاب کنید."
-        }), 400
+    if not file or file.filename == "":
 
-    if not allowed_file(file.filename, ALLOWED_AUDIO):
-        return jsonify({
-            "success": False,
-            "error": "فرمت فایل صوتی پشتیبانی نمی‌شود."
-        }), 400
+        return render_template(
+            "index.html",
+            error="لطفاً یک فایل صوتی انتخاب کنید.",
+            audio_file=None,
+            instrumental_file=None,
+            vocal_file=None,
+            transcribed_text=None,
+            image_text=None
+        )
 
     original_name = secure_filename(file.filename)
 
-    unique_name = f"{uuid.uuid4().hex}_{original_name}"
+    if not original_name:
+
+        return render_template(
+            "index.html",
+            error="نام فایل معتبر نیست.",
+            audio_file=None,
+            instrumental_file=None,
+            vocal_file=None,
+            transcribed_text=None,
+            image_text=None
+        )
+
+    input_filename = f"{uuid.uuid4().hex}_{original_name}"
 
     input_path = os.path.join(
-        app.config["UPLOAD_FOLDER"],
-        unique_name
+        UPLOAD_FOLDER,
+        input_filename
     )
 
     file.save(input_path)
 
     try:
 
-        # Load audio as stereo
-        y, sr = librosa.load(
+        # خواندن فایل صوتی
+        audio, sample_rate = librosa.load(
             input_path,
             sr=None,
             mono=False
         )
 
-        # Make sure audio has two channels
-        if y.ndim == 1:
+        # اگر فایل Mono باشد
+        if audio.ndim == 1:
 
-            y = np.vstack([y, y])
+            audio = np.expand_dims(
+                audio,
+                axis=0
+            )
 
-        left = y[0]
-        right = y[1]
+        # روش ساده برای جداسازی تقریبی
+        # این روش AI Source Separation واقعی نیست.
+        if audio.shape[0] >= 2:
 
-        # Approximate vocal extraction
-        vocals = (left + right) / 2
+            left = audio[0]
+            right = audio[1]
 
-        # Approximate instrumental extraction
-        instrumental = (left - right) / 2
+            vocals = (left + right) / 2
+            instrumental = (left - right) / 2
 
-        vocals_filename = f"{uuid.uuid4().hex}_vocals.wav"
-        instrumental_filename = (
-            f"{uuid.uuid4().hex}_instrumental.wav"
-        )
+        else:
 
-        vocals_path = os.path.join(
-            app.config["SEPARATED_FOLDER"],
-            vocals_filename
+            vocals = audio[0]
+            instrumental = np.zeros_like(vocals)
+
+        vocal_filename = f"vocals_{uuid.uuid4().hex}.wav"
+        instrumental_filename = f"instrumental_{uuid.uuid4().hex}.wav"
+
+        vocal_path = os.path.join(
+            SEPARATED_FOLDER,
+            vocal_filename
         )
 
         instrumental_path = os.path.join(
-            app.config["SEPARATED_FOLDER"],
+            SEPARATED_FOLDER,
             instrumental_filename
         )
 
         sf.write(
-            vocals_path,
+            vocal_path,
             vocals,
-            sr
+            sample_rate
         )
 
         sf.write(
             instrumental_path,
             instrumental,
-            sr
+            sample_rate
         )
 
-        return jsonify({
-            "success": True,
-            "vocals": vocals_filename,
-            "instrumental": instrumental_filename,
-            "vocals_url": f"/download/{vocals_filename}",
-            "instrumental_url": f"/download/{instrumental_filename}"
-        })
+        return render_template(
+            "index.html",
+            audio_file=None,
+            vocal_file=vocal_filename,
+            instrumental_file=instrumental_filename,
+            transcribed_text=None,
+            image_text=None,
+            error=None
+        )
 
     except Exception as e:
 
-        return jsonify({
-            "success": False,
-            "error": f"خطا در پردازش فایل صوتی: {str(e)}"
-        }), 500
+        return render_template(
+            "index.html",
+            audio_file=None,
+            instrumental_file=None,
+            vocal_file=None,
+            instrumental_file=None,
+            transcribed_text=None,
+            image_text=None,
+            error=f"خطا در پردازش فایل صوتی: {str(e)}"
+        )
 
 
 # =========================================================
 # Speech To Text
 # =========================================================
 
-@app.route("/process-speech", methods=["POST"])
-def process_speech():
+@app.route("/speech-to-text", methods=["POST"])
+def speech_to_text():
 
     if "audio" not in request.files:
-        return jsonify({
-            "success": False,
-            "error": "فایل صوتی ارسال نشده است."
-        }), 400
+
+        return render_template(
+            "index.html",
+            error="فایل صوتی انتخاب نشده است.",
+            audio_file=None,
+            instrumental_file=None,
+            vocal_file=None,
+            transcribed_text=None,
+            image_text=None
+        )
 
     file = request.files["audio"]
 
-    if file.filename == "":
-        return jsonify({
-            "success": False,
-            "error": "لطفاً فایل صوتی را انتخاب کنید."
-        }), 400
+    if not file or file.filename == "":
 
-    if not allowed_file(file.filename, ALLOWED_AUDIO):
-        return jsonify({
-            "success": False,
-            "error": "فرمت فایل صوتی پشتیبانی نمی‌شود."
-        }), 400
+        return render_template(
+            "index.html",
+            error="لطفاً فایل صوتی انتخاب کنید.",
+            audio_file=None,
+            instrumental_file=None,
+            vocal_file=None,
+            transcribed_text=None,
+            image_text=None
+        )
 
     original_name = secure_filename(file.filename)
 
-    unique_name = f"{uuid.uuid4().hex}_{original_name}"
+    if not original_name:
+
+        return render_template(
+            "index.html",
+            error="نام فایل معتبر نیست.",
+            audio_file=None,
+            instrumental_file=None,
+            vocal_file=None,
+            transcribed_text=None,
+            image_text=None
+        )
+
+    filename = f"stt_{uuid.uuid4().hex}_{original_name}"
 
     input_path = os.path.join(
-        app.config["UPLOAD_FOLDER"],
-        unique_name
+        UPLOAD_FOLDER,
+        filename
     )
 
     file.save(input_path)
@@ -344,27 +401,48 @@ def process_speech():
             temperature=0,
             vad_filter=True,
             condition_on_previous_text=False,
-            without_timestamps=True,
+            without_timestamps=True
         )
 
         text_parts = []
 
         for segment in segments:
-            text_parts.append(segment.text)
 
-        extracted_text = " ".join(text_parts).strip()
+            text = segment.text.strip()
 
-        return jsonify({
-            "success": True,
-            "text": extracted_text
-        })
+            if text:
+
+                text_parts.append(text)
+
+        transcribed_text = " ".join(
+            text_parts
+        ).strip()
+
+        if not transcribed_text:
+
+            transcribed_text = "متنی از فایل صوتی تشخیص داده نشد."
+
+        return render_template(
+            "index.html",
+            audio_file=None,
+            instrumental_file=None,
+            vocal_file=None,
+            transcribed_text=transcribed_text,
+            image_text=None,
+            error=None
+        )
 
     except Exception as e:
 
-        return jsonify({
-            "success": False,
-            "error": f"خطا در تبدیل صدا به متن: {str(e)}"
-        }), 500
+        return render_template(
+            "index.html",
+            audio_file=None,
+            instrumental_file=None,
+            vocal_file=None,
+            transcribed_text=None,
+            image_text=None,
+            error=f"خطا در تبدیل صدا به متن: {str(e)}"
+        )
 
 
 # =========================================================
@@ -375,61 +453,111 @@ def process_speech():
 def image_to_text():
 
     if "image" not in request.files:
-        return jsonify({
-            "success": False,
-            "error": "تصویر ارسال نشده است."
-        }), 400
+
+        return render_template(
+            "index.html",
+            error="تصویری انتخاب نشده است.",
+            audio_file=None,
+            instrumental_file=None,
+            vocal_file=None,
+            transcribed_text=None,
+            image_text=None
+        )
 
     file = request.files["image"]
 
-    if file.filename == "":
-        return jsonify({
-            "success": False,
-            "error": "لطفاً یک تصویر انتخاب کنید."
-        }), 400
+    if not file or file.filename == "":
 
-    if not allowed_file(file.filename, ALLOWED_IMAGE):
-        return jsonify({
-            "success": False,
-            "error": "فرمت تصویر پشتیبانی نمی‌شود."
-        }), 400
+        return render_template(
+            "index.html",
+            error="لطفاً یک تصویر انتخاب کنید.",
+            audio_file=None,
+            instrumental_file=None,
+            vocal_file=None,
+            transcribed_text=None,
+            image_text=None
+        )
 
     original_name = secure_filename(file.filename)
 
-    unique_name = f"{uuid.uuid4().hex}_{original_name}"
+    if not original_name:
+
+        return render_template(
+            "index.html",
+            error="نام فایل معتبر نیست.",
+            audio_file=None,
+            instrumental_file=None,
+            vocal_file=None,
+            transcribed_text=None,
+            image_text=None
+        )
+
+    filename = f"ocr_{uuid.uuid4().hex}_{original_name}"
 
     input_path = os.path.join(
-        app.config["UPLOAD_FOLDER"],
-        unique_name
+        UPLOAD_FOLDER,
+        filename
     )
 
     file.save(input_path)
 
     try:
 
-        image = Image.open(input_path)
+        # -------------------------------------------------
+        # باز کردن تصویر
+        # -------------------------------------------------
 
-        image = image.convert("RGB")
+        image = Image.open(
+            input_path
+        )
 
-        # Limit image size to reduce memory usage
-        max_dimension = 1800
+        # تبدیل به RGB
+        if image.mode != "RGB":
+
+            image = image.convert("RGB")
+
+        # -------------------------------------------------
+        # محدود کردن اندازه تصویر
+        # برای جلوگیری از مصرف شدید RAM
+        # -------------------------------------------------
+
+        max_size = 1800
 
         width, height = image.size
 
-        if max(width, height) > max_dimension:
+        if width > max_size or height > max_size:
 
-            scale = max_dimension / max(width, height)
+            scale = min(
+                max_size / width,
+                max_size / height
+            )
 
-            new_width = int(width * scale)
-            new_height = int(height * scale)
+            new_width = max(
+                1,
+                int(width * scale)
+            )
+
+            new_height = max(
+                1,
+                int(height * scale)
+            )
 
             image = image.resize(
                 (new_width, new_height),
                 Image.Resampling.LANCZOS
             )
 
-        # Convert to grayscale
-        image = image.convert("L")
+        # -------------------------------------------------
+        # تبدیل تصویر به خاکستری
+        # -------------------------------------------------
+
+        image = ImageOps.grayscale(
+            image
+        )
+
+        # -------------------------------------------------
+        # OCR
+        # -------------------------------------------------
 
         extracted_text = pytesseract.image_to_string(
             image,
@@ -440,57 +568,79 @@ def image_to_text():
 
         extracted_text = extracted_text.strip()
 
-        return jsonify({
-            "success": True,
-            "text": extracted_text
-        })
+        if not extracted_text:
+
+            extracted_text = (
+                "متنی در تصویر پیدا نشد. "
+                "لطفاً تصویر واضح‌تر و با کیفیت بالاتر انتخاب کنید."
+            )
+
+        return render_template(
+            "index.html",
+            audio_file=None,
+            instrumental_file=None,
+            vocal_file=None,
+            transcribed_text=None,
+            image_text=extracted_text,
+            error=None
+        )
 
     except RuntimeError as e:
 
-        return jsonify({
-            "success": False,
-            "error": "پردازش تصویر بیش از زمان مجاز طول کشید."
-        }), 500
+        return render_template(
+            "index.html",
+            audio_file=None,
+            instrumental_file=None,
+            vocal_file=None,
+            transcribed_text=None,
+            image_text=None,
+            error="پردازش OCR بیش از حد طول کشید. لطفاً تصویر کوچک‌تر و واضح‌تری انتخاب کنید."
+        )
 
     except Exception as e:
 
-        return jsonify({
-            "success": False,
-            "error": f"خطا در استخراج متن از تصویر: {str(e)}"
-        }), 500
+        return render_template(
+            "index.html",
+            audio_file=None,
+            instrumental_file=None,
+            vocal_file=None,
+            transcribed_text=None,
+            image_text=None,
+            error=f"خطا در استخراج متن تصویر: {str(e)}"
+        )
 
 
 # =========================================================
-# Download Files
+# Download
 # =========================================================
 
 @app.route("/download/<path:filename>")
-def download_file(filename):
+def download(filename):
 
-    # First check uploads
-    upload_path = os.path.join(
-        app.config["UPLOAD_FOLDER"],
+    # اول پوشه uploads
+    uploads_path = os.path.join(
+        UPLOAD_FOLDER,
         filename
     )
 
-    if os.path.isfile(upload_path):
+    if os.path.isfile(uploads_path):
 
         return send_from_directory(
-            app.config["UPLOAD_FOLDER"],
+            UPLOAD_FOLDER,
             filename,
             as_attachment=True
         )
 
-    # Then check separated files
+    # سپس separated
     separated_path = os.path.join(
-        app.config["SEPARATED_FOLDER"],
+        SEPARATED_FOLDER,
         filename
     )
 
     if os.path.isfile(separated_path):
 
         return send_from_directory(
-            app.config["SEPARATED_FOLDER"],
+            SEPARATED_FOLDER,
             filename,
             as_attachment=True
         )
@@ -505,86 +655,87 @@ def download_file(filename):
 @app.route("/sitemap.xml")
 def sitemap():
 
-    pages = [
-        "/",
-        "/text-to-speech",
-        "/about",
-        "/contact",
-    ]
+    base_url = request.url_root.rstrip("/")
 
-    base_url = "https://rt-k9g5.onrender.com"
+    xml = f"""<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
-    xml = [
-        '<?xml version="1.0" encoding="UTF-8"?>',
-        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'
-    ]
+    <url>
+        <loc>{base_url}/</loc>
+    </url>
 
-    for page in pages:
+    <url>
+        <loc>{base_url}/about</loc>
+    </url>
 
-        xml.append(
-            f"""
-            <url>
-                <loc>{base_url}{page}</loc>
-            </url>
-            """
-        )
+    <url>
+        <loc>{base_url}/contact</loc>
+    </url>
 
-    xml.append("</urlset>")
+    <url>
+        <loc>{base_url}/text-to-speech</loc>
+    </url>
+
+</urlset>
+"""
 
     return Response(
-        "\n".join(xml),
+        xml,
         mimetype="application/xml"
     )
 
 
 # =========================================================
-# Robots.txt
+# Robots
 # =========================================================
 
 @app.route("/robots.txt")
 def robots():
 
-    content = """User-agent: *
+    base_url = request.url_root.rstrip("/")
+
+    robots_txt = f"""User-agent: *
 Allow: /
 
-Sitemap: https://rt-k9g5.onrender.com/sitemap.xml
+Sitemap: {base_url}/sitemap.xml
 """
 
     return Response(
-        content,
+        robots_txt,
         mimetype="text/plain"
     )
 
 
 # =========================================================
-# Error Handlers
+# Error handlers
 # =========================================================
 
 @app.errorhandler(413)
 def too_large(error):
 
-    return jsonify({
-        "success": False,
-        "error": "حجم فایل بیش از حد مجاز است. حداکثر حجم فایل 50 مگابایت است."
-    }), 413
-
-
-@app.errorhandler(404)
-def not_found(error):
-
-    return jsonify({
-        "success": False,
-        "error": "صفحه موردنظر پیدا نشد."
-    }), 404
+    return render_template(
+        "index.html",
+        error="حجم فایل خیلی زیاد است. حداکثر حجم فایل ۵۰ مگابایت است.",
+        audio_file=None,
+        instrumental_file=None,
+        vocal_file=None,
+        transcribed_text=None,
+        image_text=None
+    ), 413
 
 
 @app.errorhandler(500)
 def internal_error(error):
 
-    return jsonify({
-        "success": False,
-        "error": "خطای داخلی سرور."
-    }), 500
+    return render_template(
+        "index.html",
+        error="خطای داخلی سرور رخ داد. لطفاً دوباره تلاش کنید.",
+        audio_file=None,
+        instrumental_file=None,
+        vocal_file=None,
+        transcribed_text=None,
+        image_text=None
+    ), 500
 
 
 # =========================================================
@@ -602,5 +753,6 @@ if __name__ == "__main__":
 
     app.run(
         host="0.0.0.0",
-        port=port
+        port=port,
+        debug=False
     )
