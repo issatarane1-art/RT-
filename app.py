@@ -1,65 +1,127 @@
 import os
 import re
 import uuid
-import asyncio
+import json
+import base64
+import hashlib
+import secrets
+import string
 import shutil
 import subprocess
+import datetime
+import urllib.parse
+
 from pathlib import Path
 
-from flask import Flask, render_template, request, send_from_directory, jsonify
+from flask import (
+    Flask,
+    render_template,
+    request,
+    send_from_directory,
+    jsonify,
+    Response
+)
+
 from werkzeug.utils import secure_filename
+
 
 app = Flask(__name__)
 
 BASE_DIR = Path(__file__).resolve().parent
+
 UPLOAD_DIR = BASE_DIR / "uploads"
 OUTPUT_DIR = BASE_DIR / "outputs"
 
 UPLOAD_DIR.mkdir(exist_ok=True)
 OUTPUT_DIR.mkdir(exist_ok=True)
 
-app.config["MAX_CONTENT_LENGTH"] = 100 * 1024 * 1024
+app.config["MAX_CONTENT_LENGTH"] = 150 * 1024 * 1024
+
 
 AUDIO_EXTENSIONS = {
-    "mp3", "wav", "m4a", "aac",
-    "ogg", "flac", "webm", "mp4"
+    "mp3",
+    "wav",
+    "m4a",
+    "aac",
+    "ogg",
+    "flac",
+    "webm",
+    "mp4"
+}
+
+VIDEO_EXTENSIONS = {
+    "mp4",
+    "webm",
+    "mkv",
+    "mov",
+    "avi",
+    "m4v"
 }
 
 IMAGE_EXTENSIONS = {
-    "jpg", "jpeg", "png", "webp",
-    "bmp", "gif", "tiff"
+    "jpg",
+    "jpeg",
+    "png",
+    "webp",
+    "bmp",
+    "gif",
+    "tiff"
+}
+
+PDF_EXTENSIONS = {
+    "pdf"
 }
 
 
 # =========================================================
-# ابزارهای کمکی
+# HELPERS
 # =========================================================
 
 def get_extension(filename):
+
     filename = secure_filename(filename or "")
+
     return Path(filename).suffix.lower().replace(".", "")
 
 
-def save_uploaded_file(file, allowed_extensions):
-    if not file or not file.filename:
-        raise ValueError("فایلی انتخاب نشده است.")
+def save_upload(file, allowed_extensions):
 
-    extension = get_extension(file.filename)
+    if not file or not file.filename:
+
+        raise ValueError(
+            "لطفاً یک فایل انتخاب کنید."
+        )
+
+    extension = get_extension(
+        file.filename
+    )
 
     if extension not in allowed_extensions:
-        raise ValueError("نوع فایل انتخاب‌شده پشتیبانی نمی‌شود.")
 
-    path = UPLOAD_DIR / f"{uuid.uuid4().hex}.{extension}"
+        raise ValueError(
+            "فرمت فایل پشتیبانی نمی‌شود."
+        )
+
+    path = (
+        UPLOAD_DIR /
+        f"{uuid.uuid4().hex}.{extension}"
+    )
+
     file.save(path)
 
     return path
 
 
 def create_output(extension):
-    return OUTPUT_DIR / f"{uuid.uuid4().hex}.{extension}"
+
+    return (
+        OUTPUT_DIR /
+        f"{uuid.uuid4().hex}.{extension}"
+    )
 
 
 def run_command(*command, timeout=900):
+
     result = subprocess.run(
         [str(x) for x in command],
         capture_output=True,
@@ -68,27 +130,36 @@ def run_command(*command, timeout=900):
     )
 
     if result.returncode != 0:
-        error = result.stderr.strip()
 
-        if len(error) > 3000:
-            error = error[-3000:]
+        error = (
+            result.stderr
+            or result.stdout
+            or "پردازش ناموفق بود."
+        )
 
         raise RuntimeError(
-            error or "پردازش فایل با خطا مواجه شد."
+            error[-3000:]
         )
 
     return result
 
 
-def success(message, **kwargs):
-    kwargs["success_text"] = message
+def success(
+    message,
+    result_file=None,
+    result_text=None
+):
+
     return render_template(
         "index.html",
-        **kwargs
+        success_text=message,
+        result_file=result_file,
+        result_text=result_text
     )
 
 
 def failure(error):
+
     return render_template(
         "index.html",
         error_text=str(error)
@@ -96,69 +167,99 @@ def failure(error):
 
 
 # =========================================================
-# صفحات اصلی
+# MAIN
 # =========================================================
 
 @app.route("/")
 def index():
-    return render_template("index.html")
+
+    return render_template(
+        "index.html"
+    )
 
 
 @app.route("/about")
 def about():
-    template = BASE_DIR / "templates" / "about.html"
 
-    if template.exists():
-        return render_template("about.html")
-
-    return "سامانه ابزار آنلاین"
+    return render_template(
+        "index.html",
+        simple_page="درباره ابزارینو"
+    )
 
 
 @app.route("/contact")
 def contact():
-    template = BASE_DIR / "templates" / "contact.html"
 
-    if template.exists():
-        return render_template("contact.html")
+    return render_template(
+        "index.html",
+        simple_page="تماس با ما"
+    )
 
-    return "تماس با ما"
+
+@app.route("/health")
+def health():
+
+    return jsonify(
+        status="ok",
+        service="abzarino"
+    )
 
 
-@app.route("/text-to-speech")
+@app.route("/api/tools")
+def api_tools():
+
+    return jsonify(
+        status="active",
+        tools=70
+    )
+
+
+@app.route("/download/<path:filename>")
+def download(filename):
+
+    return send_from_directory(
+        OUTPUT_DIR,
+        filename,
+        as_attachment=True
+    )
+
+
+# =========================================================
+# TEXT TO SPEECH
+# =========================================================
+
+@app.route(
+    "/text-to-speech",
+    methods=["POST"]
+)
+@app.route(
+    "/process-text",
+    methods=["POST"]
+)
 def text_to_speech():
-    template = BASE_DIR / "templates" / "text-to-speech.html"
-
-    if template.exists():
-        return render_template("text-to-speech.html")
-
-    return render_template("index.html")
-
-
-# =========================================================
-# 1 - تبدیل متن به صدا
-# =========================================================
-
-@app.route("/process-text", methods=["POST"])
-def process_text():
 
     try:
 
         text = (
-            request.form.get("text_input")
-            or request.form.get("text")
+            request.form.get("text")
+            or request.form.get("text_input")
             or ""
         ).strip()
 
         if not text:
+
             raise ValueError(
-                "لطفاً متن را وارد کنید."
+                "متن را وارد کنید."
             )
 
+        import asyncio
         import edge_tts
 
-        output = create_output("mp3")
+        output = create_output(
+            "mp3"
+        )
 
-        async def generate_audio():
+        async def generate():
 
             communicator = edge_tts.Communicate(
                 text,
@@ -169,69 +270,11 @@ def process_text():
                 str(output)
             )
 
-        asyncio.run(
-            generate_audio()
-        )
+        asyncio.run(generate())
 
         return success(
-            "تبدیل متن به صدا با موفقیت انجام شد.",
-            speech_file=output.name
-        )
-
-    except Exception as e:
-
-        return failure(
-            f"تبدیل متن به صدا انجام نشد: {e}"
-        )
-
-
-# =========================================================
-# 2 - پردازش صوت / جداسازی تقریبی
-# =========================================================
-
-@app.route("/process-audio", methods=["POST"])
-def process_audio():
-
-    try:
-
-        file = (
-            request.files.get("audio_file")
-            or request.files.get("audio")
-        )
-
-        source = save_uploaded_file(
-            file,
-            AUDIO_EXTENSIONS
-        )
-
-        vocals = create_output("wav")
-        instrumental = create_output("wav")
-
-        # جداسازی تقریبی کانال‌های استریو
-        run_command(
-            "ffmpeg",
-            "-y",
-            "-i",
-            source,
-            "-af",
-            "pan=mono|c0=0.5*c0+0.5*c1",
-            vocals
-        )
-
-        run_command(
-            "ffmpeg",
-            "-y",
-            "-i",
-            source,
-            "-af",
-            "pan=mono|c0=0.5*c0-0.5*c1",
-            instrumental
-        )
-
-        return success(
-            "پردازش فایل صوتی انجام شد.",
-            vocals_file=vocals.name,
-            instrumental_file=instrumental.name
+            "تبدیل متن به صدا انجام شد.",
+            output.name
         )
 
     except Exception as e:
@@ -240,26 +283,1477 @@ def process_audio():
 
 
 # =========================================================
-# 3 - تبدیل صوت به متن
+# TEXT TOOLS
 # =========================================================
 
-@app.route("/speech-to-text", methods=["POST"])
-def speech_to_text():
+@app.route(
+    "/text-stats",
+    methods=["POST"]
+)
+def text_stats():
+
+    text = request.form.get(
+        "text",
+        ""
+    )
+
+    chars = len(text)
+
+    no_spaces = len(
+        re.sub(
+            r"\s+",
+            "",
+            text
+        )
+    )
+
+    words = len(
+        re.findall(
+            r"\S+",
+            text
+        )
+    )
+
+    lines = (
+        len(text.splitlines())
+        if text
+        else 0
+    )
+
+    result = (
+        f"تعداد حروف: {chars}\n"
+        f"حروف بدون فاصله: {no_spaces}\n"
+        f"تعداد کلمات: {words}\n"
+        f"تعداد خطوط: {lines}"
+    )
+
+    return success(
+        "آمار متن آماده شد.",
+        result_text=result
+    )
+
+
+@app.route(
+    "/text-clean",
+    methods=["POST"]
+)
+def text_clean():
+
+    text = request.form.get(
+        "text",
+        ""
+    )
+
+    text = re.sub(
+        r"[ \t]+",
+        " ",
+        text
+    )
+
+    text = re.sub(
+        r"\n{3,}",
+        "\n\n",
+        text
+    )
+
+    text = text.strip()
+
+    return success(
+        "متن پاکسازی شد.",
+        result_text=text
+    )
+
+
+@app.route(
+    "/text-case",
+    methods=["POST"]
+)
+def text_case():
+
+    text = request.form.get(
+        "text",
+        ""
+    )
+
+    mode = request.form.get(
+        "mode",
+        "upper"
+    )
+
+    if mode == "lower":
+
+        result = text.lower()
+
+    elif mode == "title":
+
+        result = text.title()
+
+    else:
+
+        result = text.upper()
+
+    return success(
+        "تغییر متن انجام شد.",
+        result_text=result
+    )
+
+
+@app.route(
+    "/text-sort",
+    methods=["POST"]
+)
+def text_sort():
+
+    lines = [
+        x
+        for x in request.form.get(
+            "text",
+            ""
+        ).splitlines()
+        if x.strip()
+    ]
+
+    mode = request.form.get(
+        "mode",
+        "asc"
+    )
+
+    lines.sort(
+        reverse=mode == "desc"
+    )
+
+    return success(
+        "مرتب‌سازی انجام شد.",
+        result_text="\n".join(lines)
+    )
+
+
+@app.route(
+    "/text-number",
+    methods=["POST"]
+)
+def text_number():
+
+    lines = request.form.get(
+        "text",
+        ""
+    ).splitlines()
+
+    result = "\n".join(
+        f"{i}. {line}"
+        for i, line in enumerate(
+            lines,
+            1
+        )
+    )
+
+    return success(
+        "شماره‌گذاری انجام شد.",
+        result_text=result
+    )
+
+
+@app.route(
+    "/text-replace",
+    methods=["POST"]
+)
+def text_replace():
+
+    text = request.form.get(
+        "text",
+        ""
+    )
+
+    find_text = request.form.get(
+        "find",
+        ""
+    )
+
+    replace_text = request.form.get(
+        "replace",
+        ""
+    )
+
+    if not find_text:
+
+        raise ValueError(
+            "عبارت مورد جستجو را وارد کنید."
+        )
+
+    result = text.replace(
+        find_text,
+        replace_text
+    )
+
+    return success(
+        "جایگزینی انجام شد.",
+        result_text=result
+    )
+
+
+@app.route(
+    "/text-compare",
+    methods=["POST"]
+)
+def text_compare():
+
+    import difflib
+
+    first = request.form.get(
+        "first",
+        ""
+    )
+
+    second = request.form.get(
+        "second",
+        ""
+    )
+
+    if first == second:
+
+        result = (
+            "دو متن کاملاً یکسان هستند."
+        )
+
+    else:
+
+        result = "\n".join(
+            difflib.unified_diff(
+                first.splitlines(),
+                second.splitlines(),
+                fromfile="متن اول",
+                tofile="متن دوم",
+                lineterm=""
+            )
+        )
+
+    return success(
+        "مقایسه انجام شد.",
+        result_text=result
+    )
+
+
+@app.route(
+    "/text-count",
+    methods=["POST"]
+)
+def text_count():
+
+    text = request.form.get(
+        "text",
+        ""
+    )
+
+    result = (
+        f"کلمات: "
+        f"{len(re.findall(r'\\S+', text))}\n"
+        f"حروف: {len(text)}"
+    )
+
+    return success(
+        "شمارش انجام شد.",
+        result_text=result
+    )
+
+
+# =========================================================
+# PASSWORD / RANDOM
+# =========================================================
+
+@app.route(
+    "/password",
+    methods=["POST"]
+)
+def password():
+
+    length = int(
+        request.form.get(
+            "length",
+            16
+        )
+    )
+
+    length = max(
+        4,
+        min(
+            length,
+            128
+        )
+    )
+
+    characters = (
+        string.ascii_letters
+        + string.digits
+        + "!@#$%^&*_-+="
+    )
+
+    result = "".join(
+        secrets.choice(characters)
+        for _ in range(length)
+    )
+
+    return success(
+        "رمز عبور ساخته شد.",
+        result_text=result
+    )
+
+
+@app.route(
+    "/random-number",
+    methods=["POST"]
+)
+def random_number():
+
+    minimum = int(
+        request.form.get(
+            "minimum",
+            1
+        )
+    )
+
+    maximum = int(
+        request.form.get(
+            "maximum",
+            100
+        )
+    )
+
+    if minimum > maximum:
+
+        minimum, maximum = (
+            maximum,
+            minimum
+        )
+
+    number = (
+        secrets.randbelow(
+            maximum - minimum + 1
+        )
+        + minimum
+    )
+
+    return success(
+        "عدد تصادفی ساخته شد.",
+        result_text=str(number)
+    )
+
+
+# =========================================================
+# IMAGE
+# =========================================================
+
+@app.route(
+    "/image-to-text",
+    methods=["POST"]
+)
+def image_to_text():
 
     try:
 
         file = (
-            request.files.get("speech_file")
-            or request.files.get("speech")
-            or request.files.get("audio")
+            request.files.get("file")
+            or request.files.get(
+                "image_file"
+            )
         )
 
-        source = save_uploaded_file(
+        source = save_upload(
             file,
-            AUDIO_EXTENSIONS
+            IMAGE_EXTENSIONS
         )
 
-        wav_file = create_output("wav")
+        from PIL import Image
+        import pytesseract
+
+        image = Image.open(
+            source
+        )
+
+        text = pytesseract.image_to_string(
+            image,
+            lang="fas+eng"
+        ).strip()
+
+        if not text:
+
+            text = (
+                "متنی در تصویر پیدا نشد."
+            )
+
+        return success(
+            "متن تصویر استخراج شد.",
+            result_text=text
+        )
+
+    except Exception as e:
+
+        return failure(e)
+
+
+@app.route(
+    "/image-compress",
+    methods=["POST"]
+)
+def image_compress():
+
+    from PIL import Image
+
+    source = save_upload(
+        request.files.get("file"),
+        IMAGE_EXTENSIONS
+    )
+
+    image = Image.open(
+        source
+    )
+
+    width = int(
+        request.form.get(
+            "width",
+            1600
+        )
+    )
+
+    quality = int(
+        request.form.get(
+            "quality",
+            80
+        )
+    )
+
+    quality = max(
+        10,
+        min(
+            quality,
+            95
+        )
+    )
+
+    if image.width > width:
+
+        ratio = (
+            width /
+            image.width
+        )
+
+        image = image.resize(
+            (
+                width,
+                max(
+                    1,
+                    int(
+                        image.height *
+                        ratio
+                    )
+                )
+            ),
+            Image.Resampling.LANCZOS
+        )
+
+    image = image.convert(
+        "RGB"
+    )
+
+    output = create_output(
+        "jpg"
+    )
+
+    image.save(
+        output,
+        "JPEG",
+        quality=quality,
+        optimize=True
+    )
+
+    return success(
+        "تصویر فشرده شد.",
+        output.name
+    )
+
+
+@app.route(
+    "/image-resize",
+    methods=["POST"]
+)
+def image_resize():
+
+    from PIL import Image
+
+    source = save_upload(
+        request.files.get("file"),
+        IMAGE_EXTENSIONS
+    )
+
+    image = Image.open(
+        source
+    )
+
+    width = int(
+        request.form.get(
+            "width",
+            image.width
+        )
+    )
+
+    height = int(
+        request.form.get(
+            "height",
+            image.height
+        )
+    )
+
+    result = image.resize(
+        (
+            max(1, width),
+            max(1, height)
+        ),
+        Image.Resampling.LANCZOS
+    )
+
+    output = create_output(
+        "png"
+    )
+
+    result.save(
+        output,
+        "PNG"
+    )
+
+    return success(
+        "اندازه تصویر تغییر کرد.",
+        output.name
+    )
+
+
+@app.route(
+    "/image-convert",
+    methods=["POST"]
+)
+def image_convert():
+
+    from PIL import Image
+
+    source = save_upload(
+        request.files.get("file"),
+        IMAGE_EXTENSIONS
+    )
+
+    image = Image.open(
+        source
+    )
+
+    fmt = request.form.get(
+        "format",
+        "png"
+    ).lower()
+
+    if fmt == "jpg":
+
+        fmt = "jpeg"
+
+    if fmt not in {
+        "jpeg",
+        "png",
+        "webp"
+    }:
+
+        raise ValueError(
+            "فرمت خروجی نامعتبر است."
+        )
+
+    if fmt == "jpeg":
+
+        image = image.convert(
+            "RGB"
+        )
+
+    output = create_output(
+        "jpg"
+        if fmt == "jpeg"
+        else fmt
+    )
+
+    image.save(
+        output,
+        fmt.upper()
+    )
+
+    return success(
+        "فرمت تصویر تبدیل شد.",
+        output.name
+    )
+
+
+@app.route(
+    "/image-crop",
+    methods=["POST"]
+)
+def image_crop():
+
+    from PIL import Image
+
+    source = save_upload(
+        request.files.get("file"),
+        IMAGE_EXTENSIONS
+    )
+
+    image = Image.open(
+        source
+    )
+
+    x = int(
+        request.form.get(
+            "x",
+            0
+        )
+    )
+
+    y = int(
+        request.form.get(
+            "y",
+            0
+        )
+    )
+
+    width = int(
+        request.form.get(
+            "width"
+        )
+        or image.width
+    )
+
+    height = int(
+        request.form.get(
+            "height"
+        )
+        or image.height
+    )
+
+    result = image.crop(
+        (
+            x,
+            y,
+            min(
+                image.width,
+                x + width
+            ),
+            min(
+                image.height,
+                y + height
+            )
+        )
+    )
+
+    output = create_output(
+        "png"
+    )
+
+    result.save(
+        output,
+        "PNG"
+    )
+
+    return success(
+        "تصویر برش خورد.",
+        output.name
+    )
+
+
+@app.route(
+    "/image-rotate",
+    methods=["POST"]
+)
+def image_rotate():
+
+    from PIL import Image
+
+    source = save_upload(
+        request.files.get("file"),
+        IMAGE_EXTENSIONS
+    )
+
+    image = Image.open(
+        source
+    )
+
+    angle = float(
+        request.form.get(
+            "angle",
+            90
+        )
+    )
+
+    result = image.rotate(
+        -angle,
+        expand=True
+    )
+
+    output = create_output(
+        "png"
+    )
+
+    result.save(
+        output,
+        "PNG"
+    )
+
+    return success(
+        "تصویر چرخانده شد.",
+        output.name
+    )
+
+
+@app.route(
+    "/image-mirror",
+    methods=["POST"]
+)
+def image_mirror():
+
+    from PIL import Image
+    from PIL import ImageOps
+
+    source = save_upload(
+        request.files.get("file"),
+        IMAGE_EXTENSIONS
+    )
+
+    image = Image.open(
+        source
+    )
+
+    result = ImageOps.mirror(
+        image
+    )
+
+    output = create_output(
+        "png"
+    )
+
+    result.save(
+        output,
+        "PNG"
+    )
+
+    return success(
+        "تصویر آینه‌ای شد.",
+        output.name
+    )
+
+
+@app.route(
+    "/image-gray",
+    methods=["POST"]
+)
+def image_gray():
+
+    from PIL import Image
+    from PIL import ImageOps
+
+    source = save_upload(
+        request.files.get("file"),
+        IMAGE_EXTENSIONS
+    )
+
+    image = Image.open(
+        source
+    )
+
+    result = ImageOps.grayscale(
+        image
+    )
+
+    output = create_output(
+        "png"
+    )
+
+    result.save(
+        output,
+        "PNG"
+    )
+
+    return success(
+        "تصویر سیاه‌وسفید شد.",
+        output.name
+    )
+
+
+@app.route(
+    "/image-adjust",
+    methods=["POST"]
+)
+def image_adjust():
+
+    from PIL import Image
+    from PIL import ImageEnhance
+    from PIL import ImageFilter
+
+    source = save_upload(
+        request.files.get("file"),
+        IMAGE_EXTENSIONS
+    )
+
+    image = Image.open(
+        source
+    ).convert(
+        "RGBA"
+    )
+
+    brightness = float(
+        request.form.get(
+            "brightness",
+            1
+        )
+    )
+
+    contrast = float(
+        request.form.get(
+            "contrast",
+            1
+        )
+    )
+
+    blur = float(
+        request.form.get(
+            "blur",
+            0
+        )
+    )
+
+    image = ImageEnhance.Brightness(
+        image
+    ).enhance(
+        max(
+            0,
+            min(
+                3,
+                brightness
+            )
+        )
+    )
+
+    image = ImageEnhance.Contrast(
+        image
+    ).enhance(
+        max(
+            0,
+            min(
+                3,
+                contrast
+            )
+        )
+    )
+
+    if blur > 0:
+
+        image = image.filter(
+            ImageFilter.GaussianBlur(
+                min(
+                    20,
+                    blur
+                )
+            )
+        )
+
+    output = create_output(
+        "png"
+    )
+
+    image.save(
+        output,
+        "PNG"
+    )
+
+    return success(
+        "تنظیمات تصویر اعمال شد.",
+        output.name
+    )
+
+
+@app.route(
+    "/image-watermark",
+    methods=["POST"]
+)
+def image_watermark():
+
+    from PIL import Image
+    from PIL import ImageDraw
+
+    source = save_upload(
+        request.files.get("file"),
+        IMAGE_EXTENSIONS
+    )
+
+    image = Image.open(
+        source
+    ).convert(
+        "RGBA"
+    )
+
+    text = request.form.get(
+        "text",
+        "ابزارینو"
+    )
+
+    draw = ImageDraw.Draw(
+        image
+    )
+
+    draw.text(
+        (30, 30),
+        text[:300],
+        fill=(
+            255,
+            255,
+            255,
+            220
+        )
+    )
+
+    output = create_output(
+        "png"
+    )
+
+    image.save(
+        output,
+        "PNG"
+    )
+
+    return success(
+        "واترمارک اضافه شد.",
+        output.name
+    )
+
+
+@app.route(
+    "/favicon",
+    methods=["POST"]
+)
+def favicon():
+
+    from PIL import Image
+
+    source = save_upload(
+        request.files.get("file"),
+        IMAGE_EXTENSIONS
+    )
+
+    image = Image.open(
+        source
+    ).convert(
+        "RGBA"
+    )
+
+    image.thumbnail(
+        (
+            512,
+            512
+        ),
+        Image.Resampling.LANCZOS
+    )
+
+    output = create_output(
+        "ico"
+    )
+
+    image.save(
+        output,
+        "ICO",
+        sizes=[
+            (32, 32),
+            (64, 64),
+            (128, 128)
+        ]
+    )
+
+    return success(
+        "Favicon ساخته شد.",
+        output.name
+    )
+
+
+# =========================================================
+# AUDIO
+# =========================================================
+
+@app.route(
+    "/audio-convert",
+    methods=["POST"]
+)
+def audio_convert():
+
+    source = save_upload(
+        request.files.get("file"),
+        AUDIO_EXTENSIONS
+        | VIDEO_EXTENSIONS
+    )
+
+    fmt = request.form.get(
+        "format",
+        "mp3"
+    )
+
+    output = create_output(
+        fmt
+    )
+
+    codecs = {
+
+        "mp3": [
+            "-c:a",
+            "libmp3lame"
+        ],
+
+        "wav": [
+            "-c:a",
+            "pcm_s16le"
+        ],
+
+        "ogg": [
+            "-c:a",
+            "libvorbis"
+        ],
+
+        "flac": [
+            "-c:a",
+            "flac"
+        ],
+
+        "m4a": [
+            "-c:a",
+            "aac"
+        ]
+
+    }
+
+    run_command(
+        "ffmpeg",
+        "-y",
+        "-i",
+        source,
+        *codecs.get(
+            fmt,
+            []
+        ),
+        output
+    )
+
+    return success(
+        "فرمت صوت تبدیل شد.",
+        output.name
+    )
+
+
+@app.route(
+    "/audio-cut",
+    methods=["POST"]
+)
+def audio_cut():
+
+    source = save_upload(
+        request.files.get("file"),
+        AUDIO_EXTENSIONS
+        | VIDEO_EXTENSIONS
+    )
+
+    start = float(
+        request.form.get(
+            "start",
+            0
+        )
+    )
+
+    duration = float(
+        request.form.get(
+            "duration",
+            10
+        )
+    )
+
+    output = create_output(
+        "mp3"
+    )
+
+    run_command(
+        "ffmpeg",
+        "-y",
+        "-ss",
+        start,
+        "-i",
+        source,
+        "-t",
+        duration,
+        "-c:a",
+        "libmp3lame",
+        output
+    )
+
+    return success(
+        "قسمت انتخاب‌شده جدا شد.",
+        output.name
+    )
+
+
+@app.route(
+    "/audio-volume",
+    methods=["POST"]
+)
+def audio_volume():
+
+    source = save_upload(
+        request.files.get("file"),
+        AUDIO_EXTENSIONS
+        | VIDEO_EXTENSIONS
+    )
+
+    volume = float(
+        request.form.get(
+            "volume",
+            1.2
+        )
+    )
+
+    volume = max(
+        0,
+        min(
+            5,
+            volume
+        )
+    )
+
+    output = create_output(
+        "mp3"
+    )
+
+    run_command(
+        "ffmpeg",
+        "-y",
+        "-i",
+        source,
+        "-af",
+        f"volume={volume}",
+        "-c:a",
+        "libmp3lame",
+        output
+    )
+
+    return success(
+        "بلندی صدا تغییر کرد.",
+        output.name
+    )
+
+
+@app.route(
+    "/audio-clean",
+    methods=["POST"]
+)
+def audio_clean():
+
+    source = save_upload(
+        request.files.get("file"),
+        AUDIO_EXTENSIONS
+        | VIDEO_EXTENSIONS
+    )
+
+    output = create_output(
+        "mp3"
+    )
+
+    run_command(
+        "ffmpeg",
+        "-y",
+        "-i",
+        source,
+        "-af",
+        "afftdn",
+        "-c:a",
+        "libmp3lame",
+        output
+    )
+
+    return success(
+        "کاهش نویز انجام شد.",
+        output.name
+    )
+
+
+@app.route(
+    "/extract-audio",
+    methods=["POST"]
+)
+def extract_audio():
+
+    source = save_upload(
+        request.files.get("file"),
+        VIDEO_EXTENSIONS
+    )
+
+    output = create_output(
+        "mp3"
+    )
+
+    run_command(
+        "ffmpeg",
+        "-y",
+        "-i",
+        source,
+        "-vn",
+        "-c:a",
+        "libmp3lame",
+        output
+    )
+
+    return success(
+        "صوت از ویدئو استخراج شد.",
+        output.name
+    )
+
+
+# =========================================================
+# VIDEO
+# =========================================================
+
+@app.route(
+    "/video-cut",
+    methods=["POST"]
+)
+def video_cut():
+
+    source = save_upload(
+        request.files.get("file"),
+        VIDEO_EXTENSIONS
+    )
+
+    start = float(
+        request.form.get(
+            "start",
+            0
+        )
+    )
+
+    duration = float(
+        request.form.get(
+            "duration",
+            10
+        )
+    )
+
+    output = create_output(
+        "mp4"
+    )
+
+    run_command(
+        "ffmpeg",
+        "-y",
+        "-ss",
+        start,
+        "-i",
+        source,
+        "-t",
+        duration,
+        "-c:v",
+        "libx264",
+        "-c:a",
+        "aac",
+        output
+    )
+
+    return success(
+        "ویدئو برش خورد.",
+        output.name
+    )
+
+
+@app.route(
+    "/video-mp3",
+    methods=["POST"]
+)
+def video_mp3():
+
+    return extract_audio()
+
+
+@app.route(
+    "/video-gif",
+    methods=["POST"]
+)
+def video_gif():
+
+    source = save_upload(
+        request.files.get("file"),
+        VIDEO_EXTENSIONS
+    )
+
+    output = create_output(
+        "gif"
+    )
+
+    run_command(
+        "ffmpeg",
+        "-y",
+        "-i",
+        source,
+        "-vf",
+        "fps=10,scale=480:-1:flags=lanczos",
+        "-t",
+        "10",
+        output
+    )
+
+    return success(
+        "GIF ساخته شد.",
+        output.name
+    )
+
+
+@app.route(
+    "/video-frame",
+    methods=["POST"]
+)
+def video_frame():
+
+    source = save_upload(
+        request.files.get("file"),
+        VIDEO_EXTENSIONS
+    )
+
+    second = float(
+        request.form.get(
+            "time",
+            0
+        )
+    )
+
+    output = create_output(
+        "jpg"
+    )
+
+    run_command(
+        "ffmpeg",
+        "-y",
+        "-ss",
+        second,
+        "-i",
+        source,
+        "-frames:v",
+        "1",
+        output
+    )
+
+    return success(
+        "فریم استخراج شد.",
+        output.name
+    )
+
+
+@app.route(
+    "/video-resize",
+    methods=["POST"]
+)
+def video_resize():
+
+    source = save_upload(
+        request.files.get("file"),
+        VIDEO_EXTENSIONS
+    )
+
+    width = int(
+        request.form.get(
+            "width",
+            1280
+        )
+    )
+
+    height = int(
+        request.form.get(
+            "height",
+            720
+        )
+    )
+
+    output = create_output(
+        "mp4"
+    )
+
+    run_command(
+        "ffmpeg",
+        "-y",
+        "-i",
+        source,
+        "-vf",
+        f"scale={width}:{height}",
+        "-c:v",
+        "libx264",
+        "-c:a",
+        "aac",
+        output
+    )
+
+    return success(
+        "اندازه ویدئو تغییر کرد.",
+        output.name
+    )
+
+
+@app.route(
+    "/video-compress",
+    methods=["POST"]
+)
+def video_compress():
+
+    source = save_upload(
+        request.files.get("file"),
+        VIDEO_EXTENSIONS
+    )
+
+    output = create_output(
+        "mp4"
+    )
+
+    run_command(
+        "ffmpeg",
+        "-y",
+        "-i",
+        source,
+        "-c:v",
+        "libx264",
+        "-crf",
+        "28",
+        "-preset",
+        "veryfast",
+        "-c:a",
+        "aac",
+        "-b:a",
+        "128k",
+        output
+    )
+
+    return success(
+        "ویدئو فشرده شد.",
+        output.name
+    )
+
+
+# =========================================================
+# SPEECH TO TEXT
+# =========================================================
+
+@app.route(
+    "/speech-to-text",
+    methods=["POST"]
+)
+def speech_to_text():
+
+    try:
+
+        source = save_upload(
+            request.files.get("file"),
+            AUDIO_EXTENSIONS
+            | VIDEO_EXTENSIONS
+        )
+
+        wav = create_output(
+            "wav"
+        )
 
         run_command(
             "ffmpeg",
@@ -270,7 +1764,7 @@ def speech_to_text():
             "1",
             "-ar",
             "16000",
-            wav_file
+            wav
         )
 
         from faster_whisper import WhisperModel
@@ -282,7 +1776,7 @@ def speech_to_text():
         )
 
         segments, info = model.transcribe(
-            str(wav_file),
+            str(wav),
             language="fa",
             vad_filter=True
         )
@@ -293,143 +1787,14 @@ def speech_to_text():
         ).strip()
 
         if not text:
-            text = "متنی از فایل صوتی شناسایی نشد."
+
+            text = (
+                "متنی از صوت شناسایی نشد."
+            )
 
         return success(
             "تبدیل صوت به متن انجام شد.",
-            transcribed_text=text
-        )
-
-    except Exception as e:
-
-        return failure(
-            f"تبدیل صوت به متن انجام نشد: {e}"
-        )
-
-
-# =========================================================
-# 4 - تبدیل عکس به متن
-# =========================================================
-
-@app.route("/image-to-text", methods=["POST"])
-def image_to_text():
-
-    try:
-
-        file = (
-            request.files.get("image_file")
-            or request.files.get("image")
-        )
-
-        source = save_uploaded_file(
-            file,
-            IMAGE_EXTENSIONS
-        )
-
-        from PIL import Image
-        import pytesseract
-
-        image = Image.open(source)
-
-        text = pytesseract.image_to_string(
-            image,
-            lang="fas+eng"
-        ).strip()
-
-        if not text:
-            text = "متنی در تصویر پیدا نشد."
-
-        return success(
-            "متن تصویر استخراج شد.",
-            image_text=text
-        )
-
-    except Exception as e:
-
-        return failure(
-            f"استخراج متن انجام نشد: {e}"
-        )
-
-
-# =========================================================
-# 5 - فشرده‌سازی و تغییر اندازه عکس
-# =========================================================
-
-@app.route("/image-compress", methods=["POST"])
-def image_compress():
-
-    try:
-
-        file = (
-            request.files.get("image_file")
-            or request.files.get("image")
-        )
-
-        source = save_uploaded_file(
-            file,
-            IMAGE_EXTENSIONS
-        )
-
-        from PIL import Image
-
-        image = Image.open(source)
-
-        max_width = int(
-            request.form.get(
-                "max_width",
-                "1600"
-            )
-        )
-
-        quality = int(
-            request.form.get(
-                "quality",
-                "80"
-            )
-        )
-
-        max_width = max(
-            100,
-            min(max_width, 5000)
-        )
-
-        quality = max(
-            10,
-            min(quality, 95)
-        )
-
-        if image.width > max_width:
-
-            ratio = max_width / image.width
-
-            new_width = max_width
-
-            new_height = max(
-                1,
-                int(image.height * ratio)
-            )
-
-            image = image.resize(
-                (new_width, new_height),
-                Image.Resampling.LANCZOS
-            )
-
-        if image.mode not in ("RGB", "L"):
-
-            image = image.convert("RGB")
-
-        output = create_output("jpg")
-
-        image.save(
-            output,
-            "JPEG",
-            quality=quality,
-            optimize=True
-        )
-
-        return success(
-            "تصویر فشرده و تغییر اندازه داده شد.",
-            result_file=output.name
+            result_text=text
         )
 
     except Exception as e:
@@ -438,2145 +1803,990 @@ def image_compress():
 
 
 # =========================================================
-# 6 - تصویر به PDF
-# =========================================================
-
-@app.route("/image-to-pdf", methods=["POST"])
-def image_to_pdf():
-
-    try:
-
-        files = request.files.getlist(
-            "images"
-        )
-
-        if not files:
-
-            single = (
-                request.files.get("image_file")
-                or request.files.get("image")
-            )
-
-            if single:
-                files = [single]
-
-        from PIL import Image
-
-        images = []
-
-        for file in files:
-
-            if not file or not file.filename:
-                continue
-
-            source = save_uploaded_file(
-                file,
-                IMAGE_EXTENSIONS
-            )
-
-            image = Image.open(
-                source
-            ).convert("RGB")
-
-            images.append(image)
-
-        if not images:
-            raise ValueError(
-                "حداقل یک تصویر انتخاب کنید."
-            )
-
-        output = create_output("pdf")
-
-        first = images[0]
-
-        first.save(
-            output,
-            "PDF",
-            save_all=True,
-            append_images=images[1:]
-        )
-
-        return success(
-            "تصویر به PDF تبدیل شد.",
-            result_file=output.name
-        )
-
-    except Exception as e:
-
-        return failure(e)
-
-
-# =========================================================
-# 7 - متن به PDF
-# =========================================================
-
-@app.route("/text-to-pdf", methods=["POST"])
-def text_to_pdf():
-
-    try:
-
-        text = (
-            request.form.get("text_content")
-            or request.form.get("text")
-            or ""
-        )
-
-        if not text.strip():
-            raise ValueError(
-                "متنی برای ساخت PDF وارد کنید."
-            )
-
-        from reportlab.pdfgen import canvas
-        from reportlab.lib.pagesizes import A4
-
-        output = create_output("pdf")
-
-        pdf = canvas.Canvas(
-            str(output),
-            pagesize=A4
-        )
-
-        width, height = A4
-
-        y = height - 50
-
-        lines = text.splitlines()
-
-        if not lines:
-            lines = [text]
-
-        for line in lines:
-
-            pdf.drawString(
-                40,
-                y,
-                line[:120]
-            )
-
-            y -= 18
-
-            if y < 40:
-
-                pdf.showPage()
-
-                y = height - 50
-
-        pdf.save()
-
-        return success(
-            "PDF ساخته شد.",
-            result_file=output.name
-        )
-
-    except Exception as e:
-
-        return failure(e)
-
-
-# =========================================================
-# 8 - ساخت QR Code
-# =========================================================
-
-@app.route("/qr-code", methods=["POST"])
-def qr_code():
-
-    try:
-
-        data = (
-            request.form.get(
-                "qr_data",
-                ""
-            )
-            .strip()
-        )
-
-        if not data:
-            raise ValueError(
-                "متن یا لینک QR را وارد کنید."
-            )
-
-        import qrcode
-
-        output = create_output("png")
-
-        qr = qrcode.QRCode(
-            version=None,
-            error_correction=qrcode.constants.ERROR_CORRECT_M,
-            box_size=10,
-            border=4
-        )
-
-        qr.add_data(data)
-
-        qr.make(
-            fit=True
-        )
-
-        image = qr.make_image()
-
-        image.save(
-            output
-        )
-
-        return success(
-            "QR Code ساخته شد.",
-            result_file=output.name
-        )
-
-    except Exception as e:
-
-        return failure(e)
-
-
-# =========================================================
-# 9 - فشرده‌سازی PDF
-# =========================================================
-
-@app.route("/pdf-compress", methods=["POST"])
-def pdf_compress():
-
-    try:
-
-        file = (
-            request.files.get("pdf_file")
-            or request.files.get("file")
-        )
-
-        source = save_uploaded_file(
-            file,
-            {"pdf"}
-        )
-
-        ghostscript = shutil.which(
-            "gs"
-        )
-
-        if not ghostscript:
-
-            raise RuntimeError(
-                "Ghostscript روی سرور نصب نشده است."
-            )
-
-        output = create_output("pdf")
-
-        run_command(
-            ghostscript,
-            "-sDEVICE=pdfwrite",
-            "-dCompatibilityLevel=1.4",
-            "-dPDFSETTINGS=/ebook",
-            "-dNOPAUSE",
-            "-dQUIET",
-            "-dBATCH",
-            f"-sOutputFile={output}",
-            source
-        )
-
-        return success(
-            "PDF فشرده شد.",
-            result_file=output.name
-        )
-
-    except Exception as e:
-
-        return failure(e)
-
-
-# =========================================================
-# 10 - PDF به متن
-# =========================================================
-
-@app.route("/pdf-to-text", methods=["POST"])
-def pdf_to_text():
-
-    try:
-
-        file = (
-            request.files.get("pdf_file")
-            or request.files.get("file")
-        )
-
-        source = save_uploaded_file(
-            file,
-            {"pdf"}
-        )
-
-        from pypdf import PdfReader
-
-        reader = PdfReader(
-            str(source)
-        )
-
-        text_parts = []
-
-        for page in reader.pages:
-
-            text_parts.append(
-                page.extract_text() or ""
-            )
-
-        text = "\n\n".join(
-            text_parts
-        ).strip()
-
-        if not text:
-            text = "متنی از PDF استخراج نشد."
-
-        return success(
-            "متن PDF استخراج شد.",
-            transcribed_text=text
-        )
-
-    except Exception as e:
-
-        return failure(e)
-
-
-# =========================================================
-# 11 - عکس به JPG
-# =========================================================
-
-@app.route("/image-to-jpg", methods=["POST"])
-def image_to_jpg():
-
-    try:
-
-        file = (
-            request.files.get("image_file")
-            or request.files.get("image")
-        )
-
-        source = save_uploaded_file(
-            file,
-            IMAGE_EXTENSIONS
-        )
-
-        from PIL import Image
-
-        image = Image.open(
-            source
-        ).convert("RGB")
-
-        output = create_output(
-            "jpg"
-        )
-
-        image.save(
-            output,
-            "JPEG",
-            quality=92
-        )
-
-        return success(
-            "تصویر به JPG تبدیل شد.",
-            result_file=output.name
-        )
-
-    except Exception as e:
-
-        return failure(e)
-
-
-# =========================================================
-# 12 - عکس به PNG
-# =========================================================
-
-@app.route("/image-to-png", methods=["POST"])
-def image_to_png():
-
-    try:
-
-        file = (
-            request.files.get("image_file")
-            or request.files.get("image")
-        )
-
-        source = save_uploaded_file(
-            file,
-            IMAGE_EXTENSIONS
-        )
-
-        from PIL import Image
-
-        image = Image.open(
-            source
-        )
-
-        output = create_output(
-            "png"
-        )
-
-        image.save(
-            output,
-            "PNG",
-            optimize=True
-        )
-
-        return success(
-            "تصویر به PNG تبدیل شد.",
-            result_file=output.name
-        )
-
-    except Exception as e:
-
-        return failure(e)
-
-
-# =========================================================
-# 13 - برش عکس
-# =========================================================
-
-@app.route("/image-crop", methods=["POST"])
-def image_crop():
-
-    try:
-
-        file = (
-            request.files.get("image_file")
-            or request.files.get("image")
-        )
-
-        source = save_uploaded_file(
-            file,
-            IMAGE_EXTENSIONS
-        )
-
-        from PIL import Image
-
-        image = Image.open(
-            source
-        )
-
-        x = max(
-            0,
-            int(request.form.get("x", 0))
-        )
-
-        y = max(
-            0,
-            int(request.form.get("y", 0))
-        )
-
-        width = max(
-            1,
-            int(
-                request.form.get(
-                    "width",
-                    image.width
-                )
-            )
-        )
-
-        height = max(
-            1,
-            int(
-                request.form.get(
-                    "height",
-                    image.height
-                )
-            )
-        )
-
-        x2 = min(
-            image.width,
-            x + width
-        )
-
-        y2 = min(
-            image.height,
-            y + height
-        )
-
-        if x >= x2 or y >= y2:
-            raise ValueError(
-                "محدوده برش نامعتبر است."
-            )
-
-        result = image.crop(
-            (x, y, x2, y2)
-        )
-
-        output = create_output(
-            "png"
-        )
-
-        result.save(
-            output,
-            "PNG"
-        )
-
-        return success(
-            "تصویر برش خورد.",
-            result_file=output.name
-        )
-
-    except Exception as e:
-
-        return failure(e)
-
-
-# =========================================================
-# 14 - چرخاندن عکس
-# =========================================================
-
-@app.route("/image-rotate", methods=["POST"])
-def image_rotate():
-
-    try:
-
-        file = (
-            request.files.get("image_file")
-            or request.files.get("image")
-        )
-
-        source = save_uploaded_file(
-            file,
-            IMAGE_EXTENSIONS
-        )
-
-        from PIL import Image
-
-        image = Image.open(
-            source
-        )
-
-        angle = float(
-            request.form.get(
-                "angle",
-                90
-            )
-        )
-
-        result = image.rotate(
-            -angle,
-            expand=True
-        )
-
-        output = create_output(
-            "png"
-        )
-
-        result.save(
-            output,
-            "PNG"
-        )
-
-        return success(
-            "تصویر چرخانده شد.",
-            result_file=output.name
-        )
-
-    except Exception as e:
-
-        return failure(e)
-
-
-# =========================================================
-# 15 - آینه‌ای کردن عکس
-# =========================================================
-
-@app.route("/image-mirror", methods=["POST"])
-def image_mirror():
-
-    try:
-
-        file = (
-            request.files.get("image_file")
-            or request.files.get("image")
-        )
-
-        source = save_uploaded_file(
-            file,
-            IMAGE_EXTENSIONS
-        )
-
-        from PIL import ImageOps, Image
-
-        image = Image.open(
-            source
-        )
-
-        result = ImageOps.mirror(
-            image
-        )
-
-        output = create_output(
-            "png"
-        )
-
-        result.save(
-            output,
-            "PNG"
-        )
-
-        return success(
-            "تصویر آینه‌ای شد.",
-            result_file=output.name
-        )
-
-    except Exception as e:
-
-        return failure(e)
-
-
-# =========================================================
-# 16 - سیاه و سفید کردن عکس
-# =========================================================
-
-@app.route("/image-grayscale", methods=["POST"])
-def image_grayscale():
-
-    try:
-
-        file = (
-            request.files.get("image_file")
-            or request.files.get("image")
-        )
-
-        source = save_uploaded_file(
-            file,
-            IMAGE_EXTENSIONS
-        )
-
-        from PIL import Image
-        from PIL import ImageOps
-
-        image = Image.open(
-            source
-        )
-
-        result = ImageOps.grayscale(
-            image
-        )
-
-        output = create_output(
-            "png"
-        )
-
-        result.save(
-            output,
-            "PNG"
-        )
-
-        return success(
-            "تصویر سیاه‌وسفید شد.",
-            result_file=output.name
-        )
-
-    except Exception as e:
-
-        return failure(e)
-
-
-# =========================================================
-# 17 - تنظیم روشنایی عکس
-# =========================================================
-
-@app.route("/image-brightness", methods=["POST"])
-def image_brightness():
-
-    try:
-
-        file = (
-            request.files.get("image_file")
-            or request.files.get("image")
-        )
-
-        source = save_uploaded_file(
-            file,
-            IMAGE_EXTENSIONS
-        )
-
-        from PIL import Image
-        from PIL import ImageEnhance
-
-        image = Image.open(
-            source
-        )
-
-        factor = float(
-            request.form.get(
-                "factor",
-                1.2
-            )
-        )
-
-        factor = max(
-            0,
-            min(factor, 3)
-        )
-
-        result = ImageEnhance.Brightness(
-            image
-        ).enhance(
-            factor
-        )
-
-        output = create_output(
-            "png"
-        )
-
-        result.save(
-            output,
-            "PNG"
-        )
-
-        return success(
-            "روشنایی تصویر تغییر کرد.",
-            result_file=output.name
-        )
-
-    except Exception as e:
-
-        return failure(e)
-
-
-# =========================================================
-# 18 - تنظیم کنتراست عکس
-# =========================================================
-
-@app.route("/image-contrast", methods=["POST"])
-def image_contrast():
-
-    try:
-
-        file = (
-            request.files.get("image_file")
-            or request.files.get("image")
-        )
-
-        source = save_uploaded_file(
-            file,
-            IMAGE_EXTENSIONS
-        )
-
-        from PIL import Image
-        from PIL import ImageEnhance
-
-        image = Image.open(
-            source
-        )
-
-        factor = float(
-            request.form.get(
-                "factor",
-                1.2
-            )
-        )
-
-        factor = max(
-            0,
-            min(factor, 3)
-        )
-
-        result = ImageEnhance.Contrast(
-            image
-        ).enhance(
-            factor
-        )
-
-        output = create_output(
-            "png"
-        )
-
-        result.save(
-            output,
-            "PNG"
-        )
-
-        return success(
-            "کنتراست تصویر تغییر کرد.",
-            result_file=output.name
-        )
-
-    except Exception as e:
-
-        return failure(e)
-
-
-# =========================================================
-# 19 - ویرایشگر عکس
-# =========================================================
-
-@app.route("/image-editor", methods=["POST"])
-def image_editor():
-
-    try:
-
-        file = (
-            request.files.get("image_file")
-            or request.files.get("image")
-        )
-
-        source = save_uploaded_file(
-            file,
-            IMAGE_EXTENSIONS
-        )
-
-        from PIL import Image
-        from PIL import ImageEnhance
-        from PIL import ImageOps
-        from PIL import ImageFilter
-        from PIL import ImageDraw
-
-        image = Image.open(
-            source
-        ).convert("RGBA")
-
-        if request.form.get(
-            "mirror"
-        ) == "1":
-
-            image = ImageOps.mirror(
-                image
-            )
-
-        angle = float(
-            request.form.get(
-                "angle",
-                0
-            )
-        )
-
-        if angle:
-
-            image = image.rotate(
-                -angle,
-                expand=True
-            )
-
-        brightness = float(
-            request.form.get(
-                "brightness",
-                1
-            )
-        )
-
-        brightness = max(
-            0,
-            min(brightness, 3)
-        )
-
-        image = ImageEnhance.Brightness(
-            image
-        ).enhance(
-            brightness
-        )
-
-        contrast = float(
-            request.form.get(
-                "contrast",
-                1
-            )
-        )
-
-        contrast = max(
-            0,
-            min(contrast, 3)
-        )
-
-        image = ImageEnhance.Contrast(
-            image
-        ).enhance(
-            contrast
-        )
-
-        blur = float(
-            request.form.get(
-                "blur",
-                0
-            )
-        )
-
-        blur = max(
-            0,
-            min(blur, 20)
-        )
-
-        if blur:
-
-            image = image.filter(
-                ImageFilter.GaussianBlur(
-                    blur
-                )
-            )
-
-        overlay_text = request.form.get(
-            "overlay_text",
-            ""
-        )
-
-        if overlay_text:
-
-            draw = ImageDraw.Draw(
-                image
-            )
-
-            draw.text(
-                (30, 30),
-                overlay_text[:500],
-                fill=(
-                    255,
-                    255,
-                    255,
-                    255
-                )
-            )
-
-        output = create_output(
-            "png"
-        )
-
-        image.save(
-            output,
-            "PNG"
-        )
-
-        return success(
-            "ویرایش عکس انجام شد.",
-            result_file=output.name
-        )
-
-    except Exception as e:
-
-        return failure(e)
-        # =========================================================
-# 20 - تبدیل فرمت صوت
-# =========================================================
-
-@app.route("/audio-convert", methods=["POST"])
-def audio_convert():
-
-    try:
-
-        file = (
-            request.files.get("audio_file")
-            or request.files.get("file")
-        )
-
-        fmt = request.form.get(
-            "format",
-            "mp3"
-        ).lower()
-
-        allowed_formats = {
-            "mp3",
-            "wav",
-            "ogg",
-            "flac",
-            "m4a"
-        }
-
-        if fmt not in allowed_formats:
-            raise ValueError(
-                "فرمت خروجی معتبر نیست."
-            )
-
-        source = save_uploaded_file(
-            file,
-            AUDIO_EXTENSIONS
-        )
-
-        output = create_output(
-            fmt
-        )
-
-        run_command(
-            "ffmpeg",
-            "-y",
-            "-i",
-            source,
-            output
-        )
-
-        return success(
-            "فرمت فایل صوتی تبدیل شد.",
-            result_file=output.name
-        )
-
-    except Exception as e:
-
-        return failure(e)
-
-
-# =========================================================
-# 21 - برش صوت
-# =========================================================
-
-@app.route("/audio-cut", methods=["POST"])
-def audio_cut():
-
-    try:
-
-        file = (
-            request.files.get("audio_file")
-            or request.files.get("file")
-        )
-
-        source = save_uploaded_file(
-            file,
-            AUDIO_EXTENSIONS
-        )
-
-        start = max(
-            0,
-            float(
-                request.form.get(
-                    "start",
-                    0
-                )
-            )
-        )
-
-        duration = max(
-            0.1,
-            float(
-                request.form.get(
-                    "duration",
-                    10
-                )
-            )
-        )
-
-        output = create_output(
-            "mp3"
-        )
-
-        run_command(
-            "ffmpeg",
-            "-y",
-            "-ss",
-            start,
-            "-i",
-            source,
-            "-t",
-            duration,
-            "-c:a",
-            "libmp3lame",
-            output
-        )
-
-        return success(
-            "قسمت انتخاب‌شده از صدا جدا شد.",
-            result_file=output.name
-        )
-
-    except Exception as e:
-
-        return failure(e)
-
-
-# =========================================================
-# 22 - تغییر بلندی صدا
-# =========================================================
-
-@app.route("/audio-volume", methods=["POST"])
-def audio_volume():
-
-    try:
-
-        file = (
-            request.files.get("audio_file")
-            or request.files.get("file")
-        )
-
-        source = save_uploaded_file(
-            file,
-            AUDIO_EXTENSIONS
-        )
-
-        volume = float(
-            request.form.get(
-                "volume",
-                1.2
-            )
-        )
-
-        volume = max(
-            0,
-            min(volume, 5)
-        )
-
-        output = create_output(
-            "mp3"
-        )
-
-        run_command(
-            "ffmpeg",
-            "-y",
-            "-i",
-            source,
-            "-af",
-            f"volume={volume}",
-            "-c:a",
-            "libmp3lame",
-            output
-        )
-
-        return success(
-            "بلندی صدا تغییر کرد.",
-            result_file=output.name
-        )
-
-    except Exception as e:
-
-        return failure(e)
-
-
-# =========================================================
-# 23 - کاهش نویز صوت
-# =========================================================
-
-@app.route("/audio-clean", methods=["POST"])
-def audio_clean():
-
-    try:
-
-        file = (
-            request.files.get("audio_file")
-            or request.files.get("file")
-        )
-
-        source = save_uploaded_file(
-            file,
-            AUDIO_EXTENSIONS
-        )
-
-        output = create_output(
-            "mp3"
-        )
-
-        run_command(
-            "ffmpeg",
-            "-y",
-            "-i",
-            source,
-            "-af",
-            "afftdn",
-            "-c:a",
-            "libmp3lame",
-            output
-        )
-
-        return success(
-            "کاهش نویز انجام شد.",
-            result_file=output.name
-        )
-
-    except Exception as e:
-
-        return failure(e)
-
-
-# =========================================================
-# 24 - حذف سکوت‌های طولانی
-# =========================================================
-
-@app.route("/audio-silence", methods=["POST"])
-def audio_silence():
-
-    try:
-
-        file = (
-            request.files.get("audio_file")
-            or request.files.get("file")
-        )
-
-        source = save_uploaded_file(
-            file,
-            AUDIO_EXTENSIONS
-        )
-
-        output = create_output(
-            "mp3"
-        )
-
-        run_command(
-            "ffmpeg",
-            "-y",
-            "-i",
-            source,
-            "-af",
-            (
-                "silenceremove="
-                "stop_periods=-1:"
-                "stop_duration=1:"
-                "stop_threshold=-45dB"
-            ),
-            "-c:a",
-            "libmp3lame",
-            output
-        )
-
-        return success(
-            "سکوت‌های طولانی حذف شدند.",
-            result_file=output.name
-        )
-
-    except Exception as e:
-
-        return failure(e)
-
-
-# =========================================================
-# 25 - ادغام چند فایل صوتی
-# =========================================================
-
-@app.route("/audio-merge", methods=["POST"])
-def audio_merge():
-
-    try:
-
-        files = request.files.getlist(
-            "audio_files"
-        )
-
-        valid_files = [
-            file
-            for file in files
-            if file
-            and file.filename
-            and get_extension(file.filename)
-            in AUDIO_EXTENSIONS
-        ]
-
-        if len(valid_files) < 2:
-
-            raise ValueError(
-                "حداقل دو فایل صوتی انتخاب کنید."
-            )
-
-        saved_files = []
-
-        for file in valid_files:
-
-            saved_files.append(
-                save_uploaded_file(
-                    file,
-                    AUDIO_EXTENSIONS
-                )
-            )
-
-        list_file = (
-            UPLOAD_DIR
-            / f"{uuid.uuid4().hex}.txt"
-        )
-
-        with open(
-            list_file,
-            "w",
-            encoding="utf-8"
-        ) as f:
-
-            for source in saved_files:
-
-                safe_path = (
-                    str(source)
-                    .replace("'", "'\\''")
-                )
-
-                f.write(
-                    f"file '{safe_path}'\n"
-                )
-
-        output = create_output(
-            "mp3"
-        )
-
-        run_command(
-            "ffmpeg",
-            "-y",
-            "-f",
-            "concat",
-            "-safe",
-            "0",
-            "-i",
-            list_file,
-            "-c:a",
-            "libmp3lame",
-            output
-        )
-
-        return success(
-            "فایل‌های صوتی با هم ادغام شدند.",
-            result_file=output.name
-        )
-
-    except Exception as e:
-
-        return failure(e)
-
-
-# =========================================================
-# 26 - ادغام چند PDF
-# =========================================================
-
-@app.route("/pdf-merge", methods=["POST"])
-def pdf_merge():
-
-    try:
-
-        files = request.files.getlist(
-            "pdf_files"
-        )
-
-        if len(files) < 2:
-
-            raise ValueError(
-                "حداقل دو فایل PDF انتخاب کنید."
-            )
-
-        from pypdf import (
-            PdfReader,
-            PdfWriter
-        )
-
-        writer = PdfWriter()
-
-        for file in files:
-
-            if not file or not file.filename:
-                continue
-
-            source = save_uploaded_file(
-                file,
-                {"pdf"}
-            )
-
-            reader = PdfReader(
-                str(source)
-            )
-
-            for page in reader.pages:
-
-                writer.add_page(
-                    page
-                )
-
-        if len(writer.pages) == 0:
-
-            raise ValueError(
-                "PDF معتبری پیدا نشد."
-            )
-
-        output = create_output(
-            "pdf"
-        )
-
-        with open(
-            output,
-            "wb"
-        ) as file:
-
-            writer.write(file)
-
-        return success(
-            "PDFها با موفقیت ادغام شدند.",
-            result_file=output.name
-        )
-
-    except Exception as e:
-
-        return failure(e)
-
-
-# =========================================================
-# 27 - استخراج صفحات PDF
-# =========================================================
-
-@app.route("/pdf-extract-pages", methods=["POST"])
-def pdf_extract_pages():
-
-    try:
-
-        file = (
-            request.files.get("pdf_file")
-            or request.files.get("file")
-        )
-
-        source = save_uploaded_file(
-            file,
-            {"pdf"}
-        )
-
-        from pypdf import (
-            PdfReader,
-            PdfWriter
-        )
-
-        reader = PdfReader(
-            str(source)
-        )
-
-        pages_text = request.form.get(
-            "pages",
-            "1"
-        )
-
-        selected_pages = []
-
-        for item in pages_text.split(","):
-
-            item = item.strip()
-
-            if not item:
-                continue
-
-            if "-" in item:
-
-                start, end = map(
-                    int,
-                    item.split(
-                        "-",
-                        1
-                    )
-                )
-
-                selected_pages.extend(
-                    range(
-                        start,
-                        end + 1
-                    )
-                )
-
-            else:
-
-                selected_pages.append(
-                    int(item)
-                )
-
-        writer = PdfWriter()
-
-        for number in selected_pages:
-
-            if (
-                number >= 1
-                and number <= len(reader.pages)
-            ):
-
-                writer.add_page(
-                    reader.pages[
-                        number - 1
-                    ]
-                )
-
-        if len(writer.pages) == 0:
-
-            raise ValueError(
-                "شماره صفحه معتبر نیست."
-            )
-
-        output = create_output(
-            "pdf"
-        )
-
-        with open(
-            output,
-            "wb"
-        ) as file:
-
-            writer.write(file)
-
-        return success(
-            "صفحات انتخاب‌شده جدا شدند.",
-            result_file=output.name
-        )
-
-    except Exception as e:
-
-        return failure(e)
-
-
-# =========================================================
-# 28 - تبدیل PDF به JPG
-# =========================================================
-
-@app.route("/pdf-to-jpg", methods=["POST"])
-def pdf_to_jpg():
-
-    try:
-
-        file = (
-            request.files.get("pdf_file")
-            or request.files.get("file")
-        )
-
-        source = save_uploaded_file(
-            file,
-            {"pdf"}
-        )
-
-        pdftoppm = shutil.which(
-            "pdftoppm"
-        )
-
-        if not pdftoppm:
-
-            raise RuntimeError(
-                "pdftoppm روی سرور نصب نشده است."
-            )
-
-        prefix = (
-            OUTPUT_DIR
-            / uuid.uuid4().hex
-        )
-
-        run_command(
-            pdftoppm,
-            "-jpeg",
-            "-r",
-            "150",
-            source,
-            prefix
-        )
-
-        images = sorted(
-            OUTPUT_DIR.glob(
-                prefix.name + "-*.jpg"
-            )
-        )
-
-        if not images:
-
-            raise RuntimeError(
-                "تبدیل PDF به تصویر انجام نشد."
-            )
-
-        return success(
-            "صفحه اول PDF به JPG تبدیل شد.",
-            result_file=images[0].name
-        )
-
-    except Exception as e:
-
-        return failure(e)
-
-
-# =========================================================
-# 29 - شمارش کلمات و حروف
-# =========================================================
-
-@app.route("/text-stats", methods=["POST"])
-def text_stats():
-
-    try:
-
-        text = (
-            request.form.get(
-                "text_content"
-            )
-            or request.form.get("text")
-            or ""
-        )
-
-        characters = len(text)
-
-        characters_without_spaces = len(
-            re.sub(
-                r"\s+",
-                "",
-                text
-            )
-        )
-
-        words = len(
-            re.findall(
-                r"\S+",
-                text
-            )
-        )
-
-        lines = (
-            len(text.splitlines())
-            if text
-            else 0
-        )
-
-        result = (
-            f"تعداد حروف: {characters}\n"
-            f"حروف بدون فاصله: "
-            f"{characters_without_spaces}\n"
-            f"تعداد کلمات: {words}\n"
-            f"تعداد خطوط: {lines}"
-        )
-
-        return success(
-            "آمار متن محاسبه شد.",
-            transcribed_text=result
-        )
-
-    except Exception as e:
-
-        return failure(e)
-
-
-# =========================================================
-# 30 - تبدیل حروف بزرگ و کوچک
-# =========================================================
-
-@app.route("/text-case", methods=["POST"])
-def text_case():
-
-    try:
-
-        text = (
-            request.form.get(
-                "text_content"
-            )
-            or request.form.get("text")
-            or ""
-        )
-
-        mode = request.form.get(
-            "mode",
-            "upper"
-        )
-
-        if mode == "lower":
-
-            result = text.lower()
-
-        elif mode == "title":
-
-            result = text.title()
-
-        else:
-
-            result = text.upper()
-
-        return success(
-            "حروف متن تبدیل شدند.",
-            transcribed_text=result
-        )
-
-    except Exception as e:
-
-        return failure(e)
-
-
-# =========================================================
-# 31 - پاکسازی متن
-# =========================================================
-
-@app.route("/text-clean", methods=["POST"])
-def text_clean():
-
-    try:
-
-        text = (
-            request.form.get(
-                "text_content"
-            )
-            or request.form.get("text")
-            or ""
-        )
-
-        text = re.sub(
-            r"[ \t]+",
-            " ",
-            text
-        )
-
-        text = re.sub(
-            r"\n{3,}",
-            "\n\n",
-            text
-        )
-
-        text = text.strip()
-
-        return success(
-            "متن پاکسازی شد.",
-            transcribed_text=text
-        )
-
-    except Exception as e:
-
-        return failure(e)
-
-
-# =========================================================
-# 32 - مرتب‌سازی خطوط متن
-# =========================================================
-
-@app.route("/text-sort", methods=["POST"])
-def text_sort():
-
-    try:
-
-        text = (
-            request.form.get(
-                "text_content"
-            )
-            or request.form.get("text")
-            or ""
-        )
-
-        lines = [
-            line
-            for line in text.splitlines()
-            if line.strip()
-        ]
-
-        mode = request.form.get(
-            "mode",
-            "asc"
-        )
-
-        lines.sort(
-            reverse=(
-                mode == "desc"
-            )
-        )
-
-        result = "\n".join(
-            lines
-        )
-
-        return success(
-            "خطوط متن مرتب شدند.",
-            transcribed_text=result
-        )
-
-    except Exception as e:
-
-        return failure(e)
-
-
-# =========================================================
-# 33 - شماره‌گذاری متن
-# =========================================================
-
-@app.route("/text-number", methods=["POST"])
-def text_number():
-
-    try:
-
-        text = (
-            request.form.get(
-                "text_content"
-            )
-            or request.form.get("text")
-            or ""
-        )
-
-        result = "\n".join(
-            f"{index}. {line}"
-            for index, line in enumerate(
-                text.splitlines(),
-                start=1
-            )
-        )
-
-        return success(
-            "خطوط متن شماره‌گذاری شدند.",
-            transcribed_text=result
-        )
-
-    except Exception as e:
-
-        return failure(e)
-
-
-# =========================================================
-# 34 - جستجو و جایگزینی متن
-# =========================================================
-
-@app.route("/text-replace", methods=["POST"])
-def text_replace():
-
-    try:
-
-        text = (
-            request.form.get(
-                "text_content"
-            )
-            or request.form.get("text")
-            or ""
-        )
-
-        find_text = request.form.get(
-            "find_text",
-            ""
-        )
-
-        replace_text = request.form.get(
-            "replace_text",
-            ""
-        )
-
-        if not find_text:
-
-            raise ValueError(
-                "عبارت مورد جستجو را وارد کنید."
-            )
-
-        result = text.replace(
-            find_text,
-            replace_text
-        )
-
-        return success(
-            "جایگزینی انجام شد.",
-            transcribed_text=result
-        )
-
-    except Exception as e:
-
-        return failure(e)
-
-
-# =========================================================
-# 35 - مقایسه دو متن
-# =========================================================
-
-@app.route("/text-compare", methods=["POST"])
-def text_compare():
-
-    try:
-
-        import difflib
-
-        first = request.form.get(
-            "text_a",
-            ""
-        )
-
-        second = request.form.get(
-            "text_b",
-            ""
-        )
-
-        if first == second:
-
-            result = (
-                "دو متن کاملاً یکسان هستند."
-            )
-
-        else:
-
-            result = "\n".join(
-                difflib.unified_diff(
-                    first.splitlines(),
-                    second.splitlines(),
-                    fromfile="متن اول",
-                    tofile="متن دوم",
-                    lineterm=""
-                )
-            )
-
-        return success(
-            "مقایسه دو متن انجام شد.",
-            transcribed_text=result
-        )
-
-    except Exception as e:
-
-        return failure(e)
-
-
-# =========================================================
-# 36 - ساخت رمز عبور تصادفی
-# =========================================================
-
-@app.route("/password", methods=["POST"])
-def password():
-
-    try:
-
-        import secrets
-        import string
-
-        length = int(
-            request.form.get(
-                "length",
-                16
-            )
-        )
-
-        length = max(
-            4,
-            min(length, 128)
-        )
-
-        characters = (
-            string.ascii_letters
-            + string.digits
-            + "!@#$%^&*_-+="
-        )
-
-        result = "".join(
-            secrets.choice(
-                characters
-            )
-            for _ in range(length)
-        )
-
-        return success(
-            "رمز عبور ساخته شد.",
-            transcribed_text=result
-        )
-
-    except Exception as e:
-
-        return failure(e)
-
-
-# =========================================================
-# 37 - عدد تصادفی
-# =========================================================
-
-@app.route("/random-number", methods=["POST"])
-def random_number():
-
-    try:
-
-        import secrets
-
-        minimum = int(
-            request.form.get(
-                "minimum",
-                1
-            )
-        )
-
-        maximum = int(
-            request.form.get(
-                "maximum",
-                100
-            )
-        )
-
-        if minimum > maximum:
-
-            minimum, maximum = (
-                maximum,
-                minimum
-            )
-
-        number = (
-            secrets.randbelow(
-                maximum - minimum + 1
-            )
-            + minimum
-        )
-
-        return success(
-            "عدد تصادفی ساخته شد.",
-            transcribed_text=str(
-                number
-            )
-        )
-
-    except Exception as e:
-
-        return failure(e)
-
-
-# =========================================================
-# 38 - تبدیل واحد
-# =========================================================
-
-@app.route("/unit-convert", methods=["POST"])
-def unit_convert():
-
-    try:
-
-        value = float(
-            request.form.get(
-                "value",
-                0
-            )
-        )
-
-        conversion = request.form.get(
-            "kind",
-            "km-m"
-        )
-
-        conversions = {
-
-            "km-m":
-                value * 1000,
-
-            "m-km":
-                value / 1000,
-
-            "kg-g":
-                value * 1000,
-
-            "g-kg":
-                value / 1000,
-
-            "l-ml":
-                value * 1000,
-
-            "ml-l":
-                value / 1000,
-
-            "c-f":
-                value * 9 / 5 + 32,
-
-            "f-c":
-                (value - 32) * 5 / 9
-        }
-
-        if conversion not in conversions:
-
-            raise ValueError(
-                "نوع تبدیل واحد نامعتبر است."
-            )
-
-        result = conversions[
-            conversion
-        ]
-
-        return success(
-            "تبدیل واحد انجام شد.",
-            transcribed_text=str(
-                result
-            )
-        )
-
-    except Exception as e:
-
-        return failure(e)
-
-
-# =========================================================
-# 39 - دانلود فایل خروجی
+# PDF
 # =========================================================
 
 @app.route(
-    "/download/<path:filename>"
+    "/image-to-pdf",
+    methods=["POST"]
 )
-def download(filename):
+def image_to_pdf():
 
-    return send_from_directory(
-        OUTPUT_DIR,
-        filename,
-        as_attachment=True
+    from PIL import Image
+
+    files = [
+        x
+        for x in request.files.getlist(
+            "files"
+        )
+        if x.filename
+    ]
+
+    if not files:
+
+        file = request.files.get(
+            "file"
+        )
+
+        if file:
+
+            files = [file]
+
+    if not files:
+
+        raise ValueError(
+            "حداقل یک تصویر انتخاب کنید."
+        )
+
+    images = []
+
+    for file in files:
+
+        source = save_upload(
+            file,
+            IMAGE_EXTENSIONS
+        )
+
+        images.append(
+            Image.open(
+                source
+            ).convert(
+                "RGB"
+            )
+        )
+
+    output = create_output(
+        "pdf"
+    )
+
+    images[0].save(
+        output,
+        "PDF",
+        save_all=True,
+        append_images=images[1:]
+    )
+
+    return success(
+        "PDF ساخته شد.",
+        output.name
+    )
+
+
+@app.route(
+    "/text-to-pdf",
+    methods=["POST"]
+)
+def text_to_pdf():
+
+    from reportlab.pdfgen import canvas
+    from reportlab.lib.pagesizes import A4
+
+    text = request.form.get(
+        "text",
+        ""
+    )
+
+    if not text.strip():
+
+        raise ValueError(
+            "متنی وارد نشده است."
+        )
+
+    output = create_output(
+        "pdf"
+    )
+
+    pdf = canvas.Canvas(
+        str(output),
+        pagesize=A4
+    )
+
+    width, height = A4
+
+    y = height - 50
+
+    pdf.setFont(
+        "Helvetica",
+        11
+    )
+
+    for line in (
+        text.splitlines()
+        or [""]
+    ):
+
+        pdf.drawString(
+            40,
+            y,
+            line[:120]
+        )
+
+        y -= 18
+
+        if y < 40:
+
+            pdf.showPage()
+
+            y = height - 50
+
+    pdf.save()
+
+    return success(
+        "PDF ساخته شد.",
+        output.name
+    )
+
+
+@app.route(
+    "/pdf-text",
+    methods=["POST"]
+)
+def pdf_text():
+
+    from pypdf import PdfReader
+
+    source = save_upload(
+        request.files.get("file"),
+        PDF_EXTENSIONS
+    )
+
+    reader = PdfReader(
+        str(source)
+    )
+
+    text = "\n\n".join(
+        page.extract_text()
+        or ""
+        for page in reader.pages
+    )
+
+    return success(
+        "متن PDF استخراج شد.",
+        result_text=text
+    )
+
+
+@app.route(
+    "/pdf-merge",
+    methods=["POST"]
+)
+def pdf_merge():
+
+    from pypdf import (
+        PdfReader,
+        PdfWriter
+    )
+
+    files = [
+        x
+        for x in request.files.getlist(
+            "files"
+        )
+        if x.filename
+    ]
+
+    if len(files) < 2:
+
+        raise ValueError(
+            "حداقل دو PDF انتخاب کنید."
+        )
+
+    writer = PdfWriter()
+
+    for file in files:
+
+        source = save_upload(
+            file,
+            PDF_EXTENSIONS
+        )
+
+        reader = PdfReader(
+            str(source)
+        )
+
+        for page in reader.pages:
+
+            writer.add_page(
+                page
+            )
+
+    output = create_output(
+        "pdf"
+    )
+
+    with open(
+        output,
+        "wb"
+    ) as f:
+
+        writer.write(f)
+
+    return success(
+        "PDFها ادغام شدند.",
+        output.name
+    )
+
+
+@app.route(
+    "/pdf-split",
+    methods=["POST"]
+)
+def pdf_split():
+
+    from pypdf import (
+        PdfReader,
+        PdfWriter
+    )
+
+    source = save_upload(
+        request.files.get("file"),
+        PDF_EXTENSIONS
+    )
+
+    reader = PdfReader(
+        str(source)
+    )
+
+    pages = request.form.get(
+        "pages",
+        "1"
+    )
+
+    selected = []
+
+    for item in pages.split(","):
+
+        item = item.strip()
+
+        if "-" in item:
+
+            a, b = map(
+                int,
+                item.split("-")
+            )
+
+            selected.extend(
+                range(a, b + 1)
+            )
+
+        else:
+
+            selected.append(
+                int(item)
+            )
+
+    writer = PdfWriter()
+
+    for number in selected:
+
+        if (
+            1 <= number
+            <= len(reader.pages)
+        ):
+
+            writer.add_page(
+                reader.pages[
+                    number - 1
+                ]
+            )
+
+    if not writer.pages:
+
+        raise ValueError(
+            "شماره صفحه معتبر نیست."
+        )
+
+    output = create_output(
+        "pdf"
+    )
+
+    with open(
+        output,
+        "wb"
+    ) as f:
+
+        writer.write(f)
+
+    return success(
+        "صفحات PDF استخراج شدند.",
+        output.name
+    )
+
+
+@app.route(
+    "/pdf-compress",
+    methods=["POST"]
+)
+def pdf_compress():
+
+    source = save_upload(
+        request.files.get("file"),
+        PDF_EXTENSIONS
+    )
+
+    gs = shutil.which(
+        "gs"
+    )
+
+    if not gs:
+
+        raise RuntimeError(
+            "Ghostscript نصب نشده است."
+        )
+
+    output = create_output(
+        "pdf"
+    )
+
+    run_command(
+        gs,
+        "-sDEVICE=pdfwrite",
+        "-dCompatibilityLevel=1.4",
+        "-dPDFSETTINGS=/ebook",
+        "-dNOPAUSE",
+        "-dBATCH",
+        "-dQUIET",
+        f"-sOutputFile={output}",
+        source
+    )
+
+    return success(
+        "PDF فشرده شد.",
+        output.name
+    )
+
+
+@app.route(
+    "/pdf-jpg",
+    methods=["POST"]
+)
+def pdf_jpg():
+
+    source = save_upload(
+        request.files.get("file"),
+        PDF_EXTENSIONS
+    )
+
+    executable = shutil.which(
+        "pdftoppm"
+    )
+
+    if not executable:
+
+        raise RuntimeError(
+            "pdftoppm نصب نشده است."
+        )
+
+    prefix = (
+        OUTPUT_DIR /
+        uuid.uuid4().hex
+    )
+
+    run_command(
+        executable,
+        "-jpeg",
+        "-r",
+        "150",
+        source,
+        prefix
+    )
+
+    images = sorted(
+        OUTPUT_DIR.glob(
+            prefix.name + "-*.jpg"
+        )
+    )
+
+    if not images:
+
+        raise RuntimeError(
+            "تبدیل PDF انجام نشد."
+        )
+
+    return success(
+        "صفحه اول PDF به JPG تبدیل شد.",
+        images[0].name
     )
 
 
 # =========================================================
-# 40 - API وضعیت سایت
+# QR
 # =========================================================
 
-@app.route("/health")
-def health():
+@app.route(
+    "/qr-code",
+    methods=["POST"]
+)
+def qr_code():
 
-    return jsonify(
-        status="ok",
-        service="online"
+    import qrcode
+
+    data = request.form.get(
+        "data",
+        ""
+    ).strip()
+
+    if not data:
+
+        raise ValueError(
+            "متن یا لینک QR را وارد کنید."
+        )
+
+    output = create_output(
+        "png"
+    )
+
+    image = qrcode.make(
+        data
+    )
+
+    image.save(
+        output
+    )
+
+    return success(
+        "QR Code ساخته شد.",
+        output.name
     )
 
 
-@app.route("/api/tools")
-def api_tools():
+# =========================================================
+# PROGRAMMING
+# =========================================================
 
-    return jsonify(
-        status="active",
-        tools=40
+@app.route(
+    "/json-format",
+    methods=["POST"]
+)
+def json_format():
+
+    text = request.form.get(
+        "text",
+        ""
+    )
+
+    try:
+
+        result = json.dumps(
+            json.loads(text),
+            ensure_ascii=False,
+            indent=2
+        )
+
+    except Exception as e:
+
+        raise ValueError(
+            f"JSON نامعتبر است: {e}"
+        )
+
+    return success(
+        "JSON قالب‌بندی شد.",
+        result_text=result
+    )
+
+
+@app.route(
+    "/json-validate",
+    methods=["POST"]
+)
+def json_validate():
+
+    text = request.form.get(
+        "text",
+        ""
+    )
+
+    try:
+
+        json.loads(text)
+
+        result = (
+            "JSON معتبر است."
+        )
+
+    except Exception as e:
+
+        result = (
+            f"JSON نامعتبر است:\n{e}"
+        )
+
+    return success(
+        "اعتبارسنجی انجام شد.",
+        result_text=result
+    )
+
+
+@app.route(
+    "/base64",
+    methods=["POST"]
+)
+def base64_tool():
+
+    text = request.form.get(
+        "text",
+        ""
+    )
+
+    mode = request.form.get(
+        "mode",
+        "encode"
+    )
+
+    try:
+
+        if mode == "encode":
+
+            result = (
+                base64.b64encode(
+                    text.encode(
+                        "utf-8"
+                    )
+                ).decode()
+            )
+
+        else:
+
+            result = (
+                base64.b64decode(
+                    text
+                ).decode(
+                    "utf-8"
+                )
+            )
+
+    except Exception as e:
+
+        raise ValueError(
+            f"Base64 نامعتبر است: {e}"
+        )
+
+    return success(
+        "Base64 پردازش شد.",
+        result_text=result
+    )
+
+
+@app.route(
+    "/url-code",
+    methods=["POST"]
+)
+def url_code():
+
+    text = request.form.get(
+        "text",
+        ""
+    )
+
+    mode = request.form.get(
+        "mode",
+        "encode"
+    )
+
+    if mode == "encode":
+
+        result = urllib.parse.quote(
+            text,
+            safe=""
+        )
+
+    else:
+
+        result = urllib.parse.unquote(
+            text
+        )
+
+    return success(
+        "URL پردازش شد.",
+        result_text=result
+    )
+
+
+@app.route(
+    "/hash",
+    methods=["POST"]
+)
+def hash_tool():
+
+    text = request.form.get(
+        "text",
+        ""
+    ).encode()
+
+    algorithm = request.form.get(
+        "algorithm",
+        "sha256"
+    )
+
+    allowed = {
+        "md5",
+        "sha1",
+        "sha256",
+        "sha512"
+    }
+
+    if algorithm not in allowed:
+
+        raise ValueError(
+            "الگوریتم نامعتبر است."
+        )
+
+    result = hashlib.new(
+        algorithm,
+        text
+    ).hexdigest()
+
+    return success(
+        "Hash ساخته شد.",
+        result_text=result
+    )
+
+
+@app.route(
+    "/uuid",
+    methods=["POST"]
+)
+def uuid_tool():
+
+    return success(
+        "UUID ساخته شد.",
+        result_text=str(
+            uuid.uuid4()
+        )
     )
 
 
 # =========================================================
-# Sitemap
+# CALCULATORS
 # =========================================================
 
-@app.route("/sitemap.xml")
+@app.route(
+    "/percent",
+    methods=["POST"]
+)
+def percent():
+
+    value = float(
+        request.form.get(
+            "value",
+            0
+        )
+    )
+
+    total = float(
+        request.form.get(
+            "total",
+            0
+        )
+    )
+
+    result = (
+        value /
+        total *
+        100
+    ) if total else 0
+
+    return success(
+        "درصد محاسبه شد.",
+        result_text=f"{result:g}%"
+    )
+
+
+@app.route(
+    "/discount",
+    methods=["POST"]
+)
+def discount():
+
+    price = float(
+        request.form.get(
+            "price",
+            0
+        )
+    )
+
+    discount_value = float(
+        request.form.get(
+            "discount",
+            0
+        )
+    )
+
+    final = (
+        price *
+        (1 - discount_value / 100)
+    )
+
+    result = (
+        f"قیمت اصلی: {price:g}\n"
+        f"درصد تخفیف: {discount_value:g}%\n"
+        f"مبلغ نهایی: {final:g}\n"
+        f"مقدار تخفیف: "
+        f"{price-final:g}"
+    )
+
+    return success(
+        "تخفیف محاسبه شد.",
+        result_text=result
+    )
+
+
+@app.route(
+    "/bmi",
+    methods=["POST"]
+)
+def bmi():
+
+    weight = float(
+        request.form.get(
+            "weight",
+            0
+        )
+    )
+
+    height = (
+        float(
+            request.form.get(
+                "height",
+                0
+            )
+        ) / 100
+    )
+
+    if height <= 0:
+
+        raise ValueError(
+            "قد نامعتبر است."
+        )
+
+    value = (
+        weight /
+        (height * height)
+    )
+
+    return success(
+        "BMI محاسبه شد.",
+        result_text=f"BMI = {value:.2f}"
+    )
+
+
+@app.route(
+    "/age",
+    methods=["POST"]
+)
+def age():
+
+    birthday = datetime.date.fromisoformat(
+        request.form.get(
+            "birth"
+        )
+    )
+
+    today = datetime.date.today()
+
+    years = (
+        today.year -
+        birthday.year -
+        (
+            (
+                today.month,
+                today.day
+            )
+            <
+            (
+                birthday.month,
+                birthday.day
+            )
+        )
+    )
+
+    return success(
+        "سن محاسبه شد.",
+        result_text=f"سن: {years} سال"
+    )
+
+
+# =========================================================
+# SEO
+# =========================================================
+
+@app.route(
+    "/robots-generator",
+    methods=["POST"]
+)
+def robots_generator():
+
+    site = request.form.get(
+        "site",
+        ""
+    ).rstrip("/")
+
+    result = (
+        "User-agent: *\n"
+        "Allow: /\n\n"
+        f"Sitemap: {site}/sitemap.xml"
+    )
+
+    return success(
+        "robots.txt ساخته شد.",
+        result_text=result
+    )
+
+
+@app.route(
+    "/sitemap-generator",
+    methods=["POST"]
+)
+def sitemap_generator():
+
+    site = request.form.get(
+        "site",
+        ""
+    ).rstrip("/")
+
+    pages = request.form.get(
+        "pages",
+        "/"
+    ).splitlines()
+
+    xml = (
+        '<?xml version="1.0" '
+        'encoding="UTF-8"?>'
+        '<urlset '
+        'xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'
+    )
+
+    for page in pages:
+
+        page = page.strip()
+
+        if not page:
+            continue
+
+        xml += (
+            "<url><loc>"
+            f"{site}/{page.lstrip('/')}"
+            "</loc></url>"
+        )
+
+    xml += "</urlset>"
+
+    return success(
+        "Sitemap ساخته شد.",
+        result_text=xml
+    )
+
+
+@app.route(
+    "/og-generator",
+    methods=["POST"]
+)
+def og_generator():
+
+    title = request.form.get(
+        "title",
+        ""
+    )
+
+    description = request.form.get(
+        "description",
+        ""
+    )
+
+    url = request.form.get(
+        "url",
+        ""
+    )
+
+    result = (
+        f'<meta property="og:title" '
+        f'content="{title}">\n'
+        f'<meta property="og:description" '
+        f'content="{description}">\n'
+        f'<meta property="og:url" '
+        f'content="{url}">'
+    )
+
+    return success(
+        "تگ‌های Open Graph ساخته شدند.",
+        result_text=result
+    )
+
+
+# =========================================================
+# SITEMAP / ROBOTS
+# =========================================================
+
+@app.route(
+    "/sitemap.xml"
+)
 def sitemap():
 
-    base_url = (
+    base = (
         "https://rt-k9g5.onrender.com"
     )
 
     routes = [
         "",
         "/about",
-        "/contact",
-        "/text-to-speech"
+        "/contact"
     ]
 
     xml = (
         '<?xml version="1.0" '
         'encoding="UTF-8"?>'
         '<urlset '
-        'xmlns="http://www.sitemaps.org/'
-        'schemas/sitemap/0.9">'
+        'xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'
     )
 
     for route in routes:
 
         xml += (
-            "<url>"
-            f"<loc>{base_url}{route}</loc>"
-            "</url>"
+            f"<url><loc>"
+            f"{base}{route}"
+            f"</loc></url>"
         )
 
     xml += "</urlset>"
 
-    return (
+    return Response(
         xml,
-        200,
-        {
-            "Content-Type":
-                "application/xml; charset=utf-8"
-        }
+        mimetype="application/xml"
     )
 
 
-# =========================================================
-# Robots.txt
-# =========================================================
-
-@app.route("/robots.txt")
+@app.route(
+    "/robots.txt"
+)
 def robots():
 
-    return (
+    return Response(
         "User-agent: *\n"
-        "Allow: /\n"
-        "\n"
+        "Allow: /\n\n"
         "Sitemap: "
-        "https://rt-k9g5.onrender.com/"
-        "sitemap.xml\n"
+        "https://rt-k9g5.onrender.com/sitemap.xml\n",
+        mimetype="text/plain"
     )
 
 
 # =========================================================
-# خطای حجم فایل
+# ERRORS
 # =========================================================
 
 @app.errorhandler(413)
-def file_too_large(error):
+def too_large(error):
 
-    return (
-        failure(
-            "حجم فایل بیشتر از 100 مگابایت است."
-        ),
-        413
-    )
+    return failure(
+        "حجم فایل بیشتر از 150 مگابایت است."
+    ), 413
 
-
-# =========================================================
-# خطای عمومی
-# =========================================================
 
 @app.errorhandler(500)
 def server_error(error):
 
-    return (
-        failure(
-            "خطای داخلی سرور رخ داد. "
-            "لطفاً دوباره تلاش کنید."
-        ),
-        500
-    )
+    return failure(
+        "خطای داخلی سرور رخ داد."
+    ), 500
 
-
-# =========================================================
-# اجرای محلی
-# =========================================================
 
 if __name__ == "__main__":
 
