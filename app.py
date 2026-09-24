@@ -10,7 +10,6 @@ from gtts import gTTS
 
 app = Flask(__name__)
 
-# پوشه‌های فایل
 UPLOAD_FOLDER = "uploads"
 SEPARATED_FOLDER = "separated"
 
@@ -21,81 +20,48 @@ os.makedirs(SEPARATED_FOLDER, exist_ok=True)
 # =========================
 # صفحه اصلی
 # =========================
-
 @app.route("/")
-def index():
+def home():
     return render_template("index.html")
 
 
 # =========================
 # درباره ما
 # =========================
-
 @app.route("/about")
 def about():
     return """
-    <!DOCTYPE html>
-    <html lang="fa" dir="rtl">
-    <head>
-        <meta charset="UTF-8">
-        <title>درباره ما</title>
-    </head>
-    <body>
-        <h1>درباره سامانه پردازش صوت</h1>
-        <p>
-            این سامانه برای تبدیل متن به صوت و پردازش فایل‌های صوتی طراحی شده است.
-        </p>
-        <a href="/">بازگشت به صفحه اصلی</a>
-    </body>
-    </html>
+    <h1>درباره ما</h1>
+    <p>ابزار آنلاین تبدیل متن به صدا و پردازش فایل صوتی.</p>
     """
 
 
 # =========================
 # تماس با ما
 # =========================
-
 @app.route("/contact")
 def contact():
     return """
-    <!DOCTYPE html>
-    <html lang="fa" dir="rtl">
-    <head>
-        <meta charset="UTF-8">
-        <title>تماس با ما</title>
-    </head>
-    <body>
-        <h1>تماس با ما</h1>
-        <p>
-            برای ارتباط با ما می‌توانید از اطلاعات تماس موجود در سایت استفاده کنید.
-        </p>
-        <a href="/">بازگشت به صفحه اصلی</a>
-    </body>
-    </html>
+    <h1>تماس با ما</h1>
+    <p>برای ارتباط با ما می‌توانید از این صفحه استفاده کنید.</p>
     """
 
 
 # =========================
-# تبدیل متن به صوت
+# تبدیل متن فارسی به صدای واقعی
 # =========================
-
 @app.route("/process-text", methods=["POST"])
 def process_text():
 
     text = request.form.get("text_input", "").strip()
 
     if not text:
-        return render_template(
-            "index.html",
-            error_text="لطفاً متن خود را وارد کنید."
-        )
+        return "متنی وارد نشده است."
+
+    filename = f"speech_{int(time.time())}.mp3"
+    filepath = os.path.join(UPLOAD_FOLDER, filename)
 
     try:
-
-        # نام فایل
-        filename = f"speech_{int(time.time())}.mp3"
-
-        filepath = os.path.join(UPLOAD_FOLDER, filename)
 
         # تبدیل متن فارسی به صدای واقعی
         tts = gTTS(
@@ -104,139 +70,114 @@ def process_text():
             slow=False
         )
 
+        # ذخیره فایل صوتی
         tts.save(filepath)
 
         return render_template(
             "index.html",
-            speech_file=filename,
-            success_text="متن با موفقیت به صوت تبدیل شد."
+            success_text="صدای فارسی با موفقیت ساخته شد.",
+            speech_file=filename
         )
 
     except Exception as e:
 
-        print("TTS ERROR:", e)
-
-        return render_template(
-            "index.html",
-            error_text="در تبدیل متن به صوت خطایی رخ داد. لطفاً دوباره تلاش کنید."
-        )
+        return f"خطا در تبدیل متن به صدا: {str(e)}"
 
 
 # =========================
 # پردازش فایل صوتی
 # =========================
-
 @app.route("/process-audio", methods=["POST"])
 def process_audio():
 
-    if "file" not in request.files:
+    if "audio_file" not in request.files:
+        return "فایلی انتخاب نشده است."
 
-        return render_template(
-            "index.html",
-            error_audio="فایلی انتخاب نشده است."
-        )
-
-    file = request.files["file"]
+    file = request.files["audio_file"]
 
     if file.filename == "":
+        return "فایلی انتخاب نشده است."
 
-        return render_template(
-            "index.html",
-            error_audio="لطفاً یک فایل صوتی انتخاب کنید."
-        )
+    filename = f"{int(time.time())}_{file.filename}"
+
+    filepath = os.path.join(
+        UPLOAD_FOLDER,
+        filename
+    )
+
+    file.save(filepath)
 
     try:
 
-        filename = file.filename
-
-        input_path = os.path.join(
-            UPLOAD_FOLDER,
-            filename
-        )
-
-        file.save(input_path)
-
-        # خواندن فایل صوتی
         y, sr = librosa.load(
-            input_path,
+            filepath,
             sr=None,
             mono=False
         )
 
-        # اگر صدا استریو باشد
-        if y.ndim == 2:
+        # اگر فایل استریو باشد
+        if y.ndim == 2 and y.shape[0] >= 2:
 
-            # کانال‌ها
             left = y[0]
             right = y[1]
 
-            # روش ساده برای پردازش کانال‌ها
-            instrumental = (left - right) / 2
+            # استخراج تقریبی وکال
             vocals = (left + right) / 2
+
+            # استخراج تقریبی موسیقی
+            instrumental = (left - right) / 2
+
+            vocals_file = f"vocals_{int(time.time())}.wav"
+
+            instrumental_file = (
+                f"instrumental_{int(time.time())}.wav"
+            )
+
+            vocals_path = os.path.join(
+                SEPARATED_FOLDER,
+                vocals_file
+            )
+
+            instrumental_path = os.path.join(
+                SEPARATED_FOLDER,
+                instrumental_file
+            )
+
+            sf.write(
+                vocals_path,
+                vocals,
+                sr
+            )
+
+            sf.write(
+                instrumental_path,
+                instrumental,
+                sr
+            )
+
+            return render_template(
+                "index.html",
+                success_text="پردازش فایل با موفقیت انجام شد.",
+                vocals_file=vocals_file,
+                instrumental_file=instrumental_file
+            )
 
         else:
 
-            instrumental = y
-            vocals = y
-
-        base_name = os.path.splitext(filename)[0]
-
-        instrumental_filename = (
-            base_name + "_instrumental.wav"
-        )
-
-        vocals_filename = (
-            base_name + "_vocals.wav"
-        )
-
-        instrumental_path = os.path.join(
-            SEPARATED_FOLDER,
-            instrumental_filename
-        )
-
-        vocals_path = os.path.join(
-            SEPARATED_FOLDER,
-            vocals_filename
-        )
-
-        # ذخیره فایل‌ها
-        sf.write(
-            instrumental_path,
-            instrumental,
-            sr
-        )
-
-        sf.write(
-            vocals_path,
-            vocals,
-            sr
-        )
-
-        return render_template(
-            "index.html",
-            success_audio="پردازش فایل صوتی انجام شد.",
-            instrumental=instrumental_filename,
-            vocals=vocals_filename
-        )
+            return "برای جداسازی صدا، فایل استریو لازم است."
 
     except Exception as e:
 
-        print("AUDIO ERROR:", e)
-
-        return render_template(
-            "index.html",
-            error_audio="پردازش فایل صوتی با خطا مواجه شد."
-        )
+        return f"خطا در پردازش فایل: {str(e)}"
 
 
 # =========================
 # دانلود فایل
 # =========================
-
 @app.route("/download/<path:filename>")
 def download(filename):
 
-    # اول در uploads جستجو می‌کنیم
+    # بررسی پوشه uploads
     upload_path = os.path.join(
         UPLOAD_FOLDER,
         filename
@@ -250,7 +191,7 @@ def download(filename):
             as_attachment=True
         )
 
-    # سپس در separated
+    # بررسی پوشه separated
     separated_path = os.path.join(
         SEPARATED_FOLDER,
         filename
@@ -264,19 +205,19 @@ def download(filename):
             as_attachment=True
         )
 
-    return "File not found", 404
+    return "فایل پیدا نشد.", 404
 
 
 # =========================
 # Sitemap
 # =========================
-
 @app.route("/sitemap.xml")
 def sitemap():
 
     base_url = "https://rt-k9g5.onrender.com"
 
     xml = f"""<?xml version="1.0" encoding="UTF-8"?>
+
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
     <url>
@@ -303,18 +244,19 @@ def sitemap():
 # =========================
 # Robots.txt
 # =========================
-
 @app.route("/robots.txt")
 def robots():
 
-    content = """User-agent: *
+    base_url = "https://rt-k9g5.onrender.com"
+
+    robots_txt = f"""User-agent: *
 Allow: /
 
-Sitemap: https://rt-k9g5.onrender.com/sitemap.xml
+Sitemap: {base_url}/sitemap.xml
 """
 
     return Response(
-        content,
+        robots_txt,
         mimetype="text/plain"
     )
 
@@ -322,11 +264,13 @@ Sitemap: https://rt-k9g5.onrender.com/sitemap.xml
 # =========================
 # اجرای برنامه
 # =========================
-
 if __name__ == "__main__":
 
     port = int(
-        os.environ.get("PORT", 5000)
+        os.environ.get(
+            "PORT",
+            5000
+        )
     )
 
     app.run(
