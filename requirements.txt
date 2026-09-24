@@ -4,6 +4,6 @@ numpy
 librosa
 soundfile
 edge-tts
-SpeechRecognition
+faster-whisper
 pytesseract
 Pillow
