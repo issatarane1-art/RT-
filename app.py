@@ -1,11 +1,12 @@
 import os
 import time
+import asyncio
 import numpy as np
 import librosa
 import soundfile as sf
 
 from flask import Flask, render_template, request, send_from_directory, Response
-from gtts import gTTS
+import edge_tts
 
 
 app = Flask(__name__)
@@ -50,6 +51,19 @@ def contact():
 # =========================
 # تبدیل متن فارسی به صدای واقعی
 # =========================
+async def generate_persian_speech(text, filepath):
+
+    # صدای زن فارسی
+    voice = "fa-IR-DilaraNeural"
+
+    communicate = edge_tts.Communicate(
+        text,
+        voice
+    )
+
+    await communicate.save(filepath)
+
+
 @app.route("/process-text", methods=["POST"])
 def process_text():
 
@@ -59,19 +73,21 @@ def process_text():
         return "متنی وارد نشده است."
 
     filename = f"speech_{int(time.time())}.mp3"
-    filepath = os.path.join(UPLOAD_FOLDER, filename)
+
+    filepath = os.path.join(
+        UPLOAD_FOLDER,
+        filename
+    )
 
     try:
 
-        # تبدیل متن فارسی به صدای واقعی
-        tts = gTTS(
-            text=text,
-            lang="fa",
-            slow=False
+        # اجرای Edge TTS
+        asyncio.run(
+            generate_persian_speech(
+                text,
+                filepath
+            )
         )
-
-        # ذخیره فایل صوتی
-        tts.save(filepath)
 
         return render_template(
             "index.html",
@@ -127,7 +143,9 @@ def process_audio():
             # استخراج تقریبی موسیقی
             instrumental = (left - right) / 2
 
-            vocals_file = f"vocals_{int(time.time())}.wav"
+            vocals_file = (
+                f"vocals_{int(time.time())}.wav"
+            )
 
             instrumental_file = (
                 f"instrumental_{int(time.time())}.wav"
