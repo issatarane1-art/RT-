@@ -3,6 +3,7 @@ import time
 import asyncio
 import shutil
 
+import numpy as np
 import librosa
 import soundfile as sf
 import pytesseract
@@ -16,6 +17,11 @@ from faster_whisper import WhisperModel
 
 app = Flask(__name__)
 
+
+# =========================================================
+# FOLDERS
+# =========================================================
+
 UPLOAD_FOLDER = "uploads"
 SEPARATED_FOLDER = "separated"
 
@@ -27,7 +33,6 @@ os.makedirs(SEPARATED_FOLDER, exist_ok=True)
 # WHISPER
 # =========================================================
 
-WHISPER_MODEL_SIZE = "base"
 whisper_model = None
 
 
@@ -36,7 +41,7 @@ def get_whisper_model():
 
     if whisper_model is None:
         whisper_model = WhisperModel(
-            WHISPER_MODEL_SIZE,
+            "base",
             device="cpu",
             compute_type="int8"
         )
@@ -45,15 +50,16 @@ def get_whisper_model():
 
 
 # =========================================================
-# TESSERACT
+# TESSERACT OCR
 # =========================================================
 
 TESSERACT_PATH = shutil.which("tesseract")
 
 if TESSERACT_PATH:
     pytesseract.pytesseract.tesseract_cmd = TESSERACT_PATH
-elif os.path.exists("/usr/bin/tesseract"):
-    pytesseract.pytesseract.tesseract_cmd = "/usr/bin/tesseract"
+else:
+    if os.path.exists("/usr/bin/tesseract"):
+        pytesseract.pytesseract.tesseract_cmd = "/usr/bin/tesseract"
 
 
 # =========================================================
@@ -110,6 +116,7 @@ def contact():
         <title>تماس با ما</title>
     </head>
     <body>
+
         <h1>تماس با ما</h1>
 
         <p>
@@ -117,6 +124,7 @@ def contact():
         </p>
 
         <a href="/">بازگشت به صفحه اصلی</a>
+
     </body>
     </html>
     """
@@ -223,6 +231,7 @@ def process_audio():
         )
 
         if y.ndim != 2 or y.shape[0] < 2:
+
             return render_template(
                 "index.html",
                 error_text=(
@@ -234,12 +243,16 @@ def process_audio():
         right = y[1]
 
         vocals = (left + right) / 2
+
         instrumental = (left - right) / 2
 
         timestamp = int(time.time())
 
         vocals_file = f"vocals_{timestamp}.wav"
-        instrumental_file = f"instrumental_{timestamp}.wav"
+
+        instrumental_file = (
+            f"instrumental_{timestamp}.wav"
+        )
 
         vocals_path = os.path.join(
             SEPARATED_FOLDER,
@@ -280,6 +293,7 @@ def process_audio():
     finally:
 
         if os.path.exists(filepath):
+
             try:
                 os.remove(filepath)
             except Exception:
@@ -294,6 +308,7 @@ def process_audio():
 def speech_to_text():
 
     if "speech_file" not in request.files:
+
         return render_template(
             "index.html",
             error_text="فایل صوتی انتخاب نشده است."
@@ -302,6 +317,7 @@ def speech_to_text():
     file = request.files["speech_file"]
 
     if file.filename == "":
+
         return render_template(
             "index.html",
             error_text="فایل صوتی انتخاب نشده است."
@@ -324,7 +340,7 @@ def speech_to_text():
 
     try:
 
-        # گرفتن مدل Whisper
+        # دریافت مدل Whisper
         model = get_whisper_model()
 
         # تبدیل صوت به متن فارسی
@@ -427,7 +443,6 @@ def image_to_text():
 
     try:
 
-        # بررسی Tesseract
         tesseract_path = shutil.which(
             "tesseract"
         )
@@ -437,10 +452,13 @@ def image_to_text():
             if os.path.exists(
                 "/usr/bin/tesseract"
             ):
+
                 tesseract_path = (
                     "/usr/bin/tesseract"
                 )
+
             else:
+
                 return render_template(
                     "index.html",
                     error_text=(
@@ -452,7 +470,6 @@ def image_to_text():
             tesseract_path
         )
 
-        # باز کردن تصویر
         image = Image.open(
             image_path
         )
@@ -463,7 +480,6 @@ def image_to_text():
 
         width, height = image.size
 
-        # بزرگ‌تر کردن عکس‌های کوچک
         if width < 1600:
 
             ratio = 1600 / width
@@ -475,7 +491,6 @@ def image_to_text():
                 )
             )
 
-        # آماده‌سازی برای OCR
         image = image.convert(
             "L"
         )
@@ -488,16 +503,13 @@ def image_to_text():
             ImageFilter.SHARPEN
         )
 
-        # OCR فارسی و انگلیسی
         extracted_text = pytesseract.image_to_string(
             image,
             lang="fas+eng",
             config="--psm 6"
         )
 
-        extracted_text = (
-            extracted_text.strip()
-        )
+        extracted_text = extracted_text.strip()
 
         if not extracted_text:
 
@@ -628,7 +640,7 @@ Sitemap: {base_url}/sitemap.xml
 
 
 # =========================================================
-# START SERVER
+# RUN
 # =========================================================
 
 if __name__ == "__main__":
