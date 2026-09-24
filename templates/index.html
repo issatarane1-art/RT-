@@ -1,1570 +1,2921 @@
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <meta name="google-site-verification"
-          content="HKNJ-ewUE5WanEYFXDrVnH_oHmhafRa9F90Br7B1glw">
+<meta charset="UTF-8">
 
-    <title>سامانه ابزار آنلاین | ۴۰ ابزار کاربردی</title>
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0">
 
-    <style>
-        * {
-            box-sizing: border-box;
-        }
+<meta name="google-site-verification"
+      content="HKNJ-ewUE5WanEYFXDrVnH_oHmhafRa9F90Br7B1glw">
 
-        body {
-            margin: 0;
-            font-family: Tahoma, Arial, sans-serif;
-            background:
-                radial-gradient(circle at top right, #12345c, transparent 35%),
-                linear-gradient(135deg, #030712, #071526 55%, #02050a);
-            color: #fff;
-            min-height: 100vh;
-        }
+<title>ابزارینو | ۴۰ ابزار آنلاین رایگان</title>
 
-        header {
-            padding: 30px 15px;
-            text-align: center;
-            border-bottom: 1px solid rgba(0, 200, 255, .2);
-        }
+<style>
 
-        header h1 {
-            margin: 0 0 12px;
-            font-size: 30px;
-            color: #00d9ff;
-        }
+/* =========================
+   RESET
+========================= */
 
-        header p {
-            margin: 0;
-            color: #b9c8d8;
-        }
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
 
-        .container {
-            width: min(1200px, 94%);
-            margin: 30px auto 60px;
-        }
+html{
+    scroll-behavior:smooth;
+}
 
-        .status {
-            text-align: center;
-            background: rgba(0, 220, 255, .08);
-            border: 1px solid rgba(0, 220, 255, .2);
-            border-radius: 16px;
-            padding: 18px;
-            margin-bottom: 25px;
-        }
+body{
 
-        .status span {
-            color: #36e6ff;
-            font-weight: bold;
-        }
+    font-family:
+    Tahoma,
+    Arial,
+    sans-serif;
 
-        .tools {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 18px;
-        }
+    background:
+    radial-gradient(
+        circle at 10% 10%,
+        rgba(0,220,255,.12),
+        transparent 30%
+    ),
 
-        .tool {
-            background: rgba(10, 22, 38, .92);
-            border: 1px solid rgba(0, 210, 255, .15);
-            border-radius: 18px;
-            padding: 20px;
-            box-shadow: 0 12px 35px rgba(0,0,0,.25);
-        }
+    radial-gradient(
+        circle at 90% 20%,
+        rgba(110,70,255,.14),
+        transparent 30%
+    ),
 
-        .tool:hover {
-            border-color: rgba(0, 220, 255, .5);
-            transform: translateY(-2px);
-        }
+    linear-gradient(
+        135deg,
+        #020711,
+        #071426,
+        #030814
+    );
 
-        .tool h2 {
-            margin: 0 0 8px;
-            font-size: 18px;
-            color: #42e8ff;
-        }
+    color:#fff;
 
-        .tool p {
-            color: #aebdca;
-            font-size: 13px;
-            line-height: 1.8;
-        }
+    min-height:100vh;
 
-        input,
-        textarea,
-        select {
-            width: 100%;
-            background: #07111e;
-            border: 1px solid #233b52;
-            color: white;
-            border-radius: 10px;
-            padding: 11px;
-            margin: 6px 0;
-            font-family: inherit;
-        }
+}
 
-        textarea {
-            min-height: 100px;
-            resize: vertical;
-        }
 
-        input[type="file"] {
-            padding: 9px;
-        }
+/* =========================
+   HEADER
+========================= */
 
-        input[type="range"] {
-            padding: 0;
-        }
+header{
 
-        button {
-            width: 100%;
-            border: 0;
-            border-radius: 10px;
-            padding: 12px;
-            margin-top: 8px;
-            background: linear-gradient(135deg, #00a8ff, #006eff);
-            color: white;
-            font-weight: bold;
-            cursor: pointer;
-        }
+    position:sticky;
 
-        button:hover {
-            filter: brightness(1.15);
-        }
+    top:0;
 
-        .danger {
-            background: linear-gradient(135deg, #e53935, #ff1744);
-        }
+    z-index:1000;
 
-        .result {
-            margin-top: 25px;
-            background: rgba(0, 255, 150, .08);
-            border: 1px solid rgba(0, 255, 150, .25);
-            padding: 18px;
-            border-radius: 15px;
-            white-space: pre-wrap;
-        }
+    background:
+    rgba(3,10,22,.82);
 
-        .error {
-            background: rgba(255, 40, 70, .1);
-            border-color: rgba(255, 40, 70, .35);
-        }
+    backdrop-filter:
+    blur(18px);
 
-        .download {
-            display: inline-block;
-            margin-top: 12px;
-            padding: 10px 18px;
-            background: #00b894;
-            border-radius: 10px;
-            color: white;
-            text-decoration: none;
-        }
+    border-bottom:
+    1px solid
+    rgba(255,255,255,.08);
 
-        /* ==========================
-           دایره درصد پردازش
-        ========================== */
+}
 
-        #progressBox {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,.78);
-            z-index: 9999;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-        }
+.navbar{
 
-        .circle {
-            width: 180px;
-            height: 180px;
-            border-radius: 50%;
-            background:
-                conic-gradient(
-                    #00d9ff 0deg,
-                    #00d9ff 0deg,
-                    #162638 0deg
-                );
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            box-shadow: 0 0 45px rgba(0,210,255,.25);
-        }
+    width:
+    min(1200px,94%);
 
-        .circle::before {
-            content: "";
-            position: absolute;
-            width: 145px;
-            height: 145px;
-            border-radius: 50%;
-            background: #06101c;
-        }
+    margin:auto;
 
-        #percent {
-            position: relative;
-            z-index: 2;
-            font-size: 32px;
-            font-weight: bold;
-            color: white;
-        }
+    min-height:72px;
 
-        #progressText {
-            margin-top: 22px;
-            color: #d7f8ff;
-            font-size: 15px;
-        }
+    display:flex;
 
-        .category {
-            margin: 45px 0 18px;
-            color: #fff;
-            border-right: 4px solid #00d9ff;
-            padding-right: 12px;
-        }
+    align-items:center;
 
-        @media(max-width:600px) {
-            header h1 {
-                font-size: 24px;
-            }
+    justify-content:space-between;
 
-            .tools {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
+    gap:20px;
+
+}
+
+.logo{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:10px;
+
+    font-size:22px;
+
+    font-weight:bold;
+
+    color:#fff;
+
+}
+
+.logo-icon{
+
+    width:42px;
+
+    height:42px;
+
+    border-radius:13px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    background:
+    linear-gradient(
+        135deg,
+        #00d9ff,
+        #6c4cff
+    );
+
+    box-shadow:
+    0 0 25px
+    rgba(0,210,255,.3);
+
+}
+
+.nav-links{
+
+    display:flex;
+
+    gap:8px;
+
+}
+
+.nav-links a{
+
+    color:#b9c7d8;
+
+    text-decoration:none;
+
+    padding:10px 15px;
+
+    border-radius:10px;
+
+    transition:.25s;
+
+}
+
+.nav-links a:hover{
+
+    color:#fff;
+
+    background:
+    rgba(255,255,255,.07);
+
+}
+
+
+/* =========================
+   HERO
+========================= */
+
+.hero{
+
+    width:
+    min(1200px,94%);
+
+    margin:
+    65px auto 40px;
+
+    text-align:center;
+
+}
+
+.badge{
+
+    display:inline-block;
+
+    padding:
+    8px 15px;
+
+    border:
+    1px solid
+    rgba(0,220,255,.25);
+
+    border-radius:30px;
+
+    color:#58eaff;
+
+    background:
+    rgba(0,220,255,.07);
+
+    font-size:13px;
+
+    margin-bottom:20px;
+
+}
+
+.hero h1{
+
+    font-size:
+    clamp(32px,6vw,64px);
+
+    line-height:1.25;
+
+    margin-bottom:18px;
+
+    background:
+    linear-gradient(
+        90deg,
+        #fff,
+        #45eaff,
+        #9b7cff
+    );
+
+    -webkit-background-clip:text;
+
+    background-clip:text;
+
+    color:transparent;
+
+}
+
+.hero p{
+
+    max-width:700px;
+
+    margin:auto;
+
+    color:#aebdce;
+
+    line-height:2;
+
+    font-size:16px;
+
+}
+
+
+/* =========================
+   SEARCH
+========================= */
+
+.search-box{
+
+    width:
+    min(700px,100%);
+
+    margin:30px auto;
+
+    position:relative;
+
+}
+
+.search-box input{
+
+    width:100%;
+
+    height:58px;
+
+    padding:
+    0 22px;
+
+    border-radius:18px;
+
+    border:
+    1px solid
+    rgba(255,255,255,.12);
+
+    background:
+    rgba(255,255,255,.055);
+
+    color:#fff;
+
+    outline:none;
+
+    font-family:inherit;
+
+    font-size:15px;
+
+    backdrop-filter:blur(12px);
+
+}
+
+.search-box input:focus{
+
+    border-color:#00d9ff;
+
+    box-shadow:
+    0 0 30px
+    rgba(0,217,255,.12);
+
+}
+
+
+/* =========================
+   CATEGORY
+========================= */
+
+.container{
+
+    width:
+    min(1200px,94%);
+
+    margin:auto;
+
+}
+
+.category{
+
+    margin:
+    50px 0 20px;
+
+    display:flex;
+
+    align-items:center;
+
+    gap:12px;
+
+}
+
+.category-icon{
+
+    width:42px;
+
+    height:42px;
+
+    border-radius:12px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    background:
+    rgba(0,217,255,.1);
+
+    border:
+    1px solid
+    rgba(0,217,255,.2);
+
+}
+
+.category h2{
+
+    font-size:23px;
+
+}
+
+.category-line{
+
+    flex:1;
+
+    height:1px;
+
+    background:
+    linear-gradient(
+        90deg,
+        rgba(0,217,255,.4),
+        transparent
+    );
+
+}
+
+
+/* =========================
+   TOOLS
+========================= */
+
+.tools{
+
+    display:grid;
+
+    grid-template-columns:
+    repeat(
+        auto-fit,
+        minmax(270px,1fr)
+    );
+
+    gap:18px;
+
+}
+
+.tool{
+
+    position:relative;
+
+    overflow:hidden;
+
+    background:
+    linear-gradient(
+        145deg,
+        rgba(15,31,52,.88),
+        rgba(5,15,28,.92)
+    );
+
+    border:
+    1px solid
+    rgba(255,255,255,.08);
+
+    border-radius:22px;
+
+    padding:22px;
+
+    transition:
+    transform .25s,
+    border-color .25s,
+    box-shadow .25s;
+
+}
+
+.tool::before{
+
+    content:"";
+
+    position:absolute;
+
+    width:120px;
+
+    height:120px;
+
+    border-radius:50%;
+
+    background:
+    rgba(0,217,255,.07);
+
+    top:-70px;
+
+    left:-50px;
+
+    filter:blur(5px);
+
+}
+
+.tool:hover{
+
+    transform:
+    translateY(-5px);
+
+    border-color:
+    rgba(0,217,255,.3);
+
+    box-shadow:
+    0 18px 45px
+    rgba(0,0,0,.3);
+
+}
+
+.tool-top{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:13px;
+
+    margin-bottom:12px;
+
+}
+
+.tool-icon{
+
+    min-width:48px;
+
+    height:48px;
+
+    border-radius:14px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    font-size:23px;
+
+    background:
+    linear-gradient(
+        135deg,
+        rgba(0,217,255,.15),
+        rgba(120,70,255,.15)
+    );
+
+    border:
+    1px solid
+    rgba(255,255,255,.08);
+
+}
+
+.tool h3{
+
+    font-size:17px;
+
+    color:#fff;
+
+}
+
+.tool p{
+
+    color:#92a5ba;
+
+    font-size:13px;
+
+    line-height:1.9;
+
+    margin-bottom:14px;
+
+}
+
+
+/* =========================
+   FORMS
+========================= */
+
+input,
+textarea,
+select{
+
+    width:100%;
+
+    border:
+    1px solid
+    rgba(255,255,255,.1);
+
+    background:
+    rgba(0,0,0,.25);
+
+    color:#fff;
+
+    border-radius:12px;
+
+    padding:12px;
+
+    margin:
+    5px 0;
+
+    outline:none;
+
+    font-family:inherit;
+
+}
+
+input:focus,
+textarea:focus,
+select:focus{
+
+    border-color:#00d9ff;
+
+}
+
+textarea{
+
+    min-height:90px;
+
+    resize:vertical;
+
+}
+
+input[type=file]{
+
+    font-size:12px;
+
+}
+
+input[type=range]{
+
+    padding:0;
+
+}
+
+button{
+
+    width:100%;
+
+    border:0;
+
+    border-radius:12px;
+
+    padding:13px;
+
+    margin-top:8px;
+
+    background:
+    linear-gradient(
+        135deg,
+        #00bfe8,
+        #5964ff
+    );
+
+    color:#fff;
+
+    font-family:inherit;
+
+    font-weight:bold;
+
+    cursor:pointer;
+
+    transition:.25s;
+
+}
+
+button:hover{
+
+    transform:
+    translateY(-2px);
+
+    box-shadow:
+    0 8px 25px
+    rgba(0,180,255,.2);
+
+}
+
+
+/* =========================
+   RESULTS
+========================= */
+
+.result{
+
+    margin:
+    35px 0;
+
+    padding:22px;
+
+    border-radius:18px;
+
+    background:
+    rgba(0,220,150,.07);
+
+    border:
+    1px solid
+    rgba(0,220,150,.2);
+
+    line-height:2;
+
+    white-space:pre-wrap;
+
+}
+
+.result.error{
+
+    background:
+    rgba(255,50,70,.08);
+
+    border-color:
+    rgba(255,50,70,.25);
+
+}
+
+.download{
+
+    display:inline-block;
+
+    margin-top:12px;
+
+    padding:
+    10px 18px;
+
+    color:#fff;
+
+    text-decoration:none;
+
+    border-radius:11px;
+
+    background:
+    linear-gradient(
+        135deg,
+        #00a878,
+        #00c98a
+    );
+
+}
+
+
+/* =========================
+   PROGRESS
+========================= */
+
+#progressBox{
+
+    display:none;
+
+    position:fixed;
+
+    inset:0;
+
+    z-index:9999;
+
+    background:
+    rgba(0,4,12,.86);
+
+    backdrop-filter:
+    blur(12px);
+
+    align-items:center;
+
+    justify-content:center;
+
+    flex-direction:column;
+
+}
+
+.circle{
+
+    width:190px;
+
+    height:190px;
+
+    border-radius:50%;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    background:
+    conic-gradient(
+        #00d9ff 0deg,
+        #18283b 0deg
+    );
+
+    position:relative;
+
+    box-shadow:
+    0 0 60px
+    rgba(0,217,255,.25);
+
+}
+
+.circle::before{
+
+    content:"";
+
+    position:absolute;
+
+    width:150px;
+
+    height:150px;
+
+    border-radius:50%;
+
+    background:#06101c;
+
+}
+
+#percent{
+
+    position:relative;
+
+    z-index:2;
+
+    font-size:34px;
+
+    font-weight:bold;
+
+}
+
+#progressText{
+
+    margin-top:22px;
+
+    color:#bdefff;
+
+}
+
+
+/* =========================
+   FOOTER
+========================= */
+
+footer{
+
+    margin-top:70px;
+
+    padding:35px 20px;
+
+    border-top:
+    1px solid
+    rgba(255,255,255,.08);
+
+    background:
+    rgba(0,0,0,.2);
+
+    text-align:center;
+
+    color:#8191a4;
+
+}
+
+footer strong{
+
+    color:#42e8ff;
+
+}
+
+
+/* =========================
+   MOBILE
+========================= */
+
+@media(max-width:700px){
+
+    .navbar{
+
+        min-height:62px;
+
+    }
+
+    .nav-links{
+
+        display:none;
+
+    }
+
+    .hero{
+
+        margin-top:40px;
+
+    }
+
+    .hero h1{
+
+        font-size:34px;
+
+    }
+
+    .tools{
+
+        grid-template-columns:1fr;
+
+    }
+
+    .category h2{
+
+        font-size:19px;
+
+    }
+
+}
+
+</style>
+
 </head>
+
 
 <body>
 
+
+<!-- =========================
+     HEADER
+========================= -->
+
 <header>
-    <h1>سامانه ابزار آنلاین</h1>
-    <p>۴۰ ابزار کاربردی برای متن، صدا، تصویر و PDF</p>
+
+<div class="navbar">
+
+    <div class="logo">
+
+        <div class="logo-icon">
+            ⚡
+        </div>
+
+        ابزارینو
+
+    </div>
+
+
+    <nav class="nav-links">
+
+        <a href="/">خانه</a>
+
+        <a href="/text-to-speech">تبدیل متن به صدا</a>
+
+        <a href="/about">درباره ما</a>
+
+        <a href="/contact">تماس</a>
+
+    </nav>
+
+</div>
+
 </header>
+
+
+
+<!-- =========================
+     HERO
+========================= -->
+
+<section class="hero">
+
+<div class="badge">
+    ✨ بیش از ۴۰ ابزار آنلاین
+</div>
+
+<h1>
+    همه ابزارهای مورد نیازت،
+    یکجا
+</h1>
+
+<p>
+    تبدیل متن، پردازش صدا، ویرایش عکس،
+    ابزارهای PDF و ابزارهای کاربردی؛
+    سریع، ساده و آنلاین.
+</p>
+
+
+<div class="search-box">
+
+    <input
+        id="toolSearch"
+        type="search"
+        placeholder="🔎 ابزار مورد نظر خود را جستجو کنید..."
+        oninput="searchTools()">
+
+</div>
+
+</section>
+
+
 
 <div class="container">
 
-    <div class="status">
-        وضعیت سامانه:
-        <span>● آنلاین</span>
-    </div>
 
-    <!-- دایره پردازش -->
+<!-- =========================
+     TEXT
+========================= -->
 
-    <div id="progressBox">
-        <div class="circle" id="circle">
-            <span id="percent">0%</span>
-        </div>
-        <div id="progressText">
-            در حال پردازش...
-        </div>
-    </div>
+<div class="category">
 
+<div class="category-icon">
+    📝
+</div>
 
-    <!-- =====================================================
-         ابزارهای متن
-    ====================================================== -->
+<h2>
+    ابزارهای متن
+</h2>
 
-    <h2 class="category">📝 ابزارهای متن</h2>
-
-    <div class="tools">
-
-        <!-- 1 -->
-
-        <div class="tool">
-            <h2>🔊 ۱. تبدیل متن به صدا</h2>
-            <p>متن فارسی را به فایل صوتی تبدیل کنید.</p>
-
-            <form action="/process-text" method="post">
-                <textarea name="text_input"
-                          placeholder="متن خود را وارد کنید..."></textarea>
-
-                <button type="submit">
-                    تبدیل به صدا
-                </button>
-            </form>
-        </div>
-
-
-        <!-- 2 -->
-
-        <div class="tool">
-            <h2>📊 ۲. آمار متن</h2>
-            <p>تعداد کلمات، حروف و خطوط متن را محاسبه می‌کند.</p>
-
-            <form action="/text-stats" method="post">
-                <textarea name="text_content"
-                          placeholder="متن..."></textarea>
-
-                <button type="submit">
-                    محاسبه
-                </button>
-            </form>
-        </div>
-
-
-        <!-- 3 -->
-
-        <div class="tool">
-            <h2>🔠 ۳. تغییر حروف</h2>
-
-            <form action="/text-case" method="post">
-
-                <textarea name="text_content"
-                          placeholder="متن..."></textarea>
-
-                <select name="mode">
-                    <option value="upper">حروف بزرگ</option>
-                    <option value="lower">حروف کوچک</option>
-                    <option value="title">Title Case</option>
-                </select>
-
-                <button type="submit">
-                    تبدیل
-                </button>
-
-            </form>
-        </div>
-
-
-        <!-- 4 -->
-
-        <div class="tool">
-            <h2>🧹 ۴. پاکسازی متن</h2>
-
-            <form action="/text-clean" method="post">
-
-                <textarea name="text_content"
-                          placeholder="متن..."></textarea>
-
-                <button type="submit">
-                    پاکسازی
-                </button>
-
-            </form>
-        </div>
-
-
-        <!-- 5 -->
-
-        <div class="tool">
-            <h2>↕️ ۵. مرتب‌سازی خطوط</h2>
-
-            <form action="/text-sort" method="post">
-
-                <textarea name="text_content"
-                          placeholder="هر مورد را در یک خط بنویسید"></textarea>
-
-                <select name="mode">
-                    <option value="asc">صعودی</option>
-                    <option value="desc">نزولی</option>
-                </select>
-
-                <button type="submit">
-                    مرتب‌سازی
-                </button>
-
-            </form>
-        </div>
-
-
-        <!-- 6 -->
-
-        <div class="tool">
-            <h2>🔢 ۶. شماره‌گذاری متن</h2>
-
-            <form action="/text-number" method="post">
-
-                <textarea name="text_content"
-                          placeholder="هر مورد در یک خط"></textarea>
-
-                <button type="submit">
-                    شماره‌گذاری
-                </button>
-
-            </form>
-        </div>
-
-
-        <!-- 7 -->
-
-        <div class="tool">
-            <h2>🔄 ۷. جستجو و جایگزینی</h2>
-
-            <form action="/text-replace" method="post">
-
-                <textarea name="text_content"
-                          placeholder="متن اصلی"></textarea>
-
-                <input name="find_text"
-                       placeholder="عبارت مورد جستجو">
-
-                <input name="replace_text"
-                       placeholder="عبارت جایگزین">
-
-                <button type="submit">
-                    جایگزینی
-                </button>
-
-            </form>
-        </div>
-
-
-        <!-- 8 -->
-
-        <div class="tool">
-            <h2>⚖️ ۸. مقایسه دو متن</h2>
-
-            <form action="/text-compare" method="post">
-
-                <textarea name="text_a"
-                          placeholder="متن اول"></textarea>
-
-                <textarea name="text_b"
-                          placeholder="متن دوم"></textarea>
-
-                <button type="submit">
-                    مقایسه
-                </button>
-
-            </form>
-        </div>
-
-
-        <!-- 9 -->
-
-        <div class="tool">
-            <h2>📄 ۹. متن به PDF</h2>
-
-            <form action="/text-to-pdf" method="post">
-
-                <textarea name="text_content"
-                          placeholder="متن PDF"></textarea>
-
-                <button type="submit">
-                    ساخت PDF
-                </button>
-
-            </form>
-        </div>
-
-
-        <!-- 10 -->
-
-        <div class="tool">
-            <h2>🔐 ۱۰. ساخت رمز عبور</h2>
-
-            <form action="/password" method="post">
-
-                <input type="number"
-                       name="length"
-                       value="16"
-                       min="4"
-                       max="128">
-
-                <button type="submit">
-                    ساخت رمز
-                </button>
-
-            </form>
-        </div>
-
-
-        <!-- 11 -->
-
-        <div class="tool">
-            <h2>🎲 ۱۱. عدد تصادفی</h2>
-
-            <form action="/random-number" method="post">
-
-                <input type="number"
-                       name="minimum"
-                       value="1"
-                       placeholder="حداقل">
-
-                <input type="number"
-                       name="maximum"
-                       value="100"
-                       placeholder="حداکثر">
-
-                <button type="submit">
-                    تولید عدد
-                </button>
-
-            </form>
-        </div>
-
-
-        <!-- 12 -->
-
-        <div class="tool">
-            <h2>📐 ۱۲. تبدیل واحد</h2>
-
-            <form action="/unit-convert" method="post">
-
-                <input type="number"
-                       step="any"
-                       name="value"
-                       placeholder="مقدار">
-
-                <select name="kind">
-
-                    <option value="km-m">
-                        کیلومتر → متر
-                    </option>
-
-                    <option value="m-km">
-                        متر → کیلومتر
-                    </option>
-
-                    <option value="kg-g">
-                        کیلوگرم → گرم
-                    </option>
-
-                    <option value="g-kg">
-                        گرم → کیلوگرم
-                    </option>
-
-                    <option value="l-ml">
-                        لیتر → میلی‌لیتر
-                    </option>
-
-                    <option value="ml-l">
-                        میلی‌لیتر → لیتر
-                    </option>
-
-                    <option value="c-f">
-                        سانتی‌گراد → فارنهایت
-                    </option>
-
-                    <option value="f-c">
-                        فارنهایت → سانتی‌گراد
-                    </option>
-
-                </select>
-
-                <button type="submit">
-                    تبدیل
-                </button>
-
-            </form>
-        </div>
-
-    </div>
-
-
-    <!-- =====================================================
-         ابزارهای تصویر
-    ====================================================== -->
-
-    <h2 class="category">🖼️ ابزارهای تصویر</h2>
-
-    <div class="tools">
-
-        <!-- 13 -->
-
-        <div class="tool">
-            <h2>🔍 ۱۳. عکس به متن</h2>
-
-            <form action="/image-to-text"
-                  method="post"
-                  enctype="multipart/form-data">
-
-                <input type="file"
-                       name="image_file"
-                       accept="image/*"
-                       required>
-
-                <button type="submit">
-                    استخراج متن
-                </button>
-
-            </form>
-        </div>
-
-
-        <!-- 14 -->
-
-        <div class="tool">
-            <h2>📉 ۱۴. فشرده‌سازی عکس</h2>
-
-            <form action="/image-compress"
-                  method="post"
-                  enctype="multipart/form-data">
-
-                <input type="file"
-                       name="image_file"
-                       accept="image/*"
-                       required>
-
-                <input type="number"
-                       name="max_width"
-                       value="1600"
-                       placeholder="حداکثر عرض">
-
-                <input type="number"
-                       name="quality"
-                       value="80"
-                       min="10"
-                       max="95"
-                       placeholder="کیفیت">
-
-                <button type="submit">
-                    فشرده‌سازی
-                </button>
-
-            </form>
-        </div>
-
-
-        <!-- 15 -->
-
-        <div class="tool">
-            <h2>📄 ۱۵. عکس به PDF</h2>
-
-            <form action="/image-to-pdf"
-                  method="post"
-                  enctype="multipart/form-data">
-
-                <input type="file"
-                       name="images"
-                       accept="image/*"
-                       multiple
-                       required>
-
-                <button type="submit">
-                    ساخت PDF
-                </button>
-
-            </form>
-        </div>
-
-
-        <!-- 16 -->
-
-        <div class="tool">
-            <h2>🖼️ ۱۶. عکس به JPG</h2>
-
-            <form action="/image-to-jpg"
-                  method="post"
-                  enctype="multipart/form-data">
-
-                <input type="file"
-                       name="image_file"
-                       accept="image/*"
-                       required>
-
-                <button type="submit">
-                    تبدیل به JPG
-                </button>
-
-            </form>
-        </div>
-
-
-        <!-- 17 -->
-
-        <div class="tool">
-            <h2>🖼️ ۱۷. عکس به PNG</h2>
-
-            <form action="/image-to-png"
-                  method="post"
-                  enctype="multipart/form-data">
-
-                <input type="file"
-                       name="image_file"
-                       accept="image/*"
-                       required>
-
-                <button type="submit">
-                    تبدیل به PNG
-                </button>
-
-            </form>
-        </div>
-
-
-        <!-- 18 -->
-
-        <div class="tool">
-            <h2>✂️ ۱۸. برش عکس</h2>
-
-            <form action="/image-crop"
-                  method="post"
-                  enctype="multipart/form-data">
-
-                <input type="file"
-                       name="image_file"
-                       accept="image/*"
-                       required>
-
-                <input type="number"
-                       name="x"
-                       value="0"
-                       placeholder="X">
-
-                <input type="number"
-                       name="y"
-                       value="0"
-                       placeholder="Y">
-
-                <input type="number"
-                       name="width"
-                       placeholder="عرض">
-
-                <input type="number"
-                       name="height"
-                       placeholder="ارتفاع">
-
-                <button type="submit">
-                    برش
-                </button>
-
-            </form>
-        </div>
-
-
-        <!-- 19 -->
-
-        <div class="tool">
-            <h2>🔄 ۱۹. چرخاندن عکس</h2>
-
-            <form action="/image-rotate"
-                  method="post"
-                  enctype="multipart/form-data">
-
-                <input type="file"
-                       name="image_file"
-                       accept="image/*"
-                       required>
-
-                <input type="number"
-                       name="angle"
-                       value="90"
-                       placeholder="زاویه">
-
-                <button type="submit">
-                    چرخاندن
-                </button>
-
-            </form>
-        </div>
-
-
-        <!-- 20 -->
-
-        <div class="tool">
-            <h2>↔️ ۲۰. آینه‌ای کردن</h2>
-
-            <form action="/image-mirror"
-                  method="post"
-                  enctype="multipart/form-data">
-
-                <input type="file"
-                       name="image_file"
-                       accept="image/*"
-                       required>
-
-                <button type="submit">
-                    آینه‌ای کردن
-                </button>
-
-            </form>
-        </div>
-
-
-        <!-- 21 -->
-
-        <div class="tool">
-            <h2>⚫ ۲۱. سیاه‌وسفید</h2>
-
-            <form action="/image-grayscale"
-                  method="post"
-                  enctype="multipart/form-data">
-
-                <input type="file"
-                       name="image_file"
-                       accept="image/*"
-                       required>
-
-                <button type="submit">
-                    تبدیل
-                </button>
-
-            </form>
-        </div>
-
-
-        <!-- 22 -->
-
-        <div class="tool">
-            <h2>☀️ ۲۲. روشنایی عکس</h2>
-
-            <form action="/image-brightness"
-                  method="post"
-                  enctype="multipart/form-data">
-
-                <input type="file"
-                       name="image_file"
-                       accept="image/*"
-                       required>
-
-                <input type="number"
-                       step="0.1"
-                       name="factor"
-                       value="1.2"
-                       min="0"
-                       max="3">
-
-                <button type="submit">
-                    اعمال
-                </button>
-
-            </form>
-        </div>
-
-
-        <!-- 23 -->
-
-        <div class="tool">
-            <h2>🌗 ۲۳. کنتراست عکس</h2>
-
-            <form action="/image-contrast"
-                  method="post"
-                  enctype="multipart/form-data">
-
-                <input type="file"
-                       name="image_file"
-                       accept="image/*"
-                       required>
-
-                <input type="number"
-                       step="0.1"
-                       name="factor"
-                       value="1.2"
-                       min="0"
-                       max="3">
-
-                <button type="submit">
-                    اعمال
-                </button>
-
-            </form>
-        </div>
-
-
-        <!-- 24 -->
-
-        <div class="tool">
-            <h2>🎨 ۲۴. ویرایشگر عکس</h2>
-
-            <form action="/image-editor"
-                  method="post"
-                  enctype="multipart/form-data">
-
-                <input type="file"
-                       name="image_file"
-                       accept="image/*"
-                       required>
-
-                <input type="number"
-                       step="0.1"
-                       name="brightness"
-                       value="1"
-                       placeholder="روشنایی">
-
-                <input type="number"
-                       step="0.1"
-                       name="contrast"
-                       value="1"
-                       placeholder="کنتراست">
-
-                <input type="number"
-                       step="0.5"
-                       name="blur"
-                       value="0"
-                       min="0"
-                       max="20"
-                       placeholder="محو کردن">
-
-                <input type="number"
-                       name="angle"
-                       value="0"
-                       placeholder="چرخش">
-
-                <input name="overlay_text"
-                       placeholder="متن روی عکس">
-
-                <select name="mirror">
-                    <option value="0">
-                        بدون آینه
-                    </option>
-
-                    <option value="1">
-                        آینه‌ای
-                    </option>
-                </select>
-
-                <button type="submit">
-                    ویرایش عکس
-                </button>
-
-            </form>
-        </div>
-
-    </div>
-
-
-    <!-- =====================================================
-         ابزارهای صوتی
-    ====================================================== -->
-
-    <h2 class="category">🎵 ابزارهای صوتی</h2>
-
-    <div class="tools">
-
-        <!-- 25 -->
-
-        <div class="tool">
-            <h2>🎤 ۲۵. جداسازی صوت</h2>
-
-            <form action="/process-audio"
-                  method="post"
-                  enctype="multipart/form-data">
-
-                <input type="file"
-                       name="audio_file"
-                       accept="audio/*,video/*"
-                       required>
-
-                <button type="submit">
-                    پردازش صدا
-                </button>
-
-            </form>
-        </div>
-
-
-        <!-- 26 -->
-
-        <div class="tool">
-            <h2>📝 ۲۶. صوت به متن</h2>
-
-            <form action="/speech-to-text"
-                  method="post"
-                  enctype="multipart/form-data">
-
-                <input type="file"
-                       name="speech_file"
-                       accept="audio/*,video/*"
-                       required>
-
-                <button type="submit">
-                    تبدیل به متن
-                </button>
-
-            </form>
-        </div>
-
-
-        <!-- 27 -->
-
-        <div class="tool">
-            <h2>🔄 ۲۷. تبدیل فرمت صوت</h2>
-
-            <form action="/audio-convert"
-                  method="post"
-                  enctype="multipart/form-data">
-
-                <input type="file"
-                       name="audio_file"
-                       accept="audio/*,video/*"
-                       required>
-
-                <select name="format">
-
-                    <option value="mp3">MP3</option>
-                    <option value="wav">WAV</option>
-                    <option value="ogg">OGG</option>
-                    <option value="flac">FLAC</option>
-                    <option value="m4a">M4A</option>
-
-                </select>
-
-                <button type="submit">
-                    تبدیل
-                </button>
-
-            </form>
-        </div>
-
-
-        <!-- 28 -->
-
-        <div class="tool">
-            <h2>✂️ ۲۸. برش صوت</h2>
-
-            <form action="/audio-cut"
-                  method="post"
-                  enctype="multipart/form-data">
-
-                <input type="file"
-                       name="audio_file"
-                       accept="audio/*"
-                       required>
-
-                <input type="number"
-                       step="0.1"
-                       name="start"
-                       value="0"
-                       placeholder="شروع بر حسب ثانیه">
-
-                <input type="number"
-                       step="0.1"
-                       name="duration"
-                       value="10"
-                       placeholder="مدت">
-
-                <button type="submit">
-                    برش
-                </button>
-
-            </form>
-        </div>
-
-
-        <!-- 29 -->
-
-        <div class="tool">
-            <h2>🔊 ۲۹. تغییر بلندی صدا</h2>
-
-            <form action="/audio-volume"
-                  method="post"
-                  enctype="multipart/form-data">
-
-                <input type="file"
-                       name="audio_file"
-                       accept="audio/*"
-                       required>
-
-                <input type="number"
-                       step="0.1"
-                       name="volume"
-                       value="1.2"
-                       min="0"
-                       max="5">
-
-                <button type="submit">
-                    تغییر صدا
-                </button>
-
-            </form>
-        </div>
-
-
-        <!-- 30 -->
-
-        <div class="tool">
-            <h2>🧹 ۳۰. کاهش نویز</h2>
-
-            <form action="/audio-clean"
-                  method="post"
-                  enctype="multipart/form-data">
-
-                <input type="file"
-                       name="audio_file"
-                       accept="audio/*"
-                       required>
-
-                <button type="submit">
-                    کاهش نویز
-                </button>
-
-            </form>
-        </div>
-
-
-        <!-- 31 -->
-
-        <div class="tool">
-            <h2>🔇 ۳۱. حذف سکوت</h2>
-
-            <form action="/audio-silence"
-                  method="post"
-                  enctype="multipart/form-data">
-
-                <input type="file"
-                       name="audio_file"
-                       accept="audio/*"
-                       required>
-
-                <button type="submit">
-                    حذف سکوت
-                </button>
-
-            </form>
-        </div>
-
-
-        <!-- 32 -->
-
-        <div class="tool">
-            <h2>🔗 ۳۲. ادغام صداها</h2>
-
-            <form action="/audio-merge"
-                  method="post"
-                  enctype="multipart/form-data">
-
-                <input type="file"
-                       name="audio_files"
-                       accept="audio/*"
-                       multiple
-                       required>
-
-                <button type="submit">
-                    ادغام فایل‌ها
-                </button>
-
-            </form>
-        </div>
-
-    </div>
-
-
-    <!-- =====================================================
-         ابزارهای PDF
-    ====================================================== -->
-
-    <h2 class="category">📚 ابزارهای PDF</h2>
-
-    <div class="tools">
-
-        <!-- 33 -->
-
-        <div class="tool">
-            <h2>🗜️ ۳۳. فشرده‌سازی PDF</h2>
-
-            <form action="/pdf-compress"
-                  method="post"
-                  enctype="multipart/form-data">
-
-                <input type="file"
-                       name="pdf_file"
-                       accept=".pdf"
-                       required>
-
-                <button type="submit">
-                    فشرده‌سازی
-                </button>
-
-            </form>
-        </div>
-
-
-        <!-- 34 -->
-
-        <div class="tool">
-            <h2>📝 ۳۴. PDF به متن</h2>
-
-            <form action="/pdf-to-text"
-                  method="post"
-                  enctype="multipart/form-data">
-
-                <input type="file"
-                       name="pdf_file"
-                       accept=".pdf"
-                       required>
-
-                <button type="submit">
-                    استخراج متن
-                </button>
-
-            </form>
-        </div>
-
-
-        <!-- 35 -->
-
-        <div class="tool">
-            <h2>🔗 ۳۵. ادغام PDF</h2>
-
-            <form action="/pdf-merge"
-                  method="post"
-                  enctype="multipart/form-data">
-
-                <input type="file"
-                       name="pdf_files"
-                       accept=".pdf"
-                       multiple
-                       required>
-
-                <button type="submit">
-                    ادغام PDFها
-                </button>
-
-            </form>
-        </div>
-
-
-        <!-- 36 -->
-
-        <div class="tool">
-            <h2>📑 ۳۶. استخراج صفحات PDF</h2>
-
-            <form action="/pdf-extract-pages"
-                  method="post"
-                  enctype="multipart/form-data">
-
-                <input type="file"
-                       name="pdf_file"
-                       accept=".pdf"
-                       required>
-
-                <input name="pages"
-                       value="1"
-                       placeholder="مثال: 1,3,5-7">
-
-                <button type="submit">
-                    استخراج
-                </button>
-
-            </form>
-        </div>
-
-
-        <!-- 37 -->
-
-        <div class="tool">
-            <h2>🖼️ ۳۷. PDF به JPG</h2>
-
-            <form action="/pdf-to-jpg"
-                  method="post"
-                  enctype="multipart/form-data">
-
-                <input type="file"
-                       name="pdf_file"
-                       accept=".pdf"
-                       required>
-
-                <button type="submit">
-                    تبدیل
-                </button>
-
-            </form>
-        </div>
-
-    </div>
-
-
-    <!-- =====================================================
-         ابزار QR
-    ====================================================== -->
-
-    <h2 class="category">🔳 ابزارهای کاربردی</h2>
-
-    <div class="tools">
-
-        <!-- 38 -->
-
-        <div class="tool">
-            <h2>🔳 ۳۸. ساخت QR Code</h2>
-
-            <form action="/qr-code"
-                  method="post">
-
-                <textarea name="qr_data"
-                          placeholder="لینک یا متن QR"></textarea>
-
-                <button type="submit">
-                    ساخت QR
-                </button>
-
-            </form>
-        </div>
-
-
-        <!-- 39 -->
-
-        <div class="tool">
-            <h2>❤️ ۳۹. وضعیت سامانه</h2>
-
-            <p>
-                برای بررسی آنلاین بودن سرور
-                روی دکمه زیر بزنید.
-            </p>
-
-            <button
-                type="button"
-                onclick="checkServer()">
-                بررسی سرور
-            </button>
-
-            <div id="serverResult"></div>
-        </div>
-
-
-        <!-- 40 -->
-
-        <div class="tool">
-            <h2>⚙️ ۴۰. API ابزارها</h2>
-
-            <p>
-                وضعیت سرویس ابزارهای سامانه را بررسی کنید.
-            </p>
-
-            <button
-                type="button"
-                onclick="checkTools()">
-                بررسی API
-            </button>
-
-            <div id="apiResult"></div>
-        </div>
-
-    </div>
-
-
-    {% if success_text %}
-
-    <div class="result">
-        <strong>✅ {{ success_text }}</strong>
-
-        {% if result_file %}
-            <br>
-            <a class="download"
-               href="/download/{{ result_file }}">
-                ⬇️ دانلود فایل خروجی
-            </a>
-        {% endif %}
-
-        {% if speech_file %}
-            <br>
-            <a class="download"
-               href="/download/{{ speech_file }}">
-                🎧 دانلود فایل صوتی
-            </a>
-        {% endif %}
-
-        {% if vocals_file %}
-            <br>
-            <a class="download"
-               href="/download/{{ vocals_file }}">
-                🎤 دانلود خروجی اول
-            </a>
-        {% endif %}
-
-        {% if instrumental_file %}
-            <br>
-            <a class="download"
-               href="/download/{{ instrumental_file }}">
-                🎵 دانلود خروجی دوم
-            </a>
-        {% endif %}
-
-        {% if transcribed_text %}
-            <hr>
-            <div>{{ transcribed_text }}</div>
-        {% endif %}
-
-        {% if image_text %}
-            <hr>
-            <div>{{ image_text }}</div>
-        {% endif %}
-    </div>
-
-    {% endif %}
-
-
-    {% if error_text %}
-
-    <div class="result error">
-        ❌ {{ error_text }}
-    </div>
-
-    {% endif %}
+<div class="category-line"></div>
 
 </div>
 
 
+<div class="tools">
+
+
+<!-- 1 -->
+
+<div class="tool">
+
+<div class="tool-top">
+
+<div class="tool-icon">🔊</div>
+
+<h3>تبدیل متن به صدا</h3>
+
+</div>
+
+<p>
+متن فارسی را به صدای طبیعی تبدیل کنید.
+</p>
+
+<form action="/process-text" method="post">
+
+<textarea
+name="text_input"
+placeholder="متن خود را وارد کنید..."
+required></textarea>
+
+<button>
+تبدیل به صدا
+</button>
+
+</form>
+
+</div>
+
+
+<!-- 2 -->
+
+<div class="tool">
+
+<div class="tool-top">
+
+<div class="tool-icon">📊</div>
+
+<h3>آمار متن</h3>
+
+</div>
+
+<p>
+تعداد حروف، کلمات و خطوط متن.
+</p>
+
+<form action="/text-stats" method="post">
+
+<textarea
+name="text_content"
+placeholder="متن..."
+required></textarea>
+
+<button>
+محاسبه
+</button>
+
+</form>
+
+</div>
+
+
+<!-- 3 -->
+
+<div class="tool">
+
+<div class="tool-top">
+
+<div class="tool-icon">🔠</div>
+
+<h3>تغییر حروف</h3>
+
+</div>
+
+<form action="/text-case" method="post">
+
+<textarea
+name="text_content"
+placeholder="متن..."
+required></textarea>
+
+<select name="mode">
+
+<option value="upper">
+حروف بزرگ
+</option>
+
+<option value="lower">
+حروف کوچک
+</option>
+
+<option value="title">
+Title Case
+</option>
+
+</select>
+
+<button>
+تبدیل
+</button>
+
+</form>
+
+</div>
+
+
+<!-- 4 -->
+
+<div class="tool">
+
+<div class="tool-top">
+
+<div class="tool-icon">🧹</div>
+
+<h3>پاکسازی متن</h3>
+
+</div>
+
+<p>
+فاصله‌های اضافی و خطوط خالی را حذف کنید.
+</p>
+
+<form action="/text-clean" method="post">
+
+<textarea
+name="text_content"
+placeholder="متن..."
+required></textarea>
+
+<button>
+پاکسازی
+</button>
+
+</form>
+
+</div>
+
+
+<!-- 5 -->
+
+<div class="tool">
+
+<div class="tool-top">
+
+<div class="tool-icon">↕️</div>
+
+<h3>مرتب‌سازی خطوط</h3>
+
+</div>
+
+<form action="/text-sort" method="post">
+
+<textarea
+name="text_content"
+placeholder="هر مورد را در یک خط بنویسید..."
+required></textarea>
+
+<select name="mode">
+
+<option value="asc">
+صعودی
+</option>
+
+<option value="desc">
+نزولی
+</option>
+
+</select>
+
+<button>
+مرتب‌سازی
+</button>
+
+</form>
+
+</div>
+
+
+<!-- 6 -->
+
+<div class="tool">
+
+<div class="tool-top">
+
+<div class="tool-icon">🔢</div>
+
+<h3>شماره‌گذاری متن</h3>
+
+</div>
+
+<form action="/text-number" method="post">
+
+<textarea
+name="text_content"
+placeholder="هر مورد در یک خط..."
+required></textarea>
+
+<button>
+شماره‌گذاری
+</button>
+
+</form>
+
+</div>
+
+
+<!-- 7 -->
+
+<div class="tool">
+
+<div class="tool-top">
+
+<div class="tool-icon">🔄</div>
+
+<h3>جستجو و جایگزینی</h3>
+
+</div>
+
+<form action="/text-replace" method="post">
+
+<textarea
+name="text_content"
+placeholder="متن اصلی..."
+required></textarea>
+
+<input
+name="find_text"
+placeholder="عبارت مورد جستجو"
+required>
+
+<input
+name="replace_text"
+placeholder="عبارت جایگزین">
+
+<button>
+جایگزینی
+</button>
+
+</form>
+
+</div>
+
+
+<!-- 8 -->
+
+<div class="tool">
+
+<div class="tool-top">
+
+<div class="tool-icon">⚖️</div>
+
+<h3>مقایسه دو متن</h3>
+
+</div>
+
+<form action="/text-compare" method="post">
+
+<textarea
+name="text_a"
+placeholder="متن اول"
+required></textarea>
+
+<textarea
+name="text_b"
+placeholder="متن دوم"
+required></textarea>
+
+<button>
+مقایسه
+</button>
+
+</form>
+
+</div>
+
+
+<!-- 9 -->
+
+<div class="tool">
+
+<div class="tool-top">
+
+<div class="tool-icon">📄</div>
+
+<h3>متن به PDF</h3>
+
+</div>
+
+<form action="/text-to-pdf" method="post">
+
+<textarea
+name="text_content"
+placeholder="متن PDF..."
+required></textarea>
+
+<button>
+ساخت PDF
+</button>
+
+</form>
+
+</div>
+
+
+<!-- 10 -->
+
+<div class="tool">
+
+<div class="tool-top">
+
+<div class="tool-icon">🔐</div>
+
+<h3>ساخت رمز عبور</h3>
+
+</div>
+
+<form action="/password" method="post">
+
+<input
+type="number"
+name="length"
+value="16"
+min="4"
+max="128">
+
+<button>
+ساخت رمز
+</button>
+
+</form>
+
+</div>
+
+
+<!-- 11 -->
+
+<div class="tool">
+
+<div class="tool-top">
+
+<div class="tool-icon">🎲</div>
+
+<h3>عدد تصادفی</h3>
+
+</div>
+
+<form action="/random-number" method="post">
+
+<input
+type="number"
+name="minimum"
+value="1">
+
+<input
+type="number"
+name="maximum"
+value="100">
+
+<button>
+تولید عدد
+</button>
+
+</form>
+
+</div>
+
+
+<!-- 12 -->
+
+<div class="tool">
+
+<div class="tool-top">
+
+<div class="tool-icon">📐</div>
+
+<h3>تبدیل واحد</h3>
+
+</div>
+
+<form action="/unit-convert" method="post">
+
+<input
+type="number"
+step="any"
+name="value"
+placeholder="مقدار"
+required>
+
+<select name="kind">
+
+<option value="km-m">کیلومتر → متر</option>
+<option value="m-km">متر → کیلومتر</option>
+<option value="kg-g">کیلوگرم → گرم</option>
+<option value="g-kg">گرم → کیلوگرم</option>
+<option value="l-ml">لیتر → میلی‌لیتر</option>
+<option value="ml-l">میلی‌لیتر → لیتر</option>
+<option value="c-f">سانتی‌گراد → فارنهایت</option>
+<option value="f-c">فارنهایت → سانتی‌گراد</option>
+
+</select>
+
+<button>
+تبدیل
+</button>
+
+</form>
+
+</div>
+
+</div>
+
+
+
+<!-- =========================
+     IMAGE
+========================= -->
+
+<div class="category">
+
+<div class="category-icon">
+    🖼️
+</div>
+
+<h2>
+    ابزارهای تصویر
+</h2>
+
+<div class="category-line"></div>
+
+</div>
+
+
+<div class="tools">
+
+
+<!-- 13 -->
+
+<div class="tool">
+
+<div class="tool-top">
+
+<div class="tool-icon">🔍</div>
+
+<h3>عکس به متن</h3>
+
+</div>
+
+<p>
+متن موجود در تصویر را استخراج کنید.
+</p>
+
+<form
+action="/image-to-text"
+method="post"
+enctype="multipart/form-data">
+
+<input
+type="file"
+name="image_file"
+accept="image/*"
+required>
+
+<button>
+استخراج متن
+</button>
+
+</form>
+
+</div>
+
+
+<!-- 14 -->
+
+<div class="tool">
+
+<div class="tool-top">
+
+<div class="tool-icon">📉</div>
+
+<h3>فشرده‌سازی عکس</h3>
+
+</div>
+
+<form
+action="/image-compress"
+method="post"
+enctype="multipart/form-data">
+
+<input
+type="file"
+name="image_file"
+accept="image/*"
+required>
+
+<input
+type="number"
+name="max_width"
+value="1600"
+placeholder="حداکثر عرض">
+
+<input
+type="number"
+name="quality"
+value="80"
+min="10"
+max="95"
+placeholder="کیفیت">
+
+<button>
+فشرده‌سازی
+</button>
+
+</form>
+
+</div>
+
+
+<!-- 15 -->
+
+<div class="tool">
+
+<div class="tool-top">
+
+<div class="tool-icon">📄</div>
+
+<h3>عکس به PDF</h3>
+
+</div>
+
+<form
+action="/image-to-pdf"
+method="post"
+enctype="multipart/form-data">
+
+<input
+type="file"
+name="images"
+accept="image/*"
+multiple
+required>
+
+<button>
+ساخت PDF
+</button>
+
+</form>
+
+</div>
+
+
+<!-- 16 -->
+
+<div class="tool">
+
+<div class="tool-top">
+
+<div class="tool-icon">🖼️</div>
+
+<h3>عکس به JPG</h3>
+
+</div>
+
+<form
+action="/image-to-jpg"
+method="post"
+enctype="multipart/form-data">
+
+<input
+type="file"
+name="image_file"
+accept="image/*"
+required>
+
+<button>
+تبدیل به JPG
+</button>
+
+</form>
+
+</div>
+
+
+<!-- 17 -->
+
+<div class="tool">
+
+<div class="tool-top">
+
+<div class="tool-icon">🎨</div>
+
+<h3>عکس به PNG</h3>
+
+</div>
+
+<form
+action="/image-to-png"
+method="post"
+enctype="multipart/form-data">
+
+<input
+type="file"
+name="image_file"
+accept="image/*"
+required>
+
+<button>
+تبدیل به PNG
+</button>
+
+</form>
+
+</div>
+
+
+<!-- 18 -->
+
+<div class="tool">
+
+<div class="tool-top">
+
+<div class="tool-icon">✂️</div>
+
+<h3>برش عکس</h3>
+
+</div>
+
+<form
+action="/image-crop"
+method="post"
+enctype="multipart/form-data">
+
+<input
+type="file"
+name="image_file"
+accept="image/*"
+required>
+
+<input
+type="number"
+name="x"
+value="0"
+placeholder="X">
+
+<input
+type="number"
+name="y"
+value="0"
+placeholder="Y">
+
+<input
+type="number"
+name="width"
+placeholder="عرض">
+
+<input
+type="number"
+name="height"
+placeholder="ارتفاع">
+
+<button>
+برش
+</button>
+
+</form>
+
+</div>
+
+
+<!-- 19 -->
+
+<div class="tool">
+
+<div class="tool-top">
+
+<div class="tool-icon">🔄</div>
+
+<h3>چرخاندن عکس</h3>
+
+</div>
+
+<form
+action="/image-rotate"
+method="post"
+enctype="multipart/form-data">
+
+<input
+type="file"
+name="image_file"
+accept="image/*"
+required>
+
+<input
+type="number"
+name="angle"
+value="90"
+placeholder="زاویه">
+
+<button>
+چرخاندن
+</button>
+
+</form>
+
+</div>
+
+
+<!-- 20 -->
+
+<div class="tool">
+
+<div class="tool-top">
+
+<div class="tool-icon">↔️</div>
+
+<h3>آینه‌ای کردن</h3>
+
+</div>
+
+<form
+action="/image-mirror"
+method="post"
+enctype="multipart/form-data">
+
+<input
+type="file"
+name="image_file"
+accept="image/*"
+required>
+
+<button>
+آینه‌ای کردن
+</button>
+
+</form>
+
+</div>
+
+
+<!-- 21 -->
+
+<div class="tool">
+
+<div class="tool-top">
+
+<div class="tool-icon">⚫</div>
+
+<h3>سیاه و سفید</h3>
+
+</div>
+
+<form
+action="/image-grayscale"
+method="post"
+enctype="multipart/form-data">
+
+<input
+type="file"
+name="image_file"
+accept="image/*"
+required>
+
+<button>
+تبدیل
+</button>
+
+</form>
+
+</div>
+
+
+<!-- 22 -->
+
+<div class="tool">
+
+<div class="tool-top">
+
+<div class="tool-icon">☀️</div>
+
+<h3>روشنایی عکس</h3>
+
+</div>
+
+<form
+action="/image-brightness"
+method="post"
+enctype="multipart/form-data">
+
+<input
+type="file"
+name="image_file"
+accept="image/*"
+required>
+
+<input
+type="number"
+step="0.1"
+name="factor"
+value="1.2"
+min="0"
+max="3">
+
+<button>
+اعمال
+</button>
+
+</form>
+
+</div>
+
+
+<!-- 23 -->
+
+<div class="tool">
+
+<div class="tool-top">
+
+<div class="tool-icon">🌗</div>
+
+<h3>کنتراست عکس</h3>
+
+</div>
+
+<form
+action="/image-contrast"
+method="post"
+enctype="multipart/form-data">
+
+<input
+type="file"
+name="image_file"
+accept="image/*"
+required>
+
+<input
+type="number"
+step="0.1"
+name="factor"
+value="1.2"
+min="0"
+max="3">
+
+<button>
+اعمال
+</button>
+
+</form>
+
+</div>
+
+
+<!-- 24 -->
+
+<div class="tool">
+
+<div class="tool-top">
+
+<div class="tool-icon">🎨</div>
+
+<h3>ویرایشگر عکس</h3>
+
+</div>
+
+<form
+action="/image-editor"
+method="post"
+enctype="multipart/form-data">
+
+<input
+type="file"
+name="image_file"
+accept="image/*"
+required>
+
+<input
+type="number"
+step="0.1"
+name="brightness"
+value="1"
+placeholder="روشنایی">
+
+<input
+type="number"
+step="0.1"
+name="contrast"
+value="1"
+placeholder="کنتراست">
+
+<input
+type="number"
+step="0.5"
+name="blur"
+value="0"
+min="0"
+max="20"
+placeholder="محو کردن">
+
+<input
+type="number"
+name="angle"
+value="0"
+placeholder="چرخش">
+
+<input
+name="overlay_text"
+placeholder="متن روی عکس">
+
+<select name="mirror">
+
+<option value="0">
+بدون آینه
+</option>
+
+<option value="1">
+آینه‌ای
+</option>
+
+</select>
+
+<button>
+ویرایش عکس
+</button>
+
+</form>
+
+</div>
+
+</div>
+
+
+
+<!-- =========================
+     AUDIO
+========================= -->
+
+<div class="category">
+
+<div class="category-icon">
+    🎵
+</div>
+
+<h2>
+    ابزارهای صوتی
+</h2>
+
+<div class="category-line"></div>
+
+</div>
+
+
+<div class="tools">
+
+
+<!-- 25 -->
+
+<div class="tool">
+
+<div class="tool-top">
+
+<div class="tool-icon">🎤</div>
+
+<h3>جداسازی صوت</h3>
+
+</div>
+
+<form
+action="/process-audio"
+method="post"
+enctype="multipart/form-data">
+
+<input
+type="file"
+name="audio_file"
+accept="audio/*,video/*"
+required>
+
+<button>
+پردازش صوت
+</button>
+
+</form>
+
+</div>
+
+
+<!-- 26 -->
+
+<div class="tool">
+
+<div class="tool-top">
+
+<div class="tool-icon">📝</div>
+
+<h3>صوت به متن</h3>
+
+</div>
+
+<form
+action="/speech-to-text"
+method="post"
+enctype="multipart/form-data">
+
+<input
+type="file"
+name="speech_file"
+accept="audio/*,video/*"
+required>
+
+<button>
+تبدیل به متن
+</button>
+
+</form>
+
+</div>
+
+
+<!-- 27 -->
+
+<div class="tool">
+
+<div class="tool-top">
+
+<div class="tool-icon">🔄</div>
+
+<h3>تبدیل فرمت صوت</h3>
+
+</div>
+
+<form
+action="/audio-convert"
+method="post"
+enctype="multipart/form-data">
+
+<input
+type="file"
+name="audio_file"
+accept="audio/*,video/*"
+required>
+
+<select name="format">
+
+<option value="mp3">MP3</option>
+<option value="wav">WAV</option>
+<option value="ogg">OGG</option>
+<option value="flac">FLAC</option>
+<option value="m4a">M4A</option>
+
+</select>
+
+<button>
+تبدیل
+</button>
+
+</form>
+
+</div>
+
+
+<!-- 28 -->
+
+<div class="tool">
+
+<div class="tool-top">
+
+<div class="tool-icon">✂️</div>
+
+<h3>برش صوت</h3>
+
+</div>
+
+<form
+action="/audio-cut"
+method="post"
+enctype="multipart/form-data">
+
+<input
+type="file"
+name="audio_file"
+accept="audio/*"
+required>
+
+<input
+type="number"
+step="0.1"
+name="start"
+value="0"
+placeholder="شروع">
+
+<input
+type="number"
+step="0.1"
+name="duration"
+value="10"
+placeholder="مدت">
+
+<button>
+برش
+</button>
+
+</form>
+
+</div>
+
+
+<!-- 29 -->
+
+<div class="tool">
+
+<div class="tool-top">
+
+<div class="tool-icon">🔊</div>
+
+<h3>تغییر بلندی صدا</h3>
+
+</div>
+
+<form
+action="/audio-volume"
+method="post"
+enctype="multipart/form-data">
+
+<input
+type="file"
+name="audio_file"
+accept="audio/*"
+required>
+
+<input
+type="number"
+step="0.1"
+name="volume"
+value="1.2"
+min="0"
+max="5">
+
+<button>
+تغییر
+</button>
+
+</form>
+
+</div>
+
+
+<!-- 30 -->
+
+<div class="tool">
+
+<div class="tool-top">
+
+<div class="tool-icon">🧹</div>
+
+<h3>کاهش نویز</h3>
+
+</div>
+
+<form
+action="/audio-clean"
+method="post"
+enctype="multipart/form-data">
+
+<input
+type="file"
+name="audio_file"
+accept="audio/*"
+required>
+
+<button>
+کاهش نویز
+</button>
+
+</form>
+
+</div>
+
+
+<!-- 31 -->
+
+<div class="tool">
+
+<div class="tool-top">
+
+<div class="tool-icon">🔇</div>
+
+<h3>حذف سکوت</h3>
+
+</div>
+
+<form
+action="/audio-silence"
+method="post"
+enctype="multipart/form-data">
+
+<input
+type="file"
+name="audio_file"
+accept="audio/*"
+required>
+
+<button>
+حذف سکوت
+</button>
+
+</form>
+
+</div>
+
+
+<!-- 32 -->
+
+<div class="tool">
+
+<div class="tool-top">
+
+<div class="tool-icon">🔗</div>
+
+<h3>ادغام فایل صوتی</h3>
+
+</div>
+
+<form
+action="/audio-merge"
+method="post"
+enctype="multipart/form-data">
+
+<input
+type="file"
+name="audio_files"
+accept="audio/*"
+multiple
+required>
+
+<button>
+ادغام
+</button>
+
+</form>
+
+</div>
+
+</div>
+
+
+
+<!-- =========================
+     PDF
+========================= -->
+
+<div class="category">
+
+<div class="category-icon">
+    📚
+</div>
+
+<h2>
+    ابزارهای PDF
+</h2>
+
+<div class="category-line"></div>
+
+</div>
+
+
+<div class="tools">
+
+
+<!-- 33 -->
+
+<div class="tool">
+
+<div class="tool-top">
+
+<div class="tool-icon">🗜️</div>
+
+<h3>فشرده‌سازی PDF</h3>
+
+</div>
+
+<form
+action="/pdf-compress"
+method="post"
+enctype="multipart/form-data">
+
+<input
+type="file"
+name="pdf_file"
+accept=".pdf"
+required>
+
+<button>
+فشرده‌سازی
+</button>
+
+</form>
+
+</div>
+
+
+<!-- 34 -->
+
+<div class="tool">
+
+<div class="tool-top">
+
+<div class="tool-icon">📝</div>
+
+<h3>PDF به متن</h3>
+
+</div>
+
+<form
+action="/pdf-to-text"
+method="post"
+enctype="multipart/form-data">
+
+<input
+type="file"
+name="pdf_file"
+accept=".pdf"
+required>
+
+<button>
+استخراج متن
+</button>
+
+</form>
+
+</div>
+
+
+<!-- 35 -->
+
+<div class="tool">
+
+<div class="tool-top">
+
+<div class="tool-icon">🔗</div>
+
+<h3>ادغام PDF</h3>
+
+</div>
+
+<form
+action="/pdf-merge"
+method="post"
+enctype="multipart/form-data">
+
+<input
+type="file"
+name="pdf_files"
+accept=".pdf"
+multiple
+required>
+
+<button>
+ادغام PDF
+</button>
+
+</form>
+
+</div>
+
+
+<!-- 36 -->
+
+<div class="tool">
+
+<div class="tool-top">
+
+<div class="tool-icon">📑</div>
+
+<h3>استخراج صفحات PDF</h3>
+
+</div>
+
+<form
+action="/pdf-extract-pages"
+method="post"
+enctype="multipart/form-data">
+
+<input
+type="file"
+name="pdf_file"
+accept=".pdf"
+required>
+
+<input
+name="pages"
+value="1"
+placeholder="مثال: 1,3,5-7">
+
+<button>
+استخراج
+</button>
+
+</form>
+
+</div>
+
+
+<!-- 37 -->
+
+<div class="tool">
+
+<div class="tool-top">
+
+<div class="tool-icon">🖼️</div>
+
+<h3>PDF به JPG</h3>
+
+</div>
+
+<form
+action="/pdf-to-jpg"
+method="post"
+enctype="multipart/form-data">
+
+<input
+type="file"
+name="pdf_file"
+accept=".pdf"
+required>
+
+<button>
+تبدیل
+</button>
+
+</form>
+
+</div>
+
+
+<!-- 38 -->
+
+<div class="tool">
+
+<div class="tool-top">
+
+<div class="tool-icon">🔳</div>
+
+<h3>ساخت QR Code</h3>
+
+</div>
+
+<form
+action="/qr-code"
+method="post">
+
+<textarea
+name="qr_data"
+placeholder="لینک یا متن QR..."
+required></textarea>
+
+<button>
+ساخت QR
+</button>
+
+</form>
+
+</div>
+
+</div>
+
+
+
+<!-- =========================
+     STATUS
+========================= -->
+
+<div class="category">
+
+<div class="category-icon">
+    ⚙️
+</div>
+
+<h2>
+    وضعیت سرویس
+</h2>
+
+<div class="category-line"></div>
+
+</div>
+
+
+<div class="tools">
+
+
+<div class="tool">
+
+<div class="tool-top">
+
+<div class="tool-icon">❤️</div>
+
+<h3>
+وضعیت سرور
+</h3>
+
+</div>
+
+<p>
+بررسی می‌کند سرور سایت آنلاین است یا خیر.
+</p>
+
+<button
+type="button"
+onclick="checkServer()">
+
+بررسی سرور
+
+</button>
+
+<div id="serverResult"></div>
+
+</div>
+
+
+<div class="tool">
+
+<div class="tool-top">
+
+<div class="tool-icon">🚀</div>
+
+<h3>
+API ابزارها
+</h3>
+
+</div>
+
+<p>
+بررسی وضعیت API و تعداد ابزارهای ثبت‌شده.
+</p>
+
+<button
+type="button"
+onclick="checkTools()">
+
+بررسی API
+
+</button>
+
+<div id="apiResult"></div>
+
+</div>
+
+</div>
+
+
+
+<!-- =========================
+     RESULTS
+========================= -->
+
+{% if success_text %}
+
+<div class="result">
+
+<strong>
+✅ {{ success_text }}
+</strong>
+
+
+{% if result_file %}
+
+<br>
+
+<a
+class="download"
+href="/download/{{ result_file }}">
+
+⬇️ دانلود فایل خروجی
+
+</a>
+
+{% endif %}
+
+
+{% if speech_file %}
+
+<br>
+
+<a
+class="download"
+href="/download/{{ speech_file }}">
+
+🎧 دانلود فایل صوتی
+
+</a>
+
+{% endif %}
+
+
+{% if vocals_file %}
+
+<br>
+
+<a
+class="download"
+href="/download/{{ vocals_file }}">
+
+🎤 دانلود خروجی اول
+
+</a>
+
+{% endif %}
+
+
+{% if instrumental_file %}
+
+<br>
+
+<a
+class="download"
+href="/download/{{ instrumental_file }}">
+
+🎵 دانلود خروجی دوم
+
+</a>
+
+{% endif %}
+
+
+{% if transcribed_text %}
+
+<hr>
+
+<div>
+{{ transcribed_text }}
+</div>
+
+{% endif %}
+
+
+{% if image_text %}
+
+<hr>
+
+<div>
+{{ image_text }}
+</div>
+
+{% endif %}
+
+</div>
+
+{% endif %}
+
+
+
+{% if error_text %}
+
+<div class="result error">
+
+❌ {{ error_text }}
+
+</div>
+
+{% endif %}
+
+</div>
+
+
+
+<!-- =========================
+     PROGRESS
+========================= -->
+
+<div id="progressBox">
+
+<div
+class="circle"
+id="circle">
+
+<span id="percent">
+0%
+</span>
+
+</div>
+
+<div id="progressText">
+در حال پردازش...
+</div>
+
+</div>
+
+
+
+<!-- =========================
+     FOOTER
+========================= -->
+
+<footer>
+
+<p>
+
+<strong>
+⚡ ابزارینو
+</strong>
+
+</p>
+
+<br>
+
+<p>
+مجموعه ابزارهای آنلاین برای متن،
+تصویر، صوت و PDF
+</p>
+
+<br>
+
+<p>
+© 2026 تمامی حقوق محفوظ است.
+</p>
+
+</footer>
+
+
+
 <script>
 
-    /*
-       دایره درصد پردازش
-    */
+/* =========================
+   جستجوی ابزار
+========================= */
 
-    const progressBox =
-        document.getElementById("progressBox");
+function searchTools(){
 
-    const circle =
-        document.getElementById("circle");
+    const input =
+        document
+        .getElementById("toolSearch")
+        .value
+        .trim()
+        .toLowerCase();
 
-    const percent =
-        document.getElementById("percent");
+    const tools =
+        document.querySelectorAll(".tool");
 
-    const progressText =
-        document.getElementById("progressText");
+    tools.forEach(tool => {
 
+        const text =
+            tool.innerText
+            .toLowerCase();
 
-    function showProgress() {
+        if(
+            !input ||
+            text.includes(input)
+        ){
 
-        progressBox.style.display = "flex";
+            tool.style.display = "";
 
-        let value = 0;
+        }else{
 
-        const timer = setInterval(() => {
+            tool.style.display = "none";
 
-            if (value < 90) {
+        }
 
-                value += Math.floor(
-                    Math.random() * 4
-                ) + 1;
+    });
 
-                if (value > 90) {
-                    value = 90;
-                }
-
-                updateProgress(value);
-
-            }
-
-        }, 250);
+}
 
 
-        return timer;
-    }
+/* =========================
+   PROGRESS
+========================= */
+
+const progressBox =
+    document.getElementById(
+        "progressBox"
+    );
+
+const circle =
+    document.getElementById(
+        "circle"
+    );
+
+const percent =
+    document.getElementById(
+        "percent"
+    );
+
+const progressText =
+    document.getElementById(
+        "progressText"
+    );
 
 
-    function updateProgress(value) {
+function updateProgress(value){
 
-        value = Math.max(
+    value =
+        Math.max(
             0,
-            Math.min(100, value)
+            Math.min(
+                100,
+                value
+            )
         );
 
-        percent.textContent =
-            value + "%";
+    percent.innerText =
+        value + "%";
 
-        circle.style.background =
-            `conic-gradient(
-                #00d9ff ${value * 3.6}deg,
-                #162638 ${value * 3.6}deg
-            )`;
+    circle.style.background =
+        `conic-gradient(
+            #00d9ff ${value * 3.6}deg,
+            #18283b ${value * 3.6}deg
+        )`;
 
-        if (value >= 100) {
-
-            progressText.textContent =
-                "پردازش با موفقیت تمام شد.";
-
-        } else {
-
-            progressText.textContent =
-                "در حال پردازش...";
-        }
-    }
+}
 
 
-    function hideProgress() {
+function showProgress(){
 
-        updateProgress(100);
+    progressBox.style.display =
+        "flex";
 
-        setTimeout(() => {
+    let value = 0;
 
-            progressBox.style.display =
-                "none";
+    const timer =
+        setInterval(
+            function(){
 
-        }, 700);
-    }
+                if(value < 90){
 
+                    value +=
+                        Math.floor(
+                            Math.random() * 4
+                        ) + 1;
 
-    /*
-       نمایش پردازش هنگام ارسال فرم
-    */
+                    if(value > 90)
+                        value = 90;
 
-    document.querySelectorAll("form")
-        .forEach(form => {
-
-            form.addEventListener(
-                "submit",
-                function() {
-
-                    showProgress();
+                    updateProgress(
+                        value
+                    );
 
                 }
-            );
 
-        });
+            },
+            250
+        );
+
+    return timer;
+
+}
 
 
-    /*
-       بررسی سرور
-    */
+/* =========================
+   FORM LOADING
+========================= */
 
-    async function checkServer() {
+document
+.querySelectorAll("form")
+.forEach(function(form){
 
-        const result =
-            document.getElementById(
-                "serverResult"
-            );
+    form.addEventListener(
+        "submit",
+        function(){
 
-        result.innerHTML =
-            "⏳ در حال بررسی...";
-
-        try {
-
-            const response =
-                await fetch("/health");
-
-            const data =
-                await response.json();
-
-            result.innerHTML =
-                "✅ سرور آنلاین است.";
-
-        } catch (error) {
-
-            result.innerHTML =
-                "❌ سرور پاسخ نمی‌دهد.";
+            showProgress();
 
         }
-    }
+    );
+
+});
 
 
-    /*
-       بررسی API
-    */
+/* =========================
+   SERVER
+========================= */
 
-    async function checkTools() {
+async function checkServer(){
 
-        const result =
-            document.getElementById(
-                "apiResult"
+    const result =
+        document.getElementById(
+            "serverResult"
+        );
+
+    result.innerHTML =
+        "⏳ در حال بررسی...";
+
+    try{
+
+        const response =
+            await fetch(
+                "/health"
             );
 
+        if(!response.ok)
+            throw new Error();
+
         result.innerHTML =
-            "⏳ در حال بررسی...";
+            "<br>✅ سرور آنلاین است.";
 
-        try {
+    }catch(error){
 
-            const response =
-                await fetch("/api/tools");
+        result.innerHTML =
+            "<br>❌ سرور پاسخ نمی‌دهد.";
 
-            const data =
-                await response.json();
-
-            result.innerHTML =
-                "✅ API فعال است — " +
-                data.tools +
-                " ابزار ثبت شده.";
-
-        } catch (error) {
-
-            result.innerHTML =
-                "❌ API در دسترس نیست.";
-
-        }
     }
+
+}
+
+
+/* =========================
+   API
+========================= */
+
+async function checkTools(){
+
+    const result =
+        document.getElementById(
+            "apiResult"
+        );
+
+    result.innerHTML =
+        "⏳ در حال بررسی...";
+
+    try{
+
+        const response =
+            await fetch(
+                "/api/tools"
+            );
+
+        if(!response.ok)
+            throw new Error();
+
+        const data =
+            await response.json();
+
+        result.innerHTML =
+            "<br>✅ API فعال است — " +
+            data.tools +
+            " ابزار ثبت شده.";
+
+    }catch(error){
+
+        result.innerHTML =
+            "<br>❌ API در دسترس نیست.";
+
+    }
+
+}
 
 </script>
 
+
 </body>
+
 </html>
