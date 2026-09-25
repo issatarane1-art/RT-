@@ -3,21 +3,34 @@
 <head>
 <meta charset="UTF-8">
 
-<meta name="viewport"
-      content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <meta name="description"
-      content="مجموعه ابزارهای آنلاین رایگان برای پردازش صوت، تصویر، PDF و متن">
+      content="ابزارک؛ مجموعه‌ای حرفه‌ای از بیش از ۴۰ ابزار آنلاین رایگان برای پردازش صوت، تصویر، PDF و متن.">
 
-<meta name="robots"
-      content="index,follow">
+<meta name="robots" content="index,follow">
 
 <meta name="google-site-verification"
-      content="HKNJ-ewUE5WanEYFXDrVnH_oHmhafRa9F90Br7B1glw">
+      content="HKNJ-ewUE5WanEYFXDrVnH_oHmhafRa9F90Br7Bglw">
 
-<title>ابزارک | مجموعه ابزارهای آنلاین</title>
+<title>ابزارک | ابزارهای آنلاین رایگان</title>
 
 <style>
+:root{
+    --bg:#070b14;
+    --bg2:#0b1120;
+    --card:rgba(255,255,255,.055);
+    --card-hover:rgba(255,255,255,.085);
+    --border:rgba(255,255,255,.09);
+    --text:#f7f9ff;
+    --muted:#94a0ba;
+    --muted2:#68748d;
+    --primary:#6366f1;
+    --cyan:#06b6d4;
+    --green:#22c55e;
+    --danger:#fb7185;
+    --shadow:0 25px 80px rgba(0,0,0,.28);
+}
 
 *{
     box-sizing:border-box;
@@ -34,17 +47,49 @@ body{
         Tahoma,
         Arial,
         sans-serif;
-
     background:
         radial-gradient(
-            circle at top right,
-            #182a54 0,
-            #080d19 38%,
-            #050810 100%
+            circle at 85% -10%,
+            rgba(99,102,241,.28),
+            transparent 35%
+        ),
+        radial-gradient(
+            circle at 10% 20%,
+            rgba(6,182,212,.12),
+            transparent 30%
+        ),
+        linear-gradient(
+            180deg,
+            var(--bg2),
+            var(--bg)
         );
-
-    color:#f5f7ff;
+    color:var(--text);
     min-height:100vh;
+    line-height:1.7;
+}
+
+body:before{
+    content:"";
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    opacity:.18;
+    background-image:
+        linear-gradient(
+            rgba(255,255,255,.025) 1px,
+            transparent 1px
+        ),
+        linear-gradient(
+            90deg,
+            rgba(255,255,255,.025) 1px,
+            transparent 1px
+        );
+    background-size:45px 45px;
+    mask-image:linear-gradient(
+        to bottom,
+        black,
+        transparent 75%
+    );
 }
 
 a{
@@ -59,30 +104,28 @@ select{
     font-family:inherit;
 }
 
-/* NAVBAR */
+button{
+    cursor:pointer;
+}
+
+/* =========================
+   NAVBAR
+========================= */
 
 .navbar{
     position:sticky;
     top:0;
     z-index:1000;
-
-    background:
-        rgba(5,8,16,.82);
-
-    backdrop-filter:blur(18px);
-
-    border-bottom:
-        1px solid
-        rgba(255,255,255,.08);
+    border-bottom:1px solid var(--border);
+    background:rgba(7,11,20,.78);
+    backdrop-filter:blur(22px);
+    -webkit-backdrop-filter:blur(22px);
 }
 
 .nav-inner{
-    max-width:1250px;
+    width:min(1280px,calc(100% - 32px));
+    min-height:72px;
     margin:auto;
-
-    padding:
-        15px 20px;
-
     display:flex;
     align-items:center;
     justify-content:space-between;
@@ -92,108 +135,137 @@ select{
 .logo{
     display:flex;
     align-items:center;
-    gap:10px;
-
-    font-size:22px;
+    gap:11px;
+    font-size:21px;
     font-weight:900;
+    white-space:nowrap;
 }
 
 .logo-icon{
-    width:42px;
-    height:42px;
-
-    display:flex;
-    align-items:center;
-    justify-content:center;
-
-    border-radius:13px;
-
+    width:43px;
+    height:43px;
+    display:grid;
+    place-items:center;
+    border-radius:14px;
     background:
         linear-gradient(
             135deg,
-            #5b5cff,
-            #00d4ff
+            #6366f1,
+            #06b6d4
         );
-
     box-shadow:
         0 10px 35px
-        rgba(0,180,255,.25);
+        rgba(6,182,212,.25);
+}
+
+.logo small{
+    display:block;
+    color:var(--muted2);
+    font-size:9px;
+    font-weight:500;
+    margin-top:-4px;
 }
 
 .nav-links{
     display:flex;
-    gap:8px;
+    align-items:center;
+    gap:5px;
 }
 
 .nav-links a{
-    padding:9px 14px;
+    color:#aeb8cd;
+    padding:9px 13px;
     border-radius:10px;
-
-    color:#aeb8d0;
-
     transition:.2s;
 }
 
 .nav-links a:hover{
-    color:white;
-    background:
-        rgba(255,255,255,.07);
+    color:#fff;
+    background:rgba(255,255,255,.07);
 }
 
-@media(max-width:700px){
-
-    .nav-links{
-        display:none;
-    }
+.nav-status{
+    display:flex;
+    align-items:center;
+    gap:7px;
+    color:#aeb8cd;
+    font-size:12px;
 }
 
-/* HERO */
+.status-dot{
+    width:8px;
+    height:8px;
+    border-radius:50%;
+    background:#22c55e;
+    box-shadow:0 0 12px #22c55e;
+}
+
+.mobile-tools{
+    display:none;
+}
+
+/* =========================
+   HERO
+========================= */
 
 .hero{
-    max-width:1250px;
+    position:relative;
+    width:min(1180px,calc(100% - 32px));
     margin:auto;
-
-    padding:
-        85px 20px
-        55px;
-
+    padding:92px 0 55px;
     text-align:center;
+}
+
+.hero-glow{
+    position:absolute;
+    width:420px;
+    height:420px;
+    border-radius:50%;
+    background:
+        radial-gradient(
+            circle,
+            rgba(99,102,241,.16),
+            transparent 68%
+        );
+    filter:blur(20px);
+    top:20px;
+    left:50%;
+    transform:translateX(-50%);
+    pointer-events:none;
+}
+
+.hero-content{
+    position:relative;
+    z-index:1;
 }
 
 .hero-badge{
     display:inline-flex;
     align-items:center;
     gap:8px;
-
-    padding:
-        8px 14px;
-
-    border:
-        1px solid
-        rgba(0,212,255,.25);
-
-    background:
-        rgba(0,212,255,.08);
-
+    padding:8px 15px;
+    border:1px solid rgba(6,182,212,.25);
     border-radius:999px;
+    background:rgba(6,182,212,.07);
+    color:#7eeeff;
+    font-size:12px;
+    box-shadow:
+        0 8px 30px rgba(6,182,212,.08);
+}
 
-    color:#6fe9ff;
-
-    font-size:13px;
+.hero-badge .pulse{
+    width:7px;
+    height:7px;
+    border-radius:50%;
+    background:#22c55e;
+    box-shadow:0 0 10px #22c55e;
 }
 
 .hero h1{
     margin-top:22px;
-
-    font-size:
-        clamp(
-            36px,
-            6vw,
-            70px
-        );
-
-    line-height:1.2;
-
+    font-size:clamp(38px,6.5vw,76px);
+    line-height:1.15;
+    letter-spacing:-2px;
     font-weight:1000;
 }
 
@@ -201,336 +273,472 @@ select{
     background:
         linear-gradient(
             90deg,
-            #ffffff,
-            #69e6ff,
-            #7c7cff
+            #fff 0%,
+            #73e8ff 45%,
+            #818cf8 100%
         );
-
     -webkit-background-clip:text;
     background-clip:text;
-
     color:transparent;
 }
 
 .hero p{
-    max-width:720px;
-    margin:22px auto 0;
-
-    color:#aeb8d0;
-
-    font-size:17px;
+    width:min(720px,100%);
+    margin:24px auto 0;
+    color:var(--muted);
+    font-size:16px;
     line-height:2;
 }
 
 .hero-actions{
-    margin-top:30px;
-
     display:flex;
     justify-content:center;
-    gap:12px;
     flex-wrap:wrap;
+    gap:12px;
+    margin-top:32px;
 }
 
 .primary-btn,
 .secondary-btn{
-    border:0;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    min-height:48px;
+    padding:0 21px;
     border-radius:13px;
-
-    padding:
-        13px 22px;
-
-    cursor:pointer;
-
     font-weight:800;
-
     transition:
         transform .2s,
-        box-shadow .2s;
+        box-shadow .2s,
+        border-color .2s;
 }
 
 .primary-btn{
-    color:white;
-
+    color:#fff;
     background:
         linear-gradient(
             135deg,
-            #5659ff,
-            #00bce8
+            #6366f1,
+            #06b6d4
         );
-
     box-shadow:
-        0 12px 35px
-        rgba(0,170,255,.22);
+        0 15px 35px
+        rgba(6,182,212,.17);
 }
 
 .secondary-btn{
-    color:#dce4f8;
-
-    background:
-        rgba(255,255,255,.06);
-
-    border:
-        1px solid
-        rgba(255,255,255,.1);
+    color:#dce5f8;
+    border:1px solid var(--border);
+    background:rgba(255,255,255,.045);
 }
 
 .primary-btn:hover,
 .secondary-btn:hover{
-    transform:translateY(-2px);
+    transform:translateY(-3px);
 }
 
-/* STATS */
+.primary-btn:hover{
+    box-shadow:
+        0 20px 45px
+        rgba(6,182,212,.24);
+}
+
+/* =========================
+   TRUST / STATS
+========================= */
 
 .stats{
-    max-width:1050px;
-    margin:
-        0 auto
-        35px;
-
-    padding:
-        0 20px;
-
+    width:min(1080px,calc(100% - 32px));
+    margin:0 auto 65px;
     display:grid;
-
-    grid-template-columns:
-        repeat(
-            3,
-            1fr
-        );
-
-    gap:15px;
+    grid-template-columns:repeat(3,1fr);
+    gap:14px;
 }
 
 .stat{
+    position:relative;
+    overflow:hidden;
+    padding:21px;
+    border:1px solid var(--border);
+    border-radius:19px;
+    background:rgba(255,255,255,.035);
     text-align:center;
+}
 
-    padding:20px;
-
-    border:
-        1px solid
-        rgba(255,255,255,.08);
-
-    border-radius:18px;
-
-    background:
-        rgba(255,255,255,.035);
+.stat:before{
+    content:"";
+    position:absolute;
+    width:100px;
+    height:100px;
+    top:-50px;
+    right:-50px;
+    border-radius:50%;
+    background:rgba(99,102,241,.12);
+    filter:blur(15px);
 }
 
 .stat strong{
     display:block;
-
-    font-size:27px;
+    font-size:28px;
+    line-height:1.3;
 }
 
 .stat span{
-    color:#8f9bb7;
+    color:var(--muted2);
+    font-size:12px;
+}
+
+/* =========================
+   RESULT / ALERT
+========================= */
+
+.alert{
+    width:min(900px,calc(100% - 32px));
+    margin:0 auto 25px;
+    padding:16px 19px;
+    border:1px solid rgba(251,113,133,.25);
+    border-radius:15px;
+    color:#ffc1ca;
+    background:rgba(251,113,133,.08);
+}
+
+.result-area{
+    width:min(900px,calc(100% - 32px));
+    margin:0 auto 45px;
+}
+
+.result-box{
+    position:relative;
+    overflow:hidden;
+    padding:25px;
+    border:1px solid rgba(6,182,212,.25);
+    border-radius:22px;
+    background:
+        linear-gradient(
+            145deg,
+            rgba(6,182,212,.09),
+            rgba(99,102,241,.06)
+        );
+    box-shadow:var(--shadow);
+}
+
+.result-box:before{
+    content:"";
+    position:absolute;
+    width:180px;
+    height:180px;
+    top:-100px;
+    left:-80px;
+    border-radius:50%;
+    background:rgba(6,182,212,.12);
+    filter:blur(25px);
+}
+
+.result-title{
+    position:relative;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom:15px;
+    font-size:19px;
+}
+
+.result-title-icon{
+    width:38px;
+    height:38px;
+    display:grid;
+    place-items:center;
+    border-radius:11px;
+    background:rgba(34,197,94,.12);
+}
+
+.success-message{
+    position:relative;
+    margin-bottom:14px;
+    color:#7eeeff;
+}
+
+.result-text{
+    position:relative;
+    white-space:pre-wrap;
+    max-height:450px;
+    overflow:auto;
+    padding:17px;
+    border:1px solid rgba(255,255,255,.07);
+    border-radius:14px;
+    background:rgba(0,0,0,.22);
+    color:#e2eaff;
+    line-height:2;
+}
+
+.downloads{
+    position:relative;
+    display:flex;
+    flex-wrap:wrap;
+    gap:9px;
+    margin-top:15px;
+}
+
+.download{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:7px;
+    min-height:43px;
+    padding:0 16px;
+    border-radius:11px;
+    color:#fff;
+    background:
+        linear-gradient(
+            135deg,
+            #4f46e5,
+            #0891b2
+        );
     font-size:13px;
+    font-weight:800;
+    transition:.2s;
 }
 
-@media(max-width:650px){
-
-    .stats{
-        grid-template-columns:1fr;
-    }
+.download:hover{
+    transform:translateY(-2px);
 }
 
-/* TOOL AREA */
+/* =========================
+   TOOLS SECTION
+========================= */
 
 .tools-section{
-    max-width:1250px;
+    width:min(1280px,calc(100% - 32px));
     margin:auto;
-
-    padding:
-        20px;
+    padding-bottom:30px;
 }
 
-.section-title{
+.section-heading{
     display:flex;
-    justify-content:space-between;
     align-items:end;
-
+    justify-content:space-between;
     gap:20px;
-
     margin-bottom:20px;
 }
 
-.section-title h2{
-    font-size:30px;
+.heading-label{
+    display:inline-flex;
+    align-items:center;
+    gap:7px;
+    color:#6ee7f9;
+    font-size:12px;
+    font-weight:800;
+    margin-bottom:7px;
 }
 
-.section-title p{
-    color:#8793ae;
-    margin-top:6px;
+.section-heading h2{
+    font-size:32px;
+    line-height:1.3;
+}
+
+.section-heading p{
+    color:var(--muted);
+    margin-top:7px;
+    font-size:13px;
 }
 
 /* SEARCH */
 
 .search-box{
     position:relative;
-    margin-bottom:18px;
+    margin-bottom:14px;
+}
+
+.search-icon{
+    position:absolute;
+    top:50%;
+    right:17px;
+    transform:translateY(-50%);
+    color:#7f8ba5;
+    pointer-events:none;
 }
 
 .search-box input{
     width:100%;
-
-    padding:
-        16px 18px;
-
+    height:55px;
+    padding:0 47px 0 18px;
+    border:1px solid var(--border);
     border-radius:15px;
-
-    color:white;
-
-    background:
-        rgba(255,255,255,.05);
-
-    border:
-        1px solid
-        rgba(255,255,255,.1);
-
     outline:none;
+    color:#fff;
+    background:rgba(255,255,255,.045);
+    transition:.2s;
+}
 
-    font-size:15px;
+.search-box input::placeholder{
+    color:#69758d;
 }
 
 .search-box input:focus{
-    border-color:#35d7ff;
+    border-color:
+        rgba(6,182,212,.5);
+    background:rgba(255,255,255,.06);
+    box-shadow:
+        0 0 0 4px
+        rgba(6,182,212,.06);
 }
 
-/* FILTER */
+/* FILTERS */
 
 .filters{
     display:flex;
     gap:8px;
-
     overflow-x:auto;
+    padding:2px 1px 15px;
+    margin-bottom:8px;
+    scrollbar-width:none;
+}
 
-    padding-bottom:12px;
-
-    margin-bottom:22px;
+.filters::-webkit-scrollbar{
+    display:none;
 }
 
 .filter{
-    white-space:nowrap;
-
-    border:0;
-
-    padding:
-        10px 15px;
-
+    flex:none;
+    min-height:40px;
+    padding:0 15px;
+    border:1px solid var(--border);
     border-radius:999px;
+    color:#aeb8cd;
+    background:rgba(255,255,255,.04);
+    transition:.2s;
+}
 
-    color:#aeb8d0;
-
-    background:
-        rgba(255,255,255,.055);
-
-    cursor:pointer;
+.filter:hover{
+    color:#fff;
+    border-color:rgba(255,255,255,.18);
 }
 
 .filter.active{
-    color:white;
-
+    color:#fff;
+    border-color:transparent;
     background:
         linear-gradient(
             135deg,
-            #5559ff,
-            #00bde8
+            #6366f1,
+            #06b6d4
         );
+    box-shadow:
+        0 8px 25px
+        rgba(6,182,212,.12);
 }
 
 /* TOOL GRID */
 
 .tools-grid{
     display:grid;
-
     grid-template-columns:
         repeat(
             auto-fit,
-            minmax(
-                270px,
-                1fr
-            )
+            minmax(280px,1fr)
         );
-
     gap:16px;
 }
 
 .tool-card{
     position:relative;
-
     overflow:hidden;
-
     padding:21px;
-
+    border:1px solid var(--border);
     border-radius:20px;
-
     background:
         linear-gradient(
             145deg,
-            rgba(255,255,255,.075),
+            rgba(255,255,255,.065),
             rgba(255,255,255,.025)
         );
-
-    border:
-        1px solid
-        rgba(255,255,255,.09);
-
     transition:
         transform .25s,
         border-color .25s,
         box-shadow .25s;
 }
 
+.tool-card:after{
+    content:"";
+    position:absolute;
+    width:150px;
+    height:150px;
+    top:-100px;
+    left:-90px;
+    border-radius:50%;
+    background:rgba(99,102,241,.08);
+    filter:blur(25px);
+    transition:.3s;
+}
+
 .tool-card:hover{
-    transform:
-        translateY(-5px);
-
+    transform:translateY(-5px);
     border-color:
-        rgba(83,217,255,.32);
-
+        rgba(6,182,212,.28);
     box-shadow:
-        0 18px 55px
-        rgba(0,0,0,.25);
+        0 20px 55px
+        rgba(0,0,0,.24);
+}
+
+.tool-card:hover:after{
+    background:rgba(6,182,212,.12);
+}
+
+.tool-tag{
+    position:absolute;
+    top:16px;
+    left:16px;
+    z-index:2;
+    padding:4px 8px;
+    border:1px solid rgba(6,182,212,.14);
+    border-radius:999px;
+    color:#7eeeff;
+    background:rgba(6,182,212,.07);
+    font-size:9px;
 }
 
 .tool-icon{
-    width:50px;
-    height:50px;
-
-    display:flex;
-    align-items:center;
-    justify-content:center;
-
+    position:relative;
+    z-index:2;
+    width:52px;
+    height:52px;
+    display:grid;
+    place-items:center;
+    border:1px solid rgba(6,182,212,.13);
     border-radius:15px;
-
-    font-size:23px;
-
+    color:#7eeeff;
     background:
-        rgba(71,217,255,.1);
-
-    border:
-        1px solid
-        rgba(71,217,255,.16);
+        linear-gradient(
+            145deg,
+            rgba(6,182,212,.11),
+            rgba(99,102,241,.08)
+        );
+    font-size:22px;
+    font-weight:900;
 }
 
 .tool-card h3{
-    margin-top:16px;
-
-    font-size:18px;
+    position:relative;
+    z-index:2;
+    margin-top:15px;
+    font-size:17px;
 }
 
 .tool-card p{
-    color:#8995af;
-
-    font-size:13px;
-
-    line-height:1.8;
-
-    margin-top:8px;
+    position:relative;
+    z-index:2;
+    min-height:44px;
+    margin-top:6px;
+    color:#8d99b1;
+    font-size:12px;
+    line-height:1.85;
 }
 
 .tool-form{
-    margin-top:16px;
+    position:relative;
+    z-index:3;
+    margin-top:15px;
 }
 
 .tool-form input[type="text"],
@@ -539,337 +747,321 @@ select{
 .tool-form textarea,
 .tool-form select{
     width:100%;
-
     margin-bottom:9px;
-
-    padding:
-        11px 12px;
-
+    padding:11px 12px;
+    border:1px solid rgba(255,255,255,.09);
     border-radius:11px;
-
-    border:
-        1px solid
-        rgba(255,255,255,.1);
-
-    background:
-        rgba(0,0,0,.2);
-
-    color:white;
-
     outline:none;
+    color:#fff;
+    background:rgba(0,0,0,.21);
+    transition:.2s;
+}
+
+.tool-form input[type="text"]:focus,
+.tool-form input[type="number"]:focus,
+.tool-form textarea:focus,
+.tool-form select:focus{
+    border-color:rgba(6,182,212,.45);
+    box-shadow:
+        0 0 0 3px
+        rgba(6,182,212,.05);
+}
+
+.tool-form input::placeholder,
+.tool-form textarea::placeholder{
+    color:#64718a;
+}
+
+.tool-form select{
+    appearance:auto;
 }
 
 .tool-form textarea{
     min-height:100px;
     resize:vertical;
+    line-height:1.8;
+}
+
+.tool-form input[type="file"]{
+    padding:8px;
+    color:#8e9ab2;
 }
 
 .tool-form input::file-selector-button{
-    border:0;
-
-    padding:
-        7px 10px;
-
     margin-left:8px;
-
-    border-radius:7px;
-
-    color:white;
-
-    background:
-        #363c55;
-
+    padding:7px 10px;
+    border:0;
+    border-radius:8px;
+    color:#fff;
+    background:#30384e;
     cursor:pointer;
 }
 
 .form-row{
     display:grid;
-
-    grid-template-columns:
-        1fr 1fr;
-
+    grid-template-columns:1fr 1fr;
     gap:8px;
 }
 
 .tool-btn{
     width:100%;
-
-    padding:
-        11px 14px;
-
+    min-height:43px;
+    padding:0 14px;
     border:0;
-
     border-radius:11px;
-
-    color:white;
-
+    color:#fff;
     background:
         linear-gradient(
             135deg,
-            #5055ff,
-            #00bce8
+            #5855ed,
+            #0891b2
         );
-
-    cursor:pointer;
-
-    font-weight:800;
+    font-size:13px;
+    font-weight:900;
+    box-shadow:
+        0 8px 22px
+        rgba(6,182,212,.08);
+    transition:
+        transform .2s,
+        filter .2s,
+        box-shadow .2s;
 }
 
 .tool-btn:hover{
-    filter:brightness(1.1);
+    transform:translateY(-2px);
+    filter:brightness(1.08);
+    box-shadow:
+        0 12px 28px
+        rgba(6,182,212,.14);
 }
-
-.tool-tag{
-    position:absolute;
-
-    top:15px;
-    left:15px;
-
-    padding:
-        4px 8px;
-
-    border-radius:999px;
-
-    font-size:10px;
-
-    color:#a8f2ff;
-
-    background:
-        rgba(0,210,255,.08);
-}
-
-/* EMPTY */
 
 .empty{
     display:none;
-
+    padding:60px 20px;
+    color:#7f8ba3;
     text-align:center;
-
-    padding:45px;
-
-    color:#8c98b2;
+    border:1px dashed var(--border);
+    border-radius:18px;
+    margin-top:10px;
 }
 
-/* RESULT */
+/* =========================
+   INFO SECTION
+========================= */
 
-.result-area{
-    max-width:900px;
-    margin:
-        40px auto
-        0;
-
-    padding:
-        0 20px;
+.info-section{
+    width:min(1280px,calc(100% - 32px));
+    margin:65px auto 0;
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:15px;
 }
 
-.result-box{
+.info-card{
     padding:24px;
-
+    border:1px solid var(--border);
     border-radius:20px;
-
-    background:
-        rgba(40,55,100,.3);
-
-    border:
-        1px solid
-        rgba(84,220,255,.2);
+    background:rgba(255,255,255,.035);
 }
 
-.result-box h3{
+.info-icon{
+    width:44px;
+    height:44px;
+    display:grid;
+    place-items:center;
+    border-radius:13px;
+    background:rgba(99,102,241,.1);
     margin-bottom:14px;
 }
 
-.result-text{
-    white-space:pre-wrap;
-
-    line-height:2;
-
-    padding:15px;
-
-    border-radius:12px;
-
-    background:
-        rgba(0,0,0,.25);
-
-    color:#dce7ff;
-
-    max-height:450px;
-
-    overflow:auto;
+.info-card h3{
+    font-size:16px;
 }
 
-.download{
-    display:inline-block;
-
-    margin-top:15px;
-
-    padding:
-        11px 18px;
-
-    border-radius:11px;
-
-    color:white;
-
-    background:
-        #087fbe;
+.info-card p{
+    margin-top:7px;
+    color:#818da6;
+    font-size:12px;
+    line-height:1.9;
 }
 
-/* ALERT */
+/* =========================
+   FOOTER
+========================= */
 
-.alert{
-    max-width:900px;
-
-    margin:
-        20px auto;
-
-    padding:
-        15px 18px;
-
-    border-radius:14px;
-
-    background:
-        rgba(255,70,90,.1);
-
-    border:
-        1px solid
-        rgba(255,70,90,.25);
-
-    color:#ffb8c0;
+footer{
+    width:min(1280px,calc(100% - 32px));
+    margin:75px auto 0;
+    padding:35px 0 40px;
+    border-top:1px solid var(--border);
+    text-align:center;
+    color:#69758d;
+    font-size:12px;
+    line-height:2.2;
 }
 
-/* LOADING */
+.footer-logo{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    margin-bottom:5px;
+    color:#e7edff;
+    font-size:17px;
+    font-weight:900;
+}
+
+.footer-links{
+    display:flex;
+    justify-content:center;
+    flex-wrap:wrap;
+    gap:16px;
+    margin:13px 0;
+}
+
+.footer-links a{
+    color:#8d99b1;
+}
+
+.footer-links a:hover{
+    color:#fff;
+}
+
+/* =========================
+   LOADING
+========================= */
 
 .loading-overlay{
     display:none;
-
     position:fixed;
-
     inset:0;
-
     z-index:5000;
-
-    background:
-        rgba(2,5,12,.82);
-
-    backdrop-filter:
-        blur(12px);
-
     align-items:center;
-
     justify-content:center;
+    padding:20px;
+    background:rgba(2,5,12,.84);
+    backdrop-filter:blur(15px);
+    -webkit-backdrop-filter:blur(15px);
 }
 
 .loading-card{
-    text-align:center;
-
-    width:300px;
-
-    padding:30px;
-
-    border-radius:24px;
-
-    background:
-        #0d1425;
-
-    border:
-        1px solid
-        rgba(255,255,255,.1);
-
+    width:min(350px,100%);
+    padding:31px 25px;
+    border:1px solid rgba(255,255,255,.1);
+    border-radius:25px;
+    background:#0d1425;
     box-shadow:
-        0 25px 90px
-        rgba(0,0,0,.45);
+        0 30px 100px
+        rgba(0,0,0,.5);
+    text-align:center;
 }
 
 .progress-circle{
-    width:125px;
-    height:125px;
-
-    border-radius:50%;
-
-    margin:
-        0 auto 20px;
-
+    position:relative;
+    width:130px;
+    height:130px;
     display:flex;
     align-items:center;
     justify-content:center;
-
+    margin:0 auto 21px;
+    border-radius:50%;
     background:
         conic-gradient(
-            #5c62ff
-            var(--progress),
-            #202941
-            0
+            #6366f1 var(--progress),
+            #202a41 0
         );
-
-    position:relative;
 }
 
-.progress-circle::after{
+.progress-circle:before{
     content:"";
-
     position:absolute;
-
-    width:95px;
-    height:95px;
-
+    inset:6px;
     border-radius:50%;
+    background:
+        conic-gradient(
+            #06b6d4,
+            #6366f1
+        );
+    opacity:.25;
+}
 
+.progress-circle:after{
+    content:"";
+    position:absolute;
+    width:96px;
+    height:96px;
+    border-radius:50%;
     background:#0d1425;
 }
 
 .progress-number{
     position:relative;
-    z-index:2;
-
+    z-index:3;
     font-size:25px;
+    font-weight:1000;
+}
 
-    font-weight:900;
+.loading-card h3{
+    font-size:18px;
 }
 
 .loading-card p{
-    color:#9da8bf;
-
-    margin-top:8px;
+    margin-top:7px;
+    color:#8d99b2;
+    font-size:12px;
 }
 
-/* FOOTER */
+/* =========================
+   MOBILE
+========================= */
 
-footer{
-    max-width:1250px;
+@media(max-width:900px){
 
-    margin:
-        70px auto
-        0;
+    .nav-status{
+        display:none;
+    }
 
-    padding:
-        35px 20px;
+    .info-section{
+        grid-template-columns:1fr;
+    }
 
-    border-top:
-        1px solid
-        rgba(255,255,255,.08);
-
-    color:#7f8aa4;
-
-    text-align:center;
-
-    line-height:2;
+    .section-heading{
+        align-items:flex-start;
+        flex-direction:column;
+    }
 }
 
-footer strong{
-    color:#dce6ff;
-}
+@media(max-width:700px){
 
-@media(max-width:500px){
+    .nav-inner{
+        min-height:65px;
+    }
+
+    .nav-links{
+        display:none;
+    }
+
+    .mobile-tools{
+        display:block;
+        padding:8px 11px;
+        border:1px solid var(--border);
+        border-radius:10px;
+        background:rgba(255,255,255,.04);
+        color:#cbd5e1;
+    }
 
     .hero{
-        padding-top:55px;
+        padding:62px 0 42px;
+    }
+
+    .hero h1{
+        letter-spacing:-1px;
     }
 
     .hero p{
         font-size:14px;
     }
 
-    .form-row{
+    .stats{
         grid-template-columns:1fr;
     }
 
@@ -878,10 +1070,50 @@ footer strong{
     }
 }
 
+@media(max-width:500px){
+
+    .nav-inner,
+    .hero,
+    .stats,
+    .tools-section,
+    .info-section,
+    footer{
+        width:min(100% - 22px,1280px);
+    }
+
+    .hero h1{
+        font-size:37px;
+    }
+
+    .hero-actions{
+        flex-direction:column;
+    }
+
+    .primary-btn,
+    .secondary-btn{
+        width:100%;
+    }
+
+    .form-row{
+        grid-template-columns:1fr;
+    }
+
+    .tool-card{
+        padding:18px;
+    }
+
+    .result-box{
+        padding:19px;
+    }
+}
 </style>
 </head>
 
 <body>
+
+<!-- =========================
+     NAVBAR
+========================= -->
 
 <nav class="navbar">
 
@@ -891,7 +1123,10 @@ footer strong{
 
 <span class="logo-icon">⚡</span>
 
-<span>ابزارک</span>
+<span>
+ابزارک
+<small>ONLINE TOOLS</small>
+</span>
 
 </a>
 
@@ -904,48 +1139,67 @@ footer strong{
 
 </div>
 
+<div class="nav-status">
+<span class="status-dot"></span>
+سامانه فعال است
+</div>
+
+<a href="#tools" class="mobile-tools">ابزارها</a>
+
 </div>
 
 </nav>
 
 
+<!-- =========================
+     HERO
+========================= -->
+
 <section class="hero">
 
+<div class="hero-glow"></div>
+
+<div class="hero-content">
+
 <div class="hero-badge">
-⚡ بیش از ۴۰ ابزار آنلاین
+<span class="pulse"></span>
+بیش از ۴۰ ابزار آنلاین کاربردی
 </div>
 
 <h1>
-همه ابزارهای مورد نیازت
+ابزارهای مورد نیازت
 <br>
 <span class="gradient">
-در یکجا
+همه در یکجا
 </span>
 </h1>
 
 <p>
-پردازش سریع و ساده فایل‌های صوتی، تصویری، PDF و متن؛
+ابزارک مجموعه‌ای از ابزارهای سریع و کاربردی برای
+پردازش فایل‌های صوتی، تصویری، PDF و متن است.
 بدون نیاز به نصب نرم‌افزار اضافی.
 </p>
 
 <div class="hero-actions">
 
-<a
-    href="#tools"
-    class="primary-btn">
-    شروع استفاده از ابزارها
+<a href="#tools" class="primary-btn">
+🚀 شروع استفاده
 </a>
 
-<a
-    href="/about"
-    class="secondary-btn">
-    درباره سامانه
+<a href="/about" class="secondary-btn">
+ℹ️ درباره ابزارک
 </a>
+
+</div>
 
 </div>
 
 </section>
 
+
+<!-- =========================
+     STATS
+========================= -->
 
 <section class="stats">
 
@@ -967,6 +1221,10 @@ footer strong{
 </section>
 
 
+<!-- =========================
+     ERRORS
+========================= -->
+
 {% if error_text %}
 
 <div class="alert">
@@ -976,20 +1234,33 @@ footer strong{
 {% endif %}
 
 
+<!-- =========================
+     RESULT
+========================= -->
+
 {% if success_text or result_file or speech_file or vocals_file or instrumental_file or transcribed_text or image_text %}
 
 <div class="result-area">
 
 <div class="result-box">
 
-<h3>
-✅ نتیجه پردازش
-</h3>
+<div class="result-title">
+
+<div class="result-title-icon">
+✅
+</div>
+
+<span>نتیجه پردازش</span>
+
+</div>
+
 
 {% if success_text %}
-<p style="color:#73e7ff;margin-bottom:12px;">
+
+<div class="success-message">
 {{ success_text }}
-</p>
+</div>
+
 {% endif %}
 
 
@@ -1011,12 +1282,13 @@ footer strong{
 {% endif %}
 
 
+<div class="downloads">
+
 {% if speech_file %}
 
-<a
-    class="download"
-    href="/download/{{ speech_file }}">
-    ⬇️ دانلود فایل صوتی
+<a class="download"
+   href="/download/{{ speech_file }}">
+⬇️ دانلود فایل صوتی
 </a>
 
 {% endif %}
@@ -1024,10 +1296,9 @@ footer strong{
 
 {% if result_file %}
 
-<a
-    class="download"
-    href="/download/{{ result_file }}">
-    ⬇️ دانلود نتیجه
+<a class="download"
+   href="/download/{{ result_file }}">
+⬇️ دانلود نتیجه
 </a>
 
 {% endif %}
@@ -1035,10 +1306,9 @@ footer strong{
 
 {% if vocals_file %}
 
-<a
-    class="download"
-    href="/download/{{ vocals_file }}">
-    🎤 دانلود خروجی
+<a class="download"
+   href="/download/{{ vocals_file }}">
+🎤 دانلود خروجی
 </a>
 
 {% endif %}
@@ -1046,10 +1316,9 @@ footer strong{
 
 {% if instrumental_file %}
 
-<a
-    class="download"
-    href="/download/{{ instrumental_file }}">
-    🎵 دانلود خروجی دوم
+<a class="download"
+   href="/download/{{ instrumental_file }}">
+🎵 دانلود خروجی دوم
 </a>
 
 {% endif %}
@@ -1058,23 +1327,31 @@ footer strong{
 
 </div>
 
+</div>
+
 {% endif %}
 
 
-<section
-    class="tools-section"
-    id="tools">
+<!-- =========================
+     TOOLS
+========================= -->
 
-<div class="section-title">
+<section class="tools-section" id="tools">
+
+<div class="section-heading">
 
 <div>
 
+<div class="heading-label">
+⚡ ابزارهای کاربردی
+</div>
+
 <h2>
-ابزارهای آنلاین
+همه ابزارها
 </h2>
 
 <p>
-ابزار موردنظرت را جستجو یا انتخاب کن.
+ابزار موردنظر خود را جستجو یا از دسته‌بندی‌ها انتخاب کنید.
 </p>
 
 </div>
@@ -1084,69 +1361,56 @@ footer strong{
 
 <div class="search-box">
 
+<span class="search-icon">🔎</span>
+
 <input
     id="search"
     type="text"
-    placeholder="🔎 جستجوی ابزار...">
+    autocomplete="off"
+    placeholder="نام ابزار را جستجو کنید؛ مثلاً PDF، صوت، تصویر...">
 
 </div>
 
 
 <div class="filters">
 
-<button
-    class="filter active"
-    data-filter="all">
-    همه
+<button class="filter active" data-filter="all">
+همه
 </button>
 
-<button
-    class="filter"
-    data-filter="audio">
-    🎵 صوت
+<button class="filter" data-filter="audio">
+🎵 صوت
 </button>
 
-<button
-    class="filter"
-    data-filter="image">
-    🖼️ تصویر
+<button class="filter" data-filter="image">
+🖼️ تصویر
 </button>
 
-<button
-    class="filter"
-    data-filter="pdf">
-    📄 PDF
+<button class="filter" data-filter="pdf">
+📄 PDF
 </button>
 
-<button
-    class="filter"
-    data-filter="text">
-    ✍️ متن
+<button class="filter" data-filter="text">
+✍️ متن
 </button>
 
-<button
-    class="filter"
-    data-filter="utility">
-    🧰 کاربردی
+<button class="filter" data-filter="utility">
+🧰 کاربردی
 </button>
 
 </div>
 
 
-<div
-    class="tools-grid"
-    id="toolGrid">
+<div class="tools-grid" id="toolGrid">
 
 
 <!-- 1 -->
 
-<article
-class="tool-card"
+<article class="tool-card"
 data-category="text"
 data-search="تبدیل متن به صدا گوینده فارسی">
 
 <span class="tool-tag">متن</span>
-
 <div class="tool-icon">🔊</div>
 
 <h3>تبدیل متن به صدا</h3>
@@ -1155,8 +1419,7 @@ data-search="تبدیل متن به صدا گوینده فارسی">
 تبدیل متن فارسی به فایل صوتی با صدای طبیعی.
 </p>
 
-<form
-class="tool-form"
+<form class="tool-form"
 action="/process-text"
 method="post">
 
@@ -1166,33 +1429,29 @@ placeholder="متن خود را وارد کنید..."
 required></textarea>
 
 <button class="tool-btn">
-تبدیل به صدا
+🔊 تبدیل به صدا
 </button>
 
 </form>
-
 </article>
 
 
 <!-- 2 -->
 
-<article
-class="tool-card"
+<article class="tool-card"
 data-category="audio"
 data-search="حذف خواننده وکال جداسازی صدا">
 
 <span class="tool-tag">صوت</span>
-
 <div class="tool-icon">🎤</div>
 
 <h3>جداسازی صوت</h3>
 
 <p>
-استخراج دو خروجی از فایل استریو.
+استخراج دو خروجی از فایل صوتی استریو.
 </p>
 
-<form
-class="tool-form"
+<form class="tool-form"
 action="/process-audio"
 method="post"
 enctype="multipart/form-data">
@@ -1204,23 +1463,20 @@ accept="audio/*"
 required>
 
 <button class="tool-btn">
-پردازش صوت
+🎤 پردازش صوت
 </button>
 
 </form>
-
 </article>
 
 
 <!-- 3 -->
 
-<article
-class="tool-card"
+<article class="tool-card"
 data-category="audio"
 data-search="صوت به متن ویس تبدیل صدا به نوشته">
 
 <span class="tool-tag">صوت</span>
-
 <div class="tool-icon">🎙️</div>
 
 <h3>صوت به متن</h3>
@@ -1229,8 +1485,7 @@ data-search="صوت به متن ویس تبدیل صدا به نوشته">
 تبدیل فایل صوتی فارسی به متن.
 </p>
 
-<form
-class="tool-form"
+<form class="tool-form"
 action="/speech-to-text"
 method="post"
 enctype="multipart/form-data">
@@ -1242,23 +1497,20 @@ accept="audio/*"
 required>
 
 <button class="tool-btn">
-تبدیل به متن
+📝 تبدیل به متن
 </button>
 
 </form>
-
 </article>
 
 
 <!-- 4 -->
 
-<article
-class="tool-card"
+<article class="tool-card"
 data-category="image"
 data-search="عکس به متن OCR استخراج نوشته تصویر">
 
 <span class="tool-tag">تصویر</span>
-
 <div class="tool-icon">🔎</div>
 
 <h3>عکس به متن</h3>
@@ -1267,8 +1519,7 @@ data-search="عکس به متن OCR استخراج نوشته تصویر">
 استخراج متن فارسی و انگلیسی از تصویر.
 </p>
 
-<form
-class="tool-form"
+<form class="tool-form"
 action="/image-to-text"
 method="post"
 enctype="multipart/form-data">
@@ -1280,18 +1531,16 @@ accept="image/*"
 required>
 
 <button class="tool-btn">
-استخراج متن
+🔎 استخراج متن
 </button>
 
 </form>
-
 </article>
 
 
 <!-- 5 -->
 
-<article
-class="tool-card"
+<article class="tool-card"
 data-category="image"
 data-search="فشرده سازی عکس کاهش حجم">
 
@@ -1299,10 +1548,11 @@ data-search="فشرده سازی عکس کاهش حجم">
 
 <h3>فشرده‌سازی تصویر</h3>
 
-<p>کاهش حجم تصویر با کنترل کیفیت.</p>
+<p>
+کاهش حجم تصویر با کنترل کیفیت.
+</p>
 
-<form
-class="tool-form"
+<form class="tool-form"
 action="/image-compress"
 method="post"
 enctype="multipart/form-data">
@@ -1322,18 +1572,16 @@ max="95"
 placeholder="کیفیت">
 
 <button class="tool-btn">
-فشرده‌سازی
+🗜️ فشرده‌سازی
 </button>
 
 </form>
-
 </article>
 
 
 <!-- 6 -->
 
-<article
-class="tool-card"
+<article class="tool-card"
 data-category="image"
 data-search="تصویر به PDF عکس PDF">
 
@@ -1341,10 +1589,11 @@ data-search="تصویر به PDF عکس PDF">
 
 <h3>تصویر به PDF</h3>
 
-<p>تبدیل چند تصویر به یک PDF.</p>
+<p>
+تبدیل چند تصویر به یک فایل PDF.
+</p>
 
-<form
-class="tool-form"
+<form class="tool-form"
 action="/image-to-pdf"
 method="post"
 enctype="multipart/form-data">
@@ -1357,18 +1606,16 @@ multiple
 required>
 
 <button class="tool-btn">
-ساخت PDF
+📄 ساخت PDF
 </button>
 
 </form>
-
 </article>
 
 
 <!-- 7 -->
 
-<article
-class="tool-card"
+<article class="tool-card"
 data-category="text"
 data-search="متن PDF ساخت PDF">
 
@@ -1376,31 +1623,30 @@ data-search="متن PDF ساخت PDF">
 
 <h3>متن به PDF</h3>
 
-<p>ساخت PDF از متن واردشده.</p>
+<p>
+ساخت فایل PDF از متن واردشده.
+</p>
 
-<form
-class="tool-form"
+<form class="tool-form"
 action="/text-to-pdf"
 method="post">
 
 <textarea
 name="text_content"
-placeholder="متن..."
+placeholder="متن خود را وارد کنید..."
 required></textarea>
 
 <button class="tool-btn">
-ساخت PDF
+📄 ساخت PDF
 </button>
 
 </form>
-
 </article>
 
 
 <!-- 8 -->
 
-<article
-class="tool-card"
+<article class="tool-card"
 data-category="utility"
 data-search="QR QR Code لینک">
 
@@ -1408,10 +1654,11 @@ data-search="QR QR Code لینک">
 
 <h3>ساخت QR Code</h3>
 
-<p>تبدیل لینک یا متن به QR.</p>
+<p>
+تبدیل لینک یا متن به QR Code.
+</p>
 
-<form
-class="tool-form"
+<form class="tool-form"
 action="/qr-code"
 method="post">
 
@@ -1422,18 +1669,16 @@ placeholder="لینک یا متن"
 required>
 
 <button class="tool-btn">
-ساخت QR
+▦ ساخت QR
 </button>
 
 </form>
-
 </article>
 
 
 <!-- 9 -->
 
-<article
-class="tool-card"
+<article class="tool-card"
 data-category="pdf"
 data-search="فشرده سازی PDF کاهش حجم PDF">
 
@@ -1441,10 +1686,11 @@ data-search="فشرده سازی PDF کاهش حجم PDF">
 
 <h3>فشرده‌سازی PDF</h3>
 
-<p>کاهش حجم فایل PDF.</p>
+<p>
+کاهش حجم فایل PDF.
+</p>
 
-<form
-class="tool-form"
+<form class="tool-form"
 action="/pdf-compress"
 method="post"
 enctype="multipart/form-data">
@@ -1456,18 +1702,16 @@ accept=".pdf"
 required>
 
 <button class="tool-btn">
-فشرده‌سازی PDF
+🗜️ فشرده‌سازی PDF
 </button>
 
 </form>
-
 </article>
 
 
 <!-- 10 -->
 
-<article
-class="tool-card"
+<article class="tool-card"
 data-category="pdf"
 data-search="PDF متن استخراج متن PDF">
 
@@ -1475,10 +1719,11 @@ data-search="PDF متن استخراج متن PDF">
 
 <h3>PDF به متن</h3>
 
-<p>استخراج متن از PDF.</p>
+<p>
+استخراج متن از فایل PDF.
+</p>
 
-<form
-class="tool-form"
+<form class="tool-form"
 action="/pdf-to-text"
 method="post"
 enctype="multipart/form-data">
@@ -1490,11 +1735,10 @@ accept=".pdf"
 required>
 
 <button class="tool-btn">
-استخراج متن
+📝 استخراج متن
 </button>
 
 </form>
-
 </article>
 
 
@@ -1508,24 +1752,26 @@ data-search="JPG تبدیل تصویر">
 
 <h3>تبدیل به JPG</h3>
 
-<p>تبدیل تصویر به JPG.</p>
+<p>
+تبدیل تصویر به فرمت JPG.
+</p>
 
 <form class="tool-form"
 action="/image-to-jpg"
 method="post"
 enctype="multipart/form-data">
 
-<input type="file"
+<input
+type="file"
 name="image_file"
 accept="image/*"
 required>
 
 <button class="tool-btn">
-تبدیل JPG
+🖼️ تبدیل JPG
 </button>
 
 </form>
-
 </article>
 
 
@@ -1539,24 +1785,26 @@ data-search="PNG تبدیل تصویر">
 
 <h3>تبدیل به PNG</h3>
 
-<p>تبدیل تصویر به PNG.</p>
+<p>
+تبدیل تصویر به فرمت PNG.
+</p>
 
 <form class="tool-form"
 action="/image-to-png"
 method="post"
 enctype="multipart/form-data">
 
-<input type="file"
+<input
+type="file"
 name="image_file"
 accept="image/*"
 required>
 
 <button class="tool-btn">
-تبدیل PNG
+🌄 تبدیل PNG
 </button>
 
 </form>
-
 </article>
 
 
@@ -1570,14 +1818,17 @@ data-search="برش عکس crop">
 
 <h3>برش تصویر</h3>
 
-<p>برش تصویر با مختصات دلخواه.</p>
+<p>
+برش تصویر با مختصات دلخواه.
+</p>
 
 <form class="tool-form"
 action="/image-crop"
 method="post"
 enctype="multipart/form-data">
 
-<input type="file"
+<input
+type="file"
 name="image_file"
 accept="image/*"
 required>
@@ -1603,11 +1854,10 @@ placeholder="ارتفاع">
 </div>
 
 <button class="tool-btn">
-برش تصویر
+✂️ برش تصویر
 </button>
 
 </form>
-
 </article>
 
 
@@ -1621,29 +1871,32 @@ data-search="چرخش عکس rotate">
 
 <h3>چرخش تصویر</h3>
 
-<p>چرخاندن تصویر.</p>
+<p>
+چرخاندن تصویر با زاویه دلخواه.
+</p>
 
 <form class="tool-form"
 action="/image-rotate"
 method="post"
 enctype="multipart/form-data">
 
-<input type="file"
+<input
+type="file"
 name="image_file"
 accept="image/*"
 required>
 
-<input type="number"
+<input
+type="number"
 name="angle"
 value="90"
 placeholder="درجه">
 
 <button class="tool-btn">
-چرخش
+🔄 چرخش
 </button>
 
 </form>
-
 </article>
 
 
@@ -1657,24 +1910,26 @@ data-search="آینه عکس mirror">
 
 <h3>آینه‌ای کردن</h3>
 
-<p>برعکس کردن افقی تصویر.</p>
+<p>
+برعکس کردن افقی تصویر.
+</p>
 
 <form class="tool-form"
 action="/image-mirror"
 method="post"
 enctype="multipart/form-data">
 
-<input type="file"
+<input
+type="file"
 name="image_file"
 accept="image/*"
 required>
 
 <button class="tool-btn">
-آینه‌ای کن
+↔️ آینه‌ای کن
 </button>
 
 </form>
-
 </article>
 
 
@@ -1688,24 +1943,26 @@ data-search="سیاه سفید grayscale عکس">
 
 <h3>سیاه و سفید</h3>
 
-<p>تبدیل تصویر به خاکستری.</p>
+<p>
+تبدیل تصویر به حالت خاکستری.
+</p>
 
 <form class="tool-form"
 action="/image-grayscale"
 method="post"
 enctype="multipart/form-data">
 
-<input type="file"
+<input
+type="file"
 name="image_file"
 accept="image/*"
 required>
 
 <button class="tool-btn">
-تبدیل
+⚫ تبدیل
 </button>
 
 </form>
-
 </article>
 
 
@@ -1719,14 +1976,17 @@ data-search="روشنایی brightness عکس">
 
 <h3>روشنایی تصویر</h3>
 
-<p>افزایش یا کاهش روشنایی.</p>
+<p>
+افزایش یا کاهش روشنایی تصویر.
+</p>
 
 <form class="tool-form"
 action="/image-brightness"
 method="post"
 enctype="multipart/form-data">
 
-<input type="file"
+<input
+type="file"
 name="image_file"
 accept="image/*"
 required>
@@ -1738,11 +1998,10 @@ name="factor"
 value="1.2">
 
 <button class="tool-btn">
-تغییر روشنایی
+☀️ تغییر روشنایی
 </button>
 
 </form>
-
 </article>
 
 
@@ -1756,14 +2015,17 @@ data-search="کنتراست contrast عکس">
 
 <h3>کنتراست تصویر</h3>
 
-<p>تنظیم کنتراست تصویر.</p>
+<p>
+تنظیم کنتراست تصویر.
+</p>
 
 <form class="tool-form"
 action="/image-contrast"
 method="post"
 enctype="multipart/form-data">
 
-<input type="file"
+<input
+type="file"
 name="image_file"
 accept="image/*"
 required>
@@ -1775,11 +2037,10 @@ name="factor"
 value="1.2">
 
 <button class="tool-btn">
-تغییر کنتراست
+◐ تغییر کنتراست
 </button>
 
 </form>
-
 </article>
 
 
@@ -1793,14 +2054,17 @@ data-search="ویرایشگر عکس ادیتور">
 
 <h3>ویرایشگر تصویر</h3>
 
-<p>چرخش، نور، کنتراست، تاری و متن.</p>
+<p>
+چرخش، نور، کنتراست، تاری و متن.
+</p>
 
 <form class="tool-form"
 action="/image-editor"
 method="post"
 enctype="multipart/form-data">
 
-<input type="file"
+<input
+type="file"
 name="image_file"
 accept="image/*"
 required>
@@ -1842,11 +2106,10 @@ name="overlay_text"
 placeholder="متن روی تصویر">
 
 <button class="tool-btn">
-ویرایش
+🎨 ویرایش تصویر
 </button>
 
 </form>
-
 </article>
 
 
@@ -1860,7 +2123,9 @@ data-search="تبدیل فرمت صوت mp3 wav">
 
 <h3>تبدیل فرمت صوت</h3>
 
-<p>تبدیل MP3، WAV، OGG و FLAC.</p>
+<p>
+تبدیل MP3، WAV، OGG، FLAC و M4A.
+</p>
 
 <form class="tool-form"
 action="/audio-convert"
@@ -1884,11 +2149,10 @@ required>
 </select>
 
 <button class="tool-btn">
-تبدیل
+🔁 تبدیل فرمت
 </button>
 
 </form>
-
 </article>
 
 
@@ -1902,14 +2166,17 @@ data-search="برش صدا audio cut">
 
 <h3>برش صوت</h3>
 
-<p>جدا کردن بخشی از فایل صوتی.</p>
+<p>
+جدا کردن بخشی از فایل صوتی.
+</p>
 
 <form class="tool-form"
 action="/audio-cut"
 method="post"
 enctype="multipart/form-data">
 
-<input type="file"
+<input
+type="file"
 name="audio_file"
 accept="audio/*"
 required>
@@ -1933,11 +2200,10 @@ placeholder="مدت">
 </div>
 
 <button class="tool-btn">
-برش صوت
+✂️ برش صوت
 </button>
 
 </form>
-
 </article>
 
 
@@ -1951,14 +2217,17 @@ data-search="بلندی صدا volume">
 
 <h3>تغییر حجم صدا</h3>
 
-<p>کم یا زیاد کردن صدای فایل.</p>
+<p>
+کم یا زیاد کردن صدای فایل.
+</p>
 
 <form class="tool-form"
 action="/audio-volume"
 method="post"
 enctype="multipart/form-data">
 
-<input type="file"
+<input
+type="file"
 name="audio_file"
 accept="audio/*"
 required>
@@ -1970,11 +2239,10 @@ name="volume"
 value="1.2">
 
 <button class="tool-btn">
-تغییر صدا
+🔊 تغییر صدا
 </button>
 
 </form>
-
 </article>
 
 
@@ -1988,24 +2256,26 @@ data-search="کاهش نویز حذف نویز صدا">
 
 <h3>کاهش نویز</h3>
 
-<p>کاهش نویز پس‌زمینه صوت.</p>
+<p>
+کاهش نویز پس‌زمینه صوت.
+</p>
 
 <form class="tool-form"
 action="/audio-clean"
 method="post"
 enctype="multipart/form-data">
 
-<input type="file"
+<input
+type="file"
 name="audio_file"
 accept="audio/*"
 required>
 
 <button class="tool-btn">
-کاهش نویز
+🧹 کاهش نویز
 </button>
 
 </form>
-
 </article>
 
 
@@ -2019,24 +2289,26 @@ data-search="حذف سکوت silence صدا">
 
 <h3>حذف سکوت</h3>
 
-<p>حذف سکوت‌های طولانی از صوت.</p>
+<p>
+حذف سکوت‌های طولانی از صوت.
+</p>
 
 <form class="tool-form"
 action="/audio-silence"
 method="post"
 enctype="multipart/form-data">
 
-<input type="file"
+<input
+type="file"
 name="audio_file"
 accept="audio/*"
 required>
 
 <button class="tool-btn">
-حذف سکوت
+🤫 حذف سکوت
 </button>
 
 </form>
-
 </article>
 
 
@@ -2050,7 +2322,9 @@ data-search="ادغام صوت merge صدا">
 
 <h3>ادغام صوت</h3>
 
-<p>چند فایل صوتی را یکی کن.</p>
+<p>
+چند فایل صوتی را یکی کن.
+</p>
 
 <form class="tool-form"
 action="/audio-merge"
@@ -2065,11 +2339,10 @@ multiple
 required>
 
 <button class="tool-btn">
-ادغام
+🔗 ادغام صوت
 </button>
 
 </form>
-
 </article>
 
 
@@ -2083,7 +2356,9 @@ data-search="ادغام PDF merge">
 
 <h3>ادغام PDF</h3>
 
-<p>چند PDF را در یک فایل ادغام کن.</p>
+<p>
+چند PDF را در یک فایل ادغام کن.
+</p>
 
 <form class="tool-form"
 action="/pdf-merge"
@@ -2098,11 +2373,10 @@ multiple
 required>
 
 <button class="tool-btn">
-ادغام PDF
+📚 ادغام PDF
 </button>
 
 </form>
-
 </article>
 
 
@@ -2116,7 +2390,9 @@ data-search="استخراج صفحات PDF">
 
 <h3>استخراج صفحات PDF</h3>
 
-<p>صفحات دلخواه را جدا کن.</p>
+<p>
+صفحات دلخواه را جدا کن.
+</p>
 
 <form class="tool-form"
 action="/pdf-extract-pages"
@@ -2136,11 +2412,10 @@ value="1"
 placeholder="مثلاً 1,3,5-8">
 
 <button class="tool-btn">
-استخراج
+📑 استخراج صفحات
 </button>
 
 </form>
-
 </article>
 
 
@@ -2154,7 +2429,9 @@ data-search="PDF JPG تبدیل PDF تصویر">
 
 <h3>PDF به JPG</h3>
 
-<p>صفحه اول PDF را به تصویر تبدیل کن.</p>
+<p>
+صفحه اول PDF را به تصویر تبدیل کن.
+</p>
 
 <form class="tool-form"
 action="/pdf-to-jpg"
@@ -2168,11 +2445,10 @@ accept=".pdf"
 required>
 
 <button class="tool-btn">
-تبدیل
+🖨️ تبدیل
 </button>
 
 </form>
-
 </article>
 
 
@@ -2186,7 +2462,9 @@ data-search="آمار متن حروف کلمات">
 
 <h3>آمار متن</h3>
 
-<p>تعداد حروف، کلمات و خطوط.</p>
+<p>
+تعداد حروف، کلمات و خطوط.
+</p>
 
 <form class="tool-form"
 action="/text-stats"
@@ -2198,11 +2476,10 @@ placeholder="متن..."
 required></textarea>
 
 <button class="tool-btn">
-محاسبه
+📊 محاسبه
 </button>
 
 </form>
-
 </article>
 
 
@@ -2216,7 +2493,9 @@ data-search="تغییر حروف بزرگ کوچک انگلیسی">
 
 <h3>تغییر حروف</h3>
 
-<p>تبدیل حروف انگلیسی.</p>
+<p>
+تبدیل حروف انگلیسی به حالت‌های مختلف.
+</p>
 
 <form class="tool-form"
 action="/text-case"
@@ -2244,11 +2523,10 @@ Title Case
 </select>
 
 <button class="tool-btn">
-تبدیل
+Aa تبدیل حروف
 </button>
 
 </form>
-
 </article>
 
 
@@ -2262,7 +2540,9 @@ data-search="پاکسازی متن تمیز کردن">
 
 <h3>پاکسازی متن</h3>
 
-<p>حذف فاصله‌های اضافی.</p>
+<p>
+حذف فاصله‌های اضافی.
+</p>
 
 <form class="tool-form"
 action="/text-clean"
@@ -2274,11 +2554,10 @@ placeholder="متن..."
 required></textarea>
 
 <button class="tool-btn">
-پاکسازی
+🧽 پاکسازی
 </button>
 
 </form>
-
 </article>
 
 
@@ -2292,7 +2571,9 @@ data-search="مرتب سازی متن خطوط">
 
 <h3>مرتب‌سازی متن</h3>
 
-<p>مرتب کردن خطوط متن.</p>
+<p>
+مرتب کردن خطوط متن.
+</p>
 
 <form class="tool-form"
 action="/text-sort"
@@ -2316,11 +2597,10 @@ required></textarea>
 </select>
 
 <button class="tool-btn">
-مرتب‌سازی
+↕️ مرتب‌سازی
 </button>
 
 </form>
-
 </article>
 
 
@@ -2334,7 +2614,9 @@ data-search="شماره گذاری متن">
 
 <h3>شماره‌گذاری متن</h3>
 
-<p>اضافه کردن شماره به خطوط.</p>
+<p>
+اضافه کردن شماره به خطوط.
+</p>
 
 <form class="tool-form"
 action="/text-number"
@@ -2346,11 +2628,10 @@ placeholder="هر مورد در یک خط..."
 required></textarea>
 
 <button class="tool-btn">
-شماره‌گذاری
+🔢 شماره‌گذاری
 </button>
 
 </form>
-
 </article>
 
 
@@ -2364,7 +2645,9 @@ data-search="جایگزینی متن replace">
 
 <h3>جایگزینی متن</h3>
 
-<p>پیدا کردن و جایگزینی عبارت.</p>
+<p>
+پیدا کردن و جایگزینی عبارت.
+</p>
 
 <form class="tool-form"
 action="/text-replace"
@@ -2391,11 +2674,10 @@ placeholder="جایگزین">
 </div>
 
 <button class="tool-btn">
-جایگزینی
+🔄 جایگزینی
 </button>
 
 </form>
-
 </article>
 
 
@@ -2409,7 +2691,9 @@ data-search="مقایسه متن compare">
 
 <h3>مقایسه متن</h3>
 
-<p>مقایسه دو متن و نمایش تفاوت.</p>
+<p>
+مقایسه دو متن و نمایش تفاوت.
+</p>
 
 <form class="tool-form"
 action="/text-compare"
@@ -2426,11 +2710,10 @@ placeholder="متن دوم"
 required></textarea>
 
 <button class="tool-btn">
-مقایسه
+⚖️ مقایسه
 </button>
 
 </form>
-
 </article>
 
 
@@ -2444,7 +2727,9 @@ data-search="ساخت رمز پسورد password">
 
 <h3>ساخت رمز عبور</h3>
 
-<p>تولید رمز تصادفی امن.</p>
+<p>
+تولید رمز تصادفی امن.
+</p>
 
 <form class="tool-form"
 action="/password"
@@ -2458,11 +2743,10 @@ min="4"
 max="128">
 
 <button class="tool-btn">
-ساخت رمز
+🔐 ساخت رمز
 </button>
 
 </form>
-
 </article>
 
 
@@ -2476,7 +2760,9 @@ data-search="عدد تصادفی random number">
 
 <h3>عدد تصادفی</h3>
 
-<p>تولید عدد بین دو مقدار.</p>
+<p>
+تولید عدد بین دو مقدار.
+</p>
 
 <form class="tool-form"
 action="/random-number"
@@ -2499,11 +2785,10 @@ placeholder="حداکثر">
 </div>
 
 <button class="tool-btn">
-تولید عدد
+🎲 تولید عدد
 </button>
 
 </form>
-
 </article>
 
 
@@ -2517,7 +2802,9 @@ data-search="تبدیل واحد کیلومتر کیلوگرم لیتر دما">
 
 <h3>تبدیل واحد</h3>
 
-<p>تبدیل طول، وزن، حجم و دما.</p>
+<p>
+تبدیل طول، وزن، حجم و دما.
+</p>
 
 <form class="tool-form"
 action="/unit-convert"
@@ -2567,11 +2854,10 @@ placeholder="مقدار">
 </select>
 
 <button class="tool-btn">
-تبدیل
+📐 تبدیل
 </button>
 
 </form>
-
 </article>
 
 
@@ -2585,7 +2871,9 @@ data-search="حذف متادیتا EXIF اطلاعات عکس">
 
 <h3>حذف اطلاعات تصویر</h3>
 
-<p>حذف اطلاعات اضافی و متادیتای تصویر.</p>
+<p>
+حذف اطلاعات اضافی و متادیتای تصویر.
+</p>
 
 <form class="tool-form"
 action="/image-remove-metadata"
@@ -2599,11 +2887,10 @@ accept="image/*"
 required>
 
 <button class="tool-btn">
-حذف اطلاعات
+🛡️ حذف اطلاعات
 </button>
 
 </form>
-
 </article>
 
 
@@ -2617,7 +2904,9 @@ data-search="نرمال سازی صدا loudness normalize">
 
 <h3>نرمال‌سازی صدا</h3>
 
-<p>تنظیم سطح کلی صدای فایل.</p>
+<p>
+تنظیم سطح کلی صدای فایل.
+</p>
 
 <form class="tool-form"
 action="/audio-normalize"
@@ -2631,46 +2920,108 @@ accept="audio/*"
 required>
 
 <button class="tool-btn">
-نرمال‌سازی
+📈 نرمال‌سازی
 </button>
 
 </form>
-
 </article>
 
 
 </div>
 
 
-<div
-class="empty"
-id="empty">
+<div class="empty" id="empty">
+🔎
+<br>
 ابزاری با این جستجو پیدا نشد.
 </div>
 
 </section>
 
 
+<!-- =========================
+     INFO
+========================= -->
+
+<section class="info-section">
+
+<div class="info-card">
+
+<div class="info-icon">⚡</div>
+
+<h3>سریع و ساده</h3>
+
+<p>
+ابزارهای کاربردی در یک محیط ساده طراحی شده‌اند تا بدون پیچیدگی بتوانید فایل‌های خود را پردازش کنید.
+</p>
+
+</div>
+
+
+<div class="info-card">
+
+<div class="info-icon">🧰</div>
+
+<h3>ابزارهای متنوع</h3>
+
+<p>
+از صوت و تصویر گرفته تا PDF، متن و ابزارهای کاربردی؛ همه در یک مجموعه قرار گرفته‌اند.
+</p>
+
+</div>
+
+
+<div class="info-card">
+
+<div class="info-icon">📱</div>
+
+<h3>مناسب موبایل</h3>
+
+<p>
+طراحی واکنش‌گرا باعث می‌شود سایت در موبایل، تبلت و کامپیوتر به‌درستی نمایش داده شود.
+</p>
+
+</div>
+
+</section>
+
+
+<!-- =========================
+     FOOTER
+========================= -->
+
 <footer>
 
-<strong>ابزارک</strong>
+<div class="footer-logo">
+<span>⚡</span>
+<span>ابزارک</span>
+</div>
 
-<br>
-
+<div>
 مجموعه ابزارهای آنلاین برای متن، تصویر، صوت و PDF
+</div>
 
-<br>
+<div class="footer-links">
 
-تمامی پردازش‌ها از طریق سامانه انجام می‌شوند.
+<a href="/">خانه</a>
+<a href="#tools">ابزارها</a>
+<a href="/about">درباره ما</a>
+<a href="/contact">تماس با ما</a>
+
+</div>
+
+<div>
+© ابزارک — تمامی حقوق محفوظ است.
+</div>
 
 </footer>
 
 
-<!-- LOADING -->
+<!-- =========================
+     LOADING
+========================= -->
 
-<div
-class="loading-overlay"
-id="loading">
+<div class="loading-overlay" id="loading">
 
 <div class="loading-card">
 
@@ -2702,7 +3053,9 @@ id="progressNumber">
 
 <script>
 
-/* SEARCH + FILTER */
+/* =========================
+   SEARCH + FILTER
+========================= */
 
 const searchInput =
     document.getElementById("search");
@@ -2735,36 +3088,31 @@ function filterTools(){
     cards.forEach(card => {
 
         const category =
-            card.dataset.category;
+            card.dataset.category || "";
 
-        const text =
-            card.dataset.search
-            .toLowerCase();
+        const searchText =
+            (
+                card.dataset.search || ""
+            ).toLowerCase();
 
         const title =
-            card.innerText
-            .toLowerCase();
+            card.innerText.toLowerCase();
 
         const matchesCategory =
-            currentFilter === "all"
-            ||
+            currentFilter === "all" ||
             category === currentFilter;
 
         const matchesSearch =
-            !query
-            ||
-            text.includes(query)
-            ||
+            !query ||
+            searchText.includes(query) ||
             title.includes(query);
 
         if(
-            matchesCategory
-            &&
+            matchesCategory &&
             matchesSearch
         ){
 
             card.style.display = "";
-
             visible++;
 
         }else{
@@ -2796,19 +3144,22 @@ filters.forEach(button => {
 
             filters.forEach(
                 item =>
-                    item.classList.remove(
-                        "active"
-                    )
+                    item.classList.remove("active")
             );
 
-            button.classList.add(
-                "active"
-            );
+            button.classList.add("active");
 
             currentFilter =
                 button.dataset.filter;
 
             filterTools();
+
+            document
+                .getElementById("tools")
+                .scrollIntoView({
+                    behavior:"smooth",
+                    block:"start"
+                });
 
         }
     );
@@ -2816,31 +3167,28 @@ filters.forEach(button => {
 });
 
 
-/* LOADING */
+/* =========================
+   LOADING
+========================= */
 
 const loading =
     document.getElementById("loading");
 
 const progressCircle =
-    document.getElementById(
-        "progressCircle"
-    );
+    document.getElementById("progressCircle");
 
 const progressNumber =
-    document.getElementById(
-        "progressNumber"
-    );
+    document.getElementById("progressNumber");
 
 const loadingText =
-    document.getElementById(
-        "loadingText"
-    );
+    document.getElementById("loadingText");
 
 
 function showLoading(){
 
-    loading.style.display =
-        "flex";
+    loading.style.display = "flex";
+
+    document.body.style.overflow = "hidden";
 
 }
 
@@ -2892,7 +3240,7 @@ document
                         if(progress < 90){
 
                             progress +=
-                                Math.random() * 8;
+                                Math.random() * 7;
 
                             if(progress > 90){
                                 progress = 90;
@@ -2924,13 +3272,82 @@ document
 });
 
 
-/* اگر صفحه بعد از پردازش برگشته باشد */
+/* =========================
+   FILE INPUT UX
+========================= */
+
+document
+.querySelectorAll(
+    'input[type="file"]'
+)
+.forEach(input => {
+
+    input.addEventListener(
+        "change",
+        function(){
+
+            if(!this.files.length){
+                return;
+            }
+
+            const count =
+                this.files.length;
+
+            if(count === 1){
+
+                this.title =
+                    this.files[0].name;
+
+            }else{
+
+                this.title =
+                    count +
+                    " فایل انتخاب شده";
+
+            }
+
+        }
+    );
+
+});
+
+
+/* =========================
+   ESC CLOSE / SAFETY
+========================= */
+
+document.addEventListener(
+    "keydown",
+    event => {
+
+        if(event.key === "Escape"){
+
+            if(
+                loading.style.display === "flex"
+            ){
+
+                /*
+                 * عمدی بسته نمی‌شود؛
+                 * زیرا فرم در حال ارسال است.
+                 */
+
+            }
+
+        }
+
+    }
+);
+
+
+/* =========================
+   RETURNED RESULT
+========================= */
 
 {% if success_text or error_text %}
 
 window.scrollTo({
-    top: 0,
-    behavior: "smooth"
+    top:0,
+    behavior:"smooth"
 });
 
 {% endif %}
