@@ -12,6 +12,7 @@ from pathlib import Path
 from flask import Flask, render_template, request, send_from_directory, jsonify
 from werkzeug.utils import secure_filename
 
+
 app = Flask(__name__)
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -21,22 +22,54 @@ OUTPUT_DIR = BASE_DIR / "outputs"
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
+# حداکثر حجم فایل ورودی: 100MB
 app.config["MAX_CONTENT_LENGTH"] = 100 * 1024 * 1024
 
+
+# =========================================================
+# فرمت‌های مجاز
+# =========================================================
+
 AUDIO_EXTENSIONS = {
-    "mp3", "wav", "m4a", "aac", "ogg", "flac", "webm", "mp4"
+    "mp3",
+    "wav",
+    "m4a",
+    "aac",
+    "ogg",
+    "flac",
+    "webm",
+    "mp4"
 }
 
 IMAGE_EXTENSIONS = {
-    "jpg", "jpeg", "png", "webp", "bmp", "gif", "tiff"
+    "jpg",
+    "jpeg",
+    "png",
+    "webp",
+    "bmp",
+    "gif",
+    "tiff"
 }
+
+VIDEO_EXTENSIONS = {
+    "mp4",
+    "mov",
+    "mkv",
+    "webm",
+    "avi",
+    "m4v",
+    "mpeg",
+    "mpg",
+    "3gp"
+}
+
 
 WHISPER_MODEL = None
 
 
-# ---------------------------------------------------------
+# =========================================================
 # ابزارهای کمکی
-# ---------------------------------------------------------
+# =========================================================
 
 def get_extension(filename):
     filename = secure_filename(filename or "")
@@ -51,22 +84,30 @@ def save_uploaded_file(file, allowed_extensions):
 
     if extension not in allowed_extensions:
         raise ValueError(
-            f"فرمت فایل پشتیبانی نمی‌شود: {extension or 'نامشخص'}"
+            f"فرمت فایل پشتیبانی نمی‌شود: "
+            f"{extension or 'نامشخص'}"
         )
 
-    path = UPLOAD_DIR / f"{uuid.uuid4().hex}.{extension}"
+    path = UPLOAD_DIR / (
+        f"{uuid.uuid4().hex}.{extension}"
+    )
+
     file.save(path)
 
     return path
 
 
 def create_output(extension):
-    return OUTPUT_DIR / f"{uuid.uuid4().hex}.{extension}"
+    return OUTPUT_DIR / (
+        f"{uuid.uuid4().hex}.{extension}"
+    )
 
 
 def run_command(*command, timeout=900):
+    command = [str(x) for x in command]
+
     result = subprocess.run(
-        [str(x) for x in command],
+        command,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         text=True,
@@ -86,9 +127,28 @@ def run_command(*command, timeout=900):
     return result
 
 
+def ensure_output_exists(path):
+    path = Path(path)
+
+    if not path.exists():
+        raise RuntimeError(
+            "فایل خروجی ساخته نشد."
+        )
+
+    if path.stat().st_size <= 0:
+        raise RuntimeError(
+            "فایل خروجی خالی است."
+        )
+
+    return path
+
+
 def render_success(message, **kwargs):
     kwargs["success_text"] = message
-    return render_template("index.html", **kwargs)
+    return render_template(
+        "index.html",
+        **kwargs
+    )
 
 
 def render_failure(error):
@@ -98,9 +158,9 @@ def render_failure(error):
     )
 
 
-# ---------------------------------------------------------
+# =========================================================
 # صفحات اصلی
-# ---------------------------------------------------------
+# =========================================================
 
 @app.route("/")
 def index():
@@ -123,7 +183,10 @@ def about():
     </head>
     <body>
         <h1>سامانه ابزار آنلاین</h1>
-        <p>مجموعه‌ای از ابزارهای آنلاین پردازش متن، تصویر، صوت و PDF.</p>
+        <p>
+            مجموعه‌ای از ابزارهای آنلاین پردازش متن،
+            تصویر، صوت، ویدیو و PDF.
+        </p>
     </body>
     </html>
     """
@@ -145,7 +208,9 @@ def contact():
     </head>
     <body>
         <h1>تماس با ما</h1>
-        <p>برای ارتباط با ما از راه‌های ارتباطی سایت استفاده کنید.</p>
+        <p>
+            برای ارتباط با ما از راه‌های ارتباطی سایت استفاده کنید.
+        </p>
     </body>
     </html>
     """
@@ -156,9 +221,9 @@ def text_to_speech():
     return render_template("index.html")
 
 
-# ---------------------------------------------------------
+# =========================================================
 # 1 - تبدیل متن به صدا
-# ---------------------------------------------------------
+# =========================================================
 
 @app.route("/process-text", methods=["POST"])
 def process_text():
@@ -170,7 +235,9 @@ def process_text():
         ).strip()
 
         if not text:
-            raise ValueError("لطفاً متن را وارد کنید.")
+            raise ValueError(
+                "لطفاً متن را وارد کنید."
+            )
 
         import edge_tts
 
@@ -181,9 +248,14 @@ def process_text():
                 text,
                 "fa-IR-DilaraNeural"
             )
-            await communicator.save(str(output))
+
+            await communicator.save(
+                str(output)
+            )
 
         asyncio.run(generate_audio())
+
+        ensure_output_exists(output)
 
         return render_success(
             "تبدیل متن به صدا با موفقیت انجام شد.",
@@ -196,9 +268,9 @@ def process_text():
         )
 
 
-# ---------------------------------------------------------
+# =========================================================
 # 2 - جداسازی تقریبی صدای خواننده
-# ---------------------------------------------------------
+# =========================================================
 
 @app.route("/process-audio", methods=["POST"])
 def process_audio():
@@ -236,6 +308,9 @@ def process_audio():
             instrumental
         )
 
+        ensure_output_exists(vocals)
+        ensure_output_exists(instrumental)
+
         return render_success(
             "پردازش صوت انجام شد.",
             vocals_file=vocals.name,
@@ -248,9 +323,9 @@ def process_audio():
         )
 
 
-# ---------------------------------------------------------
+# =========================================================
 # 3 - تبدیل صوت به متن
-# ---------------------------------------------------------
+# =========================================================
 
 def get_whisper_model():
     global WHISPER_MODEL
@@ -311,10 +386,14 @@ def speech_to_text():
             if value:
                 text_parts.append(value)
 
-        text = " ".join(text_parts).strip()
+        text = " ".join(
+            text_parts
+        ).strip()
 
         if not text:
-            text = "متنی از فایل صوتی شناسایی نشد."
+            text = (
+                "متنی از فایل صوتی شناسایی نشد."
+            )
 
         return render_success(
             "تبدیل صوت به متن انجام شد.",
@@ -327,9 +406,9 @@ def speech_to_text():
         )
 
 
-# ---------------------------------------------------------
+# =========================================================
 # 4 - عکس به متن
-# ---------------------------------------------------------
+# =========================================================
 
 @app.route("/image-to-text", methods=["POST"])
 def image_to_text():
@@ -355,7 +434,9 @@ def image_to_text():
         ).strip()
 
         if not text:
-            text = "متنی در تصویر پیدا نشد."
+            text = (
+                "متنی در تصویر پیدا نشد."
+            )
 
         return render_success(
             "متن تصویر استخراج شد.",
@@ -368,9 +449,9 @@ def image_to_text():
         )
 
 
-# ---------------------------------------------------------
+# =========================================================
 # 5 - فشرده سازی تصویر
-# ---------------------------------------------------------
+# =========================================================
 
 @app.route("/image-compress", methods=["POST"])
 def image_compress():
@@ -389,27 +470,62 @@ def image_compress():
 
         image = Image.open(source)
 
-        max_width = request.form.get("max_width", "1600")
-        quality = request.form.get("quality", "80")
+        max_width = request.form.get(
+            "max_width",
+            "1600"
+        )
 
-        max_width = int(max_width) if max_width else 1600
-        quality = int(quality) if quality else 80
+        quality = request.form.get(
+            "quality",
+            "80"
+        )
 
-        max_width = max(100, min(max_width, 5000))
-        quality = max(10, min(quality, 95))
+        max_width = (
+            int(max_width)
+            if max_width
+            else 1600
+        )
+
+        quality = (
+            int(quality)
+            if quality
+            else 80
+        )
+
+        max_width = max(
+            100,
+            min(max_width, 5000)
+        )
+
+        quality = max(
+            10,
+            min(quality, 95)
+        )
 
         if image.width > max_width:
-            ratio = max_width / image.width
+            ratio = (
+                max_width /
+                image.width
+            )
 
             image = image.resize(
                 (
                     max_width,
-                    max(1, int(image.height * ratio))
+                    max(
+                        1,
+                        int(
+                            image.height *
+                            ratio
+                        )
+                    )
                 ),
                 Image.Resampling.LANCZOS
             )
 
-        if image.mode not in ("RGB", "L"):
+        if image.mode not in (
+            "RGB",
+            "L"
+        ):
             image = image.convert("RGB")
 
         output = create_output("jpg")
@@ -421,6 +537,8 @@ def image_compress():
             optimize=True
         )
 
+        ensure_output_exists(output)
+
         return render_success(
             "تصویر با موفقیت فشرده شد.",
             result_file=output.name
@@ -430,14 +548,16 @@ def image_compress():
         return render_failure(e)
 
 
-# ---------------------------------------------------------
+# =========================================================
 # 6 - تصویر به PDF
-# ---------------------------------------------------------
+# =========================================================
 
 @app.route("/image-to-pdf", methods=["POST"])
 def image_to_pdf():
     try:
-        files = request.files.getlist("images")
+        files = request.files.getlist(
+            "images"
+        )
 
         if not files:
             single = (
@@ -461,7 +581,10 @@ def image_to_pdf():
                 IMAGE_EXTENSIONS
             )
 
-            image = Image.open(source).convert("RGB")
+            image = Image.open(
+                source
+            ).convert("RGB")
+
             images.append(image)
 
         if not images:
@@ -478,6 +601,8 @@ def image_to_pdf():
             append_images=images[1:]
         )
 
+        ensure_output_exists(output)
+
         return render_success(
             "تصویر به PDF تبدیل شد.",
             result_file=output.name
@@ -487,9 +612,9 @@ def image_to_pdf():
         return render_failure(e)
 
 
-# ---------------------------------------------------------
+# =========================================================
 # 7 - متن به PDF
-# ---------------------------------------------------------
+# =========================================================
 
 @app.route("/text-to-pdf", methods=["POST"])
 def text_to_pdf():
@@ -537,6 +662,8 @@ def text_to_pdf():
 
         pdf.save()
 
+        ensure_output_exists(output)
+
         return render_success(
             "PDF ساخته شد.",
             result_file=output.name
@@ -548,9 +675,9 @@ def text_to_pdf():
         )
 
 
-# ---------------------------------------------------------
+# =========================================================
 # 8 - QR Code
-# ---------------------------------------------------------
+# =========================================================
 
 @app.route("/qr-code", methods=["POST"])
 def qr_code():
@@ -571,7 +698,9 @@ def qr_code():
 
         qr = qrcode.QRCode(
             version=None,
-            error_correction=qrcode.constants.ERROR_CORRECT_M,
+            error_correction=(
+                qrcode.constants.ERROR_CORRECT_M
+            ),
             box_size=10,
             border=4
         )
@@ -580,7 +709,10 @@ def qr_code():
         qr.make(fit=True)
 
         image = qr.make_image()
+
         image.save(output)
+
+        ensure_output_exists(output)
 
         return render_success(
             "QR Code ساخته شد.",
@@ -591,9 +723,9 @@ def qr_code():
         return render_failure(e)
 
 
-# ---------------------------------------------------------
+# =========================================================
 # 9 - فشرده سازی PDF
-# ---------------------------------------------------------
+# =========================================================
 
 @app.route("/pdf-compress", methods=["POST"])
 def pdf_compress():
@@ -629,6 +761,8 @@ def pdf_compress():
             source
         )
 
+        ensure_output_exists(output)
+
         return render_success(
             "PDF فشرده شد.",
             result_file=output.name
@@ -638,9 +772,9 @@ def pdf_compress():
         return render_failure(e)
 
 
-# ---------------------------------------------------------
+# =========================================================
 # 10 - PDF به متن
-# ---------------------------------------------------------
+# =========================================================
 
 @app.route("/pdf-to-text", methods=["POST"])
 def pdf_to_text():
@@ -657,7 +791,9 @@ def pdf_to_text():
 
         from pypdf import PdfReader
 
-        reader = PdfReader(str(source))
+        reader = PdfReader(
+            str(source)
+        )
 
         parts = []
 
@@ -666,10 +802,14 @@ def pdf_to_text():
                 page.extract_text() or ""
             )
 
-        text = "\n\n".join(parts).strip()
+        text = "\n\n".join(
+            parts
+        ).strip()
 
         if not text:
-            text = "متنی از PDF استخراج نشد."
+            text = (
+                "متنی از PDF استخراج نشد."
+            )
 
         return render_success(
             "متن PDF استخراج شد.",
@@ -682,9 +822,9 @@ def pdf_to_text():
         )
 
 
-# ---------------------------------------------------------
+# =========================================================
 # 11 - تصویر به JPG
-# ---------------------------------------------------------
+# =========================================================
 
 @app.route("/image-to-jpg", methods=["POST"])
 def image_to_jpg():
@@ -701,7 +841,9 @@ def image_to_jpg():
 
         from PIL import Image
 
-        image = Image.open(source).convert("RGB")
+        image = Image.open(
+            source
+        ).convert("RGB")
 
         output = create_output("jpg")
 
@@ -710,6 +852,8 @@ def image_to_jpg():
             "JPEG",
             quality=92
         )
+
+        ensure_output_exists(output)
 
         return render_success(
             "تصویر به JPG تبدیل شد.",
@@ -720,9 +864,9 @@ def image_to_jpg():
         return render_failure(e)
 
 
-# ---------------------------------------------------------
+# =========================================================
 # 12 - تصویر به PNG
-# ---------------------------------------------------------
+# =========================================================
 
 @app.route("/image-to-png", methods=["POST"])
 def image_to_png():
@@ -749,6 +893,8 @@ def image_to_png():
             optimize=True
         )
 
+        ensure_output_exists(output)
+
         return render_success(
             "تصویر به PNG تبدیل شد.",
             result_file=output.name
@@ -758,9 +904,9 @@ def image_to_png():
         return render_failure(e)
 
 
-# ---------------------------------------------------------
+# =========================================================
 # 13 - برش تصویر
-# ---------------------------------------------------------
+# =========================================================
 
 @app.route("/image-crop", methods=["POST"])
 def image_crop():
@@ -781,10 +927,12 @@ def image_crop():
 
         x = request.form.get("x", "0")
         y = request.form.get("y", "0")
+
         width = request.form.get(
             "width",
             str(image.width)
         )
+
         height = request.form.get(
             "height",
             str(image.height)
@@ -792,16 +940,34 @@ def image_crop():
 
         x = int(x) if x else 0
         y = int(y) if y else 0
-        width = int(width) if width else image.width
-        height = int(height) if height else image.height
+
+        width = (
+            int(width)
+            if width
+            else image.width
+        )
+
+        height = (
+            int(height)
+            if height
+            else image.height
+        )
 
         x = max(0, x)
         y = max(0, y)
+
         width = max(1, width)
         height = max(1, height)
 
-        x2 = min(image.width, x + width)
-        y2 = min(image.height, y + height)
+        x2 = min(
+            image.width,
+            x + width
+        )
+
+        y2 = min(
+            image.height,
+            y + height
+        )
 
         if x >= x2 or y >= y2:
             raise ValueError(
@@ -819,6 +985,8 @@ def image_crop():
             "PNG"
         )
 
+        ensure_output_exists(output)
+
         return render_success(
             "تصویر برش خورد.",
             result_file=output.name
@@ -828,9 +996,9 @@ def image_crop():
         return render_failure(e)
 
 
-# ---------------------------------------------------------
+# =========================================================
 # 14 - چرخش تصویر
-# ---------------------------------------------------------
+# =========================================================
 
 @app.route("/image-rotate", methods=["POST"])
 def image_rotate():
@@ -854,7 +1022,11 @@ def image_rotate():
             "90"
         )
 
-        angle = float(angle) if angle else 90
+        angle = (
+            float(angle)
+            if angle
+            else 90
+        )
 
         result = image.rotate(
             -angle,
@@ -868,6 +1040,8 @@ def image_rotate():
             "PNG"
         )
 
+        ensure_output_exists(output)
+
         return render_success(
             "تصویر چرخانده شد.",
             result_file=output.name
@@ -877,9 +1051,9 @@ def image_rotate():
         return render_failure(e)
 
 
-# ---------------------------------------------------------
+# =========================================================
 # 15 - آینه‌ای کردن تصویر
-# ---------------------------------------------------------
+# =========================================================
 
 @app.route("/image-mirror", methods=["POST"])
 def image_mirror():
@@ -907,6 +1081,8 @@ def image_mirror():
             "PNG"
         )
 
+        ensure_output_exists(output)
+
         return render_success(
             "تصویر آینه‌ای شد.",
             result_file=output.name
@@ -916,9 +1092,9 @@ def image_mirror():
         return render_failure(e)
 
 
-# ---------------------------------------------------------
+# =========================================================
 # 16 - سیاه و سفید
-# ---------------------------------------------------------
+# =========================================================
 
 @app.route("/image-grayscale", methods=["POST"])
 def image_grayscale():
@@ -946,6 +1122,8 @@ def image_grayscale():
             "PNG"
         )
 
+        ensure_output_exists(output)
+
         return render_success(
             "تصویر سیاه و سفید شد.",
             result_file=output.name
@@ -955,9 +1133,9 @@ def image_grayscale():
         return render_failure(e)
 
 
-# ---------------------------------------------------------
+# =========================================================
 # 17 - روشنایی
-# ---------------------------------------------------------
+# =========================================================
 
 @app.route("/image-brightness", methods=["POST"])
 def image_brightness():
@@ -981,8 +1159,16 @@ def image_brightness():
             "1.2"
         )
 
-        factor = float(factor) if factor else 1.2
-        factor = max(0, min(factor, 3))
+        factor = (
+            float(factor)
+            if factor
+            else 1.2
+        )
+
+        factor = max(
+            0,
+            min(factor, 3)
+        )
 
         result = ImageEnhance.Brightness(
             image
@@ -995,6 +1181,8 @@ def image_brightness():
             "PNG"
         )
 
+        ensure_output_exists(output)
+
         return render_success(
             "روشنایی تصویر تغییر کرد.",
             result_file=output.name
@@ -1004,9 +1192,9 @@ def image_brightness():
         return render_failure(e)
 
 
-# ---------------------------------------------------------
+# =========================================================
 # 18 - کنتراست
-# ---------------------------------------------------------
+# =========================================================
 
 @app.route("/image-contrast", methods=["POST"])
 def image_contrast():
@@ -1030,8 +1218,16 @@ def image_contrast():
             "1.2"
         )
 
-        factor = float(factor) if factor else 1.2
-        factor = max(0, min(factor, 3))
+        factor = (
+            float(factor)
+            if factor
+            else 1.2
+        )
+
+        factor = max(
+            0,
+            min(factor, 3)
+        )
 
         result = ImageEnhance.Contrast(
             image
@@ -1044,6 +1240,8 @@ def image_contrast():
             "PNG"
         )
 
+        ensure_output_exists(output)
+
         return render_success(
             "کنتراست تصویر تغییر کرد.",
             result_file=output.name
@@ -1053,9 +1251,9 @@ def image_contrast():
         return render_failure(e)
 
 
-# ---------------------------------------------------------
+# =========================================================
 # 19 - ویرایشگر تصویر
-# ---------------------------------------------------------
+# =========================================================
 
 @app.route("/image-editor", methods=["POST"])
 def image_editor():
@@ -1078,17 +1276,27 @@ def image_editor():
             ImageDraw
         )
 
-        image = Image.open(source).convert("RGBA")
+        image = Image.open(
+            source
+        ).convert("RGBA")
 
-        if request.form.get("mirror") == "1":
-            image = ImageOps.mirror(image)
+        if request.form.get(
+            "mirror"
+        ) == "1":
+            image = ImageOps.mirror(
+                image
+            )
 
         angle = request.form.get(
             "angle",
             "0"
         )
 
-        angle = float(angle) if angle else 0
+        angle = (
+            float(angle)
+            if angle
+            else 0
+        )
 
         if angle:
             image = image.rotate(
@@ -1141,12 +1349,22 @@ def image_editor():
             "0"
         )
 
-        blur = float(blur) if blur else 0
-        blur = max(0, min(blur, 20))
+        blur = (
+            float(blur)
+            if blur
+            else 0
+        )
+
+        blur = max(
+            0,
+            min(blur, 20)
+        )
 
         if blur:
             image = image.filter(
-                ImageFilter.GaussianBlur(blur)
+                ImageFilter.GaussianBlur(
+                    blur
+                )
             )
 
         overlay_text = request.form.get(
@@ -1155,12 +1373,19 @@ def image_editor():
         ).strip()
 
         if overlay_text:
-            draw = ImageDraw.Draw(image)
+            draw = ImageDraw.Draw(
+                image
+            )
 
             draw.text(
                 (30, 30),
                 overlay_text[:500],
-                fill=(255, 255, 255, 255)
+                fill=(
+                    255,
+                    255,
+                    255,
+                    255
+                )
             )
 
         output = create_output("png")
@@ -1169,6 +1394,8 @@ def image_editor():
             output,
             "PNG"
         )
+
+        ensure_output_exists(output)
 
         return render_success(
             "ویرایش تصویر انجام شد.",
@@ -1179,9 +1406,9 @@ def image_editor():
         return render_failure(e)
 
 
-# ---------------------------------------------------------
+# =========================================================
 # 20 - تبدیل فرمت صوت
-# ---------------------------------------------------------
+# =========================================================
 
 @app.route("/audio-convert", methods=["POST"])
 def audio_convert():
@@ -1218,53 +1445,73 @@ def audio_convert():
 
         if fmt == "mp3":
             command = [
-                "ffmpeg", "-y",
-                "-i", source,
+                "ffmpeg",
+                "-y",
+                "-i",
+                source,
                 "-vn",
-                "-c:a", "libmp3lame",
-                "-q:a", "2",
+                "-c:a",
+                "libmp3lame",
+                "-q:a",
+                "2",
                 output
             ]
 
         elif fmt == "wav":
             command = [
-                "ffmpeg", "-y",
-                "-i", source,
+                "ffmpeg",
+                "-y",
+                "-i",
+                source,
                 "-vn",
-                "-c:a", "pcm_s16le",
+                "-c:a",
+                "pcm_s16le",
                 output
             ]
 
         elif fmt == "ogg":
             command = [
-                "ffmpeg", "-y",
-                "-i", source,
+                "ffmpeg",
+                "-y",
+                "-i",
+                source,
                 "-vn",
-                "-c:a", "libvorbis",
-                "-q:a", "5",
+                "-c:a",
+                "libvorbis",
+                "-q:a",
+                "5",
                 output
             ]
 
         elif fmt == "flac":
             command = [
-                "ffmpeg", "-y",
-                "-i", source,
+                "ffmpeg",
+                "-y",
+                "-i",
+                source,
                 "-vn",
-                "-c:a", "flac",
+                "-c:a",
+                "flac",
                 output
             ]
 
         else:
             command = [
-                "ffmpeg", "-y",
-                "-i", source,
+                "ffmpeg",
+                "-y",
+                "-i",
+                source,
                 "-vn",
-                "-c:a", "aac",
-                "-b:a", "192k",
+                "-c:a",
+                "aac",
+                "-b:a",
+                "192k",
                 output
             ]
 
         run_command(*command)
+
+        ensure_output_exists(output)
 
         return render_success(
             "فرمت صوت تبدیل شد.",
@@ -1275,9 +1522,9 @@ def audio_convert():
         return render_failure(e)
 
 
-# ---------------------------------------------------------
+# =========================================================
 # 21 - برش صوت
-# ---------------------------------------------------------
+# =========================================================
 
 @app.route("/audio-cut", methods=["POST"])
 def audio_cut():
@@ -1302,11 +1549,23 @@ def audio_cut():
             "10"
         )
 
-        start = float(start) if start else 0
-        duration = float(duration) if duration else 10
+        start = (
+            float(start)
+            if start
+            else 0
+        )
+
+        duration = (
+            float(duration)
+            if duration
+            else 10
+        )
 
         start = max(0, start)
-        duration = max(0.1, duration)
+        duration = max(
+            0.1,
+            duration
+        )
 
         output = create_output("mp3")
 
@@ -1327,6 +1586,8 @@ def audio_cut():
             output
         )
 
+        ensure_output_exists(output)
+
         return render_success(
             "قسمت انتخاب‌شده از صدا جدا شد.",
             result_file=output.name
@@ -1336,9 +1597,9 @@ def audio_cut():
         return render_failure(e)
 
 
-# ---------------------------------------------------------
+# =========================================================
 # 22 - تغییر حجم صدا
-# ---------------------------------------------------------
+# =========================================================
 
 @app.route("/audio-volume", methods=["POST"])
 def audio_volume():
@@ -1358,8 +1619,16 @@ def audio_volume():
             "1.2"
         )
 
-        volume = float(volume) if volume else 1.2
-        volume = max(0, min(volume, 5))
+        volume = (
+            float(volume)
+            if volume
+            else 1.2
+        )
+
+        volume = max(
+            0,
+            min(volume, 5)
+        )
 
         output = create_output("mp3")
 
@@ -1377,6 +1646,8 @@ def audio_volume():
             output
         )
 
+        ensure_output_exists(output)
+
         return render_success(
             "بلندی صدا تغییر کرد.",
             result_file=output.name
@@ -1386,9 +1657,9 @@ def audio_volume():
         return render_failure(e)
 
 
-# ---------------------------------------------------------
+# =========================================================
 # 23 - کاهش نویز
-# ---------------------------------------------------------
+# =========================================================
 
 @app.route("/audio-clean", methods=["POST"])
 def audio_clean():
@@ -1419,6 +1690,8 @@ def audio_clean():
             output
         )
 
+        ensure_output_exists(output)
+
         return render_success(
             "کاهش نویز انجام شد.",
             result_file=output.name
@@ -1428,9 +1701,9 @@ def audio_clean():
         return render_failure(e)
 
 
-# ---------------------------------------------------------
+# =========================================================
 # 24 - حذف سکوت
-# ---------------------------------------------------------
+# =========================================================
 
 @app.route("/audio-silence", methods=["POST"])
 def audio_silence():
@@ -1453,13 +1726,20 @@ def audio_silence():
             "-i",
             source,
             "-af",
-            "silenceremove=stop_periods=-1:stop_duration=1:stop_threshold=-45dB",
+            (
+                "silenceremove="
+                "stop_periods=-1:"
+                "stop_duration=1:"
+                "stop_threshold=-45dB"
+            ),
             "-c:a",
             "libmp3lame",
             "-q:a",
             "2",
             output
         )
+
+        ensure_output_exists(output)
 
         return render_success(
             "سکوت‌های طولانی حذف شدند.",
@@ -1470,9 +1750,9 @@ def audio_silence():
         return render_failure(e)
 
 
-# ---------------------------------------------------------
+# =========================================================
 # 25 - ادغام صوت
-# ---------------------------------------------------------
+# =========================================================
 
 @app.route("/audio-merge", methods=["POST"])
 def audio_merge():
@@ -1487,8 +1767,9 @@ def audio_merge():
             if (
                 file
                 and file.filename
-                and get_extension(file.filename)
-                in AUDIO_EXTENSIONS
+                and get_extension(
+                    file.filename
+                ) in AUDIO_EXTENSIONS
             )
         ]
 
@@ -1528,8 +1809,8 @@ def audio_merge():
             )
 
         list_file = (
-            UPLOAD_DIR
-            / f"{uuid.uuid4().hex}.txt"
+            UPLOAD_DIR /
+            f"{uuid.uuid4().hex}.txt"
         )
 
         with open(
@@ -1568,6 +1849,8 @@ def audio_merge():
             output
         )
 
+        ensure_output_exists(output)
+
         return render_success(
             "فایل‌های صوتی ادغام شدند.",
             result_file=output.name
@@ -1577,9 +1860,9 @@ def audio_merge():
         return render_failure(e)
 
 
-# ---------------------------------------------------------
+# =========================================================
 # 26 - ادغام PDF
-# ---------------------------------------------------------
+# =========================================================
 
 @app.route("/pdf-merge", methods=["POST"])
 def pdf_merge():
@@ -1629,6 +1912,8 @@ def pdf_merge():
         ) as file:
             writer.write(file)
 
+        ensure_output_exists(output)
+
         return render_success(
             "PDFها با موفقیت ادغام شدند.",
             result_file=output.name
@@ -1638,9 +1923,9 @@ def pdf_merge():
         return render_failure(e)
 
 
-# ---------------------------------------------------------
+# =========================================================
 # 27 - استخراج صفحات PDF
-# ---------------------------------------------------------
+# =========================================================
 
 @app.route("/pdf-extract-pages", methods=["POST"])
 def pdf_extract_pages():
@@ -1687,7 +1972,10 @@ def pdf_extract_pages():
                     start, end = end, start
 
                 selected_pages.extend(
-                    range(start, end + 1)
+                    range(
+                        start,
+                        end + 1
+                    )
                 )
 
             else:
@@ -1703,7 +1991,9 @@ def pdf_extract_pages():
                 <= len(reader.pages)
             ):
                 writer.add_page(
-                    reader.pages[number - 1]
+                    reader.pages[
+                        number - 1
+                    ]
                 )
 
         if len(writer.pages) == 0:
@@ -1719,6 +2009,8 @@ def pdf_extract_pages():
         ) as file:
             writer.write(file)
 
+        ensure_output_exists(output)
+
         return render_success(
             "صفحات انتخاب‌شده جدا شدند.",
             result_file=output.name
@@ -1728,9 +2020,9 @@ def pdf_extract_pages():
         return render_failure(e)
 
 
-# ---------------------------------------------------------
+# =========================================================
 # 28 - PDF به JPG
-# ---------------------------------------------------------
+# =========================================================
 
 @app.route("/pdf-to-jpg", methods=["POST"])
 def pdf_to_jpg():
@@ -1755,8 +2047,8 @@ def pdf_to_jpg():
             )
 
         prefix = (
-            OUTPUT_DIR
-            / uuid.uuid4().hex
+            OUTPUT_DIR /
+            uuid.uuid4().hex
         )
 
         run_command(
@@ -1775,10 +2067,7 @@ def pdf_to_jpg():
             prefix.name + ".jpg"
         )
 
-        if not result.exists():
-            raise RuntimeError(
-                "تبدیل PDF به تصویر انجام نشد."
-            )
+        ensure_output_exists(result)
 
         return render_success(
             "صفحه اول PDF به JPG تبدیل شد.",
@@ -1789,9 +2078,9 @@ def pdf_to_jpg():
         return render_failure(e)
 
 
-# ---------------------------------------------------------
+# =========================================================
 # 29 - آمار متن
-# ---------------------------------------------------------
+# =========================================================
 
 @app.route("/text-stats", methods=["POST"])
 def text_stats():
@@ -1809,7 +2098,10 @@ def text_stats():
         )
 
         words = len(
-            re.findall(r"\S+", text)
+            re.findall(
+                r"\S+",
+                text
+            )
         )
 
         lines = (
@@ -1835,9 +2127,9 @@ def text_stats():
         return render_failure(e)
 
 
-# ---------------------------------------------------------
+# =========================================================
 # 30 - تغییر حروف
-# ---------------------------------------------------------
+# =========================================================
 
 @app.route("/text-case", methods=["POST"])
 def text_case():
@@ -1871,9 +2163,9 @@ def text_case():
         return render_failure(e)
 
 
-# ---------------------------------------------------------
+# =========================================================
 # 31 - پاکسازی متن
-# ---------------------------------------------------------
+# =========================================================
 
 @app.route("/text-clean", methods=["POST"])
 def text_clean():
@@ -1907,9 +2199,9 @@ def text_clean():
         return render_failure(e)
 
 
-# ---------------------------------------------------------
+# =========================================================
 # 32 - مرتب سازی متن
-# ---------------------------------------------------------
+# =========================================================
 
 @app.route("/text-sort", methods=["POST"])
 def text_sort():
@@ -1932,7 +2224,9 @@ def text_sort():
         )
 
         lines.sort(
-            reverse=(mode == "desc")
+            reverse=(
+                mode == "desc"
+            )
         )
 
         result = "\n".join(lines)
@@ -1946,9 +2240,9 @@ def text_sort():
         return render_failure(e)
 
 
-# ---------------------------------------------------------
+# =========================================================
 # 33 - شماره گذاری متن
-# ---------------------------------------------------------
+# =========================================================
 
 @app.route("/text-number", methods=["POST"])
 def text_number():
@@ -1977,9 +2271,9 @@ def text_number():
         return render_failure(e)
 
 
-# ---------------------------------------------------------
+# =========================================================
 # 34 - جایگزینی متن
-# ---------------------------------------------------------
+# =========================================================
 
 @app.route("/text-replace", methods=["POST"])
 def text_replace():
@@ -2018,9 +2312,9 @@ def text_replace():
         return render_failure(e)
 
 
-# ---------------------------------------------------------
+# =========================================================
 # 35 - مقایسه متن
-# ---------------------------------------------------------
+# =========================================================
 
 @app.route("/text-compare", methods=["POST"])
 def text_compare():
@@ -2060,9 +2354,9 @@ def text_compare():
         return render_failure(e)
 
 
-# ---------------------------------------------------------
+# =========================================================
 # 36 - ساخت رمز عبور
-# ---------------------------------------------------------
+# =========================================================
 
 @app.route("/password", methods=["POST"])
 def password():
@@ -2072,8 +2366,16 @@ def password():
             "16"
         )
 
-        length = int(length) if length else 16
-        length = max(4, min(length, 128))
+        length = (
+            int(length)
+            if length
+            else 16
+        )
+
+        length = max(
+            4,
+            min(length, 128)
+        )
 
         characters = (
             string.ascii_letters
@@ -2082,7 +2384,9 @@ def password():
         )
 
         result = "".join(
-            secrets.choice(characters)
+            secrets.choice(
+                characters
+            )
             for _ in range(length)
         )
 
@@ -2095,9 +2399,9 @@ def password():
         return render_failure(e)
 
 
-# ---------------------------------------------------------
+# =========================================================
 # 37 - عدد تصادفی
-# ---------------------------------------------------------
+# =========================================================
 
 @app.route("/random-number", methods=["POST"])
 def random_number():
@@ -2112,31 +2416,47 @@ def random_number():
             "100"
         )
 
-        minimum = int(minimum) if minimum else 1
-        maximum = int(maximum) if maximum else 100
+        minimum = (
+            int(minimum)
+            if minimum
+            else 1
+        )
+
+        maximum = (
+            int(maximum)
+            if maximum
+            else 100
+        )
 
         if minimum > maximum:
-            minimum, maximum = maximum, minimum
+            minimum, maximum = (
+                maximum,
+                minimum
+            )
 
         number = (
             secrets.randbelow(
-                maximum - minimum + 1
+                maximum -
+                minimum +
+                1
             )
             + minimum
         )
 
         return render_success(
             "عدد تصادفی ساخته شد.",
-            transcribed_text=str(number)
+            transcribed_text=str(
+                number
+            )
         )
 
     except Exception as e:
         return render_failure(e)
 
 
-# ---------------------------------------------------------
+# =========================================================
 # 38 - تبدیل واحد
-# ---------------------------------------------------------
+# =========================================================
 
 @app.route("/unit-convert", methods=["POST"])
 def unit_convert():
@@ -2146,7 +2466,11 @@ def unit_convert():
             "0"
         )
 
-        value = float(value) if value else 0
+        value = (
+            float(value)
+            if value
+            else 0
+        )
 
         conversion = request.form.get(
             "kind",
@@ -2160,8 +2484,13 @@ def unit_convert():
             "g-kg": value / 1000,
             "l-ml": value * 1000,
             "ml-l": value / 1000,
-            "c-f": value * 9 / 5 + 32,
-            "f-c": (value - 32) * 5 / 9
+            "c-f": (
+                value * 9 / 5
+                + 32
+            ),
+            "f-c": (
+                value - 32
+            ) * 5 / 9
         }
 
         if conversion not in conversions:
@@ -2180,11 +2509,14 @@ def unit_convert():
         return render_failure(e)
 
 
-# ---------------------------------------------------------
+# =========================================================
 # 39 - حذف اطلاعات اضافی عکس
-# ---------------------------------------------------------
+# =========================================================
 
-@app.route("/image-remove-metadata", methods=["POST"])
+@app.route(
+    "/image-remove-metadata",
+    methods=["POST"]
+)
 def image_remove_metadata():
     try:
         file = (
@@ -2225,6 +2557,8 @@ def image_remove_metadata():
             "PNG"
         )
 
+        ensure_output_exists(output)
+
         return render_success(
             "اطلاعات اضافی تصویر حذف شد.",
             result_file=output.name
@@ -2234,9 +2568,9 @@ def image_remove_metadata():
         return render_failure(e)
 
 
-# ---------------------------------------------------------
+# =========================================================
 # 40 - نرمال سازی صدا
-# ---------------------------------------------------------
+# =========================================================
 
 @app.route("/audio-normalize", methods=["POST"])
 def audio_normalize():
@@ -2259,13 +2593,20 @@ def audio_normalize():
             "-i",
             source,
             "-af",
-            "loudnorm=I=-16:TP=-1.5:LRA=11",
+            (
+                "loudnorm="
+                "I=-16:"
+                "TP=-1.5:"
+                "LRA=11"
+            ),
             "-c:a",
             "libmp3lame",
             "-q:a",
             "2",
             output
         )
+
+        ensure_output_exists(output)
 
         return render_success(
             "بلندی صدا نرمال شد.",
@@ -2276,11 +2617,872 @@ def audio_normalize():
         return render_failure(e)
 
 
-# ---------------------------------------------------------
-# دانلود فایل
-# ---------------------------------------------------------
+# =========================================================
+# 41 - تبدیل فرمت ویدیو
+# =========================================================
 
-@app.route("/download/<path:filename>")
+@app.route(
+    "/video-convert",
+    methods=["POST"]
+)
+def video_convert():
+    try:
+        file = (
+            request.files.get("video_file")
+            or request.files.get("file")
+            or request.files.get("video")
+        )
+
+        source = save_uploaded_file(
+            file,
+            VIDEO_EXTENSIONS
+        )
+
+        fmt = request.form.get(
+            "format",
+            "mp4"
+        ).lower().strip()
+
+        allowed_formats = {
+            "mp4",
+            "webm",
+            "mov",
+            "mkv"
+        }
+
+        if fmt not in allowed_formats:
+            raise ValueError(
+                "فرمت خروجی ویدیو معتبر نیست."
+            )
+
+        output = create_output(fmt)
+
+        if fmt == "mp4":
+            command = [
+                "ffmpeg",
+                "-y",
+                "-i",
+                source,
+                "-map",
+                "0:v:0",
+                "-map",
+                "0:a?",
+                "-c:v",
+                "libx264",
+                "-preset",
+                "veryfast",
+                "-crf",
+                "23",
+                "-c:a",
+                "aac",
+                "-b:a",
+                "128k",
+                "-movflags",
+                "+faststart",
+                output
+            ]
+
+        elif fmt == "webm":
+            command = [
+                "ffmpeg",
+                "-y",
+                "-i",
+                source,
+                "-map",
+                "0:v:0",
+                "-map",
+                "0:a?",
+                "-c:v",
+                "libvpx-vp9",
+                "-crf",
+                "32",
+                "-b:v",
+                "0",
+                "-c:a",
+                "libopus",
+                "-b:a",
+                "128k",
+                output
+            ]
+
+        else:
+            command = [
+                "ffmpeg",
+                "-y",
+                "-i",
+                source,
+                "-map",
+                "0:v:0",
+                "-map",
+                "0:a?",
+                "-c:v",
+                "libx264",
+                "-preset",
+                "veryfast",
+                "-crf",
+                "23",
+                "-c:a",
+                "aac",
+                "-b:a",
+                "128k",
+                output
+            ]
+
+        run_command(
+            *command,
+            timeout=900
+        )
+
+        ensure_output_exists(output)
+
+        return render_success(
+            "فرمت ویدیو با موفقیت تبدیل شد.",
+            result_file=output.name
+        )
+
+    except Exception as e:
+        return render_failure(
+            f"تبدیل ویدیو انجام نشد: {e}"
+        )
+
+
+# =========================================================
+# 42 - استخراج صدا از ویدیو
+# =========================================================
+
+@app.route(
+    "/video-extract-audio",
+    methods=["POST"]
+)
+def video_extract_audio():
+    try:
+        file = (
+            request.files.get("video_file")
+            or request.files.get("file")
+            or request.files.get("video")
+        )
+
+        source = save_uploaded_file(
+            file,
+            VIDEO_EXTENSIONS
+        )
+
+        fmt = request.form.get(
+            "format",
+            "mp3"
+        ).lower().strip()
+
+        allowed_formats = {
+            "mp3",
+            "wav",
+            "aac",
+            "m4a"
+        }
+
+        if fmt not in allowed_formats:
+            raise ValueError(
+                "فرمت صوتی خروجی معتبر نیست."
+            )
+
+        output = create_output(fmt)
+
+        if fmt == "mp3":
+            command = [
+                "ffmpeg",
+                "-y",
+                "-i",
+                source,
+                "-vn",
+                "-c:a",
+                "libmp3lame",
+                "-q:a",
+                "2",
+                output
+            ]
+
+        elif fmt == "wav":
+            command = [
+                "ffmpeg",
+                "-y",
+                "-i",
+                source,
+                "-vn",
+                "-c:a",
+                "pcm_s16le",
+                output
+            ]
+
+        else:
+            command = [
+                "ffmpeg",
+                "-y",
+                "-i",
+                source,
+                "-vn",
+                "-c:a",
+                "aac",
+                "-b:a",
+                "192k",
+                output
+            ]
+
+        run_command(
+            *command,
+            timeout=900
+        )
+
+        ensure_output_exists(output)
+
+        return render_success(
+            "صدا از ویدیو استخراج شد.",
+            result_file=output.name
+        )
+
+    except Exception as e:
+        return render_failure(
+            f"استخراج صدا انجام نشد: {e}"
+        )
+
+
+# =========================================================
+# 43 - برش ویدیو
+# =========================================================
+
+@app.route(
+    "/video-cut",
+    methods=["POST"]
+)
+def video_cut():
+    try:
+        file = (
+            request.files.get("video_file")
+            or request.files.get("file")
+            or request.files.get("video")
+        )
+
+        source = save_uploaded_file(
+            file,
+            VIDEO_EXTENSIONS
+        )
+
+        start = request.form.get(
+            "start",
+            "0"
+        )
+
+        duration = request.form.get(
+            "duration",
+            "10"
+        )
+
+        try:
+            start = float(start)
+            duration = float(duration)
+        except ValueError:
+            raise ValueError(
+                "زمان شروع و مدت باید عدد باشند."
+            )
+
+        start = max(0, start)
+        duration = max(
+            0.1,
+            duration
+        )
+
+        output = create_output("mp4")
+
+        run_command(
+            "ffmpeg",
+            "-y",
+            "-ss",
+            start,
+            "-i",
+            source,
+            "-t",
+            duration,
+            "-map",
+            "0:v:0",
+            "-map",
+            "0:a?",
+            "-c:v",
+            "libx264",
+            "-preset",
+            "veryfast",
+            "-crf",
+            "23",
+            "-c:a",
+            "aac",
+            "-b:a",
+            "128k",
+            "-movflags",
+            "+faststart",
+            output,
+            timeout=900
+        )
+
+        ensure_output_exists(output)
+
+        return render_success(
+            "ویدیو با موفقیت برش خورد.",
+            result_file=output.name
+        )
+
+    except Exception as e:
+        return render_failure(
+            f"برش ویدیو انجام نشد: {e}"
+        )
+
+
+# =========================================================
+# 44 - حذف صدای ویدیو
+# =========================================================
+
+@app.route(
+    "/video-mute",
+    methods=["POST"]
+)
+def video_mute():
+    try:
+        file = (
+            request.files.get("video_file")
+            or request.files.get("file")
+            or request.files.get("video")
+        )
+
+        source = save_uploaded_file(
+            file,
+            VIDEO_EXTENSIONS
+        )
+
+        output = create_output("mp4")
+
+        run_command(
+            "ffmpeg",
+            "-y",
+            "-i",
+            source,
+            "-map",
+            "0:v:0",
+            "-c:v",
+            "libx264",
+            "-preset",
+            "veryfast",
+            "-crf",
+            "23",
+            "-an",
+            "-movflags",
+            "+faststart",
+            output,
+            timeout=900
+        )
+
+        ensure_output_exists(output)
+
+        return render_success(
+            "صدای ویدیو حذف شد.",
+            result_file=output.name
+        )
+
+    except Exception as e:
+        return render_failure(
+            f"حذف صدای ویدیو انجام نشد: {e}"
+        )
+
+
+# =========================================================
+# 45 - تغییر صدای ویدیو
+# =========================================================
+
+@app.route(
+    "/video-volume",
+    methods=["POST"]
+)
+def video_volume():
+    try:
+        file = (
+            request.files.get("video_file")
+            or request.files.get("file")
+            or request.files.get("video")
+        )
+
+        source = save_uploaded_file(
+            file,
+            VIDEO_EXTENSIONS
+        )
+
+        volume = request.form.get(
+            "volume",
+            "1"
+        )
+
+        try:
+            volume = float(volume)
+        except ValueError:
+            raise ValueError(
+                "مقدار صدا باید عدد باشد."
+            )
+
+        volume = max(
+            0,
+            min(volume, 5)
+        )
+
+        output = create_output("mp4")
+
+        run_command(
+            "ffmpeg",
+            "-y",
+            "-i",
+            source,
+            "-map",
+            "0:v:0",
+            "-map",
+            "0:a?",
+            "-c:v",
+            "libx264",
+            "-preset",
+            "veryfast",
+            "-crf",
+            "23",
+            "-af",
+            f"volume={volume}",
+            "-c:a",
+            "aac",
+            "-b:a",
+            "128k",
+            "-movflags",
+            "+faststart",
+            output,
+            timeout=900
+        )
+
+        ensure_output_exists(output)
+
+        return render_success(
+            "صدای ویدیو تغییر کرد.",
+            result_file=output.name
+        )
+
+    except Exception as e:
+        return render_failure(
+            f"تغییر صدای ویدیو انجام نشد: {e}"
+        )
+
+
+# =========================================================
+# 46 - فشرده سازی ویدیو
+# =========================================================
+
+@app.route(
+    "/video-compress",
+    methods=["POST"]
+)
+def video_compress():
+    try:
+        file = (
+            request.files.get("video_file")
+            or request.files.get("file")
+            or request.files.get("video")
+        )
+
+        source = save_uploaded_file(
+            file,
+            VIDEO_EXTENSIONS
+        )
+
+        quality = request.form.get(
+            "quality",
+            "medium"
+        ).lower()
+
+        crf_map = {
+            "high": "20",
+            "medium": "26",
+            "low": "31"
+        }
+
+        crf = crf_map.get(
+            quality,
+            "26"
+        )
+
+        output = create_output("mp4")
+
+        run_command(
+            "ffmpeg",
+            "-y",
+            "-i",
+            source,
+            "-map",
+            "0:v:0",
+            "-map",
+            "0:a?",
+            "-c:v",
+            "libx264",
+            "-preset",
+            "medium",
+            "-crf",
+            crf,
+            "-c:a",
+            "aac",
+            "-b:a",
+            "96k",
+            "-movflags",
+            "+faststart",
+            output,
+            timeout=900
+        )
+
+        ensure_output_exists(output)
+
+        return render_success(
+            "ویدیو با موفقیت فشرده شد.",
+            result_file=output.name
+        )
+
+    except Exception as e:
+        return render_failure(
+            f"فشرده‌سازی ویدیو انجام نشد: {e}"
+        )
+
+
+# =========================================================
+# 47 - استخراج فریم
+# =========================================================
+
+@app.route(
+    "/video-frame",
+    methods=["POST"]
+)
+def video_frame():
+    try:
+        file = (
+            request.files.get("video_file")
+            or request.files.get("file")
+            or request.files.get("video")
+        )
+
+        source = save_uploaded_file(
+            file,
+            VIDEO_EXTENSIONS
+        )
+
+        timestamp = request.form.get(
+            "timestamp",
+            "0"
+        )
+
+        try:
+            timestamp = float(timestamp)
+        except ValueError:
+            raise ValueError(
+                "زمان فریم باید عدد باشد."
+            )
+
+        timestamp = max(
+            0,
+            timestamp
+        )
+
+        output = create_output("jpg")
+
+        run_command(
+            "ffmpeg",
+            "-y",
+            "-ss",
+            timestamp,
+            "-i",
+            source,
+            "-frames:v",
+            "1",
+            "-q:v",
+            "2",
+            output,
+            timeout=300
+        )
+
+        ensure_output_exists(output)
+
+        return render_success(
+            "فریم ویدیو استخراج شد.",
+            result_file=output.name
+        )
+
+    except Exception as e:
+        return render_failure(
+            f"استخراج فریم انجام نشد: {e}"
+        )
+
+
+# =========================================================
+# 48 - چرخاندن ویدیو
+# =========================================================
+
+@app.route(
+    "/video-rotate",
+    methods=["POST"]
+)
+def video_rotate():
+    try:
+        file = (
+            request.files.get("video_file")
+            or request.files.get("file")
+            or request.files.get("video")
+        )
+
+        source = save_uploaded_file(
+            file,
+            VIDEO_EXTENSIONS
+        )
+
+        angle = str(
+            request.form.get(
+                "angle",
+                "90"
+            )
+        )
+
+        allowed_angles = {
+            "90",
+            "180",
+            "270"
+        }
+
+        if angle not in allowed_angles:
+            raise ValueError(
+                "زاویه باید 90، 180 یا 270 درجه باشد."
+            )
+
+        filters = {
+            "90": "transpose=1",
+            "180": (
+                "transpose=1,"
+                "transpose=1"
+            ),
+            "270": "transpose=2"
+        }
+
+        output = create_output("mp4")
+
+        run_command(
+            "ffmpeg",
+            "-y",
+            "-i",
+            source,
+            "-map",
+            "0:v:0",
+            "-map",
+            "0:a?",
+            "-vf",
+            filters[angle],
+            "-c:v",
+            "libx264",
+            "-preset",
+            "veryfast",
+            "-crf",
+            "23",
+            "-c:a",
+            "aac",
+            "-b:a",
+            "128k",
+            "-movflags",
+            "+faststart",
+            output,
+            timeout=900
+        )
+
+        ensure_output_exists(output)
+
+        return render_success(
+            "ویدیو چرخانده شد.",
+            result_file=output.name
+        )
+
+    except Exception as e:
+        return render_failure(
+            f"چرخاندن ویدیو انجام نشد: {e}"
+        )
+
+
+# =========================================================
+# 49 - تغییر اندازه ویدیو
+# =========================================================
+
+@app.route(
+    "/video-resize",
+    methods=["POST"]
+)
+def video_resize():
+    try:
+        file = (
+            request.files.get("video_file")
+            or request.files.get("file")
+            or request.files.get("video")
+        )
+
+        source = save_uploaded_file(
+            file,
+            VIDEO_EXTENSIONS
+        )
+
+        width = request.form.get(
+            "width",
+            "1280"
+        )
+
+        height = request.form.get(
+            "height",
+            "-2"
+        )
+
+        try:
+            width = int(width)
+            height = int(height)
+        except ValueError:
+            raise ValueError(
+                "عرض و ارتفاع باید عدد باشند."
+            )
+
+        width = max(
+            160,
+            min(width, 3840)
+        )
+
+        if height != -2:
+            height = max(
+                90,
+                min(height, 2160)
+            )
+
+        output = create_output("mp4")
+
+        run_command(
+            "ffmpeg",
+            "-y",
+            "-i",
+            source,
+            "-map",
+            "0:v:0",
+            "-map",
+            "0:a?",
+            "-vf",
+            f"scale={width}:{height}",
+            "-c:v",
+            "libx264",
+            "-preset",
+            "veryfast",
+            "-crf",
+            "23",
+            "-c:a",
+            "aac",
+            "-b:a",
+            "128k",
+            "-movflags",
+            "+faststart",
+            output,
+            timeout=900
+        )
+
+        ensure_output_exists(output)
+
+        return render_success(
+            "اندازه ویدیو تغییر کرد.",
+            result_file=output.name
+        )
+
+    except Exception as e:
+        return render_failure(
+            f"تغییر اندازه ویدیو انجام نشد: {e}"
+        )
+
+
+# =========================================================
+# 50 - تغییر FPS
+# =========================================================
+
+@app.route(
+    "/video-fps",
+    methods=["POST"]
+)
+def video_fps():
+    try:
+        file = (
+            request.files.get("video_file")
+            or request.files.get("file")
+            or request.files.get("video")
+        )
+
+        source = save_uploaded_file(
+            file,
+            VIDEO_EXTENSIONS
+        )
+
+        fps = request.form.get(
+            "fps",
+            "30"
+        )
+
+        try:
+            fps = float(fps)
+        except ValueError:
+            raise ValueError(
+                "FPS باید عدد باشد."
+            )
+
+        fps = max(
+            1,
+            min(fps, 120)
+        )
+
+        output = create_output("mp4")
+
+        run_command(
+            "ffmpeg",
+            "-y",
+            "-i",
+            source,
+            "-map",
+            "0:v:0",
+            "-map",
+            "0:a?",
+            "-r",
+            fps,
+            "-c:v",
+            "libx264",
+            "-preset",
+            "veryfast",
+            "-crf",
+            "23",
+            "-c:a",
+            "aac",
+            "-b:a",
+            "128k",
+            "-movflags",
+            "+faststart",
+            output,
+            timeout=900
+        )
+
+        ensure_output_exists(output)
+
+        return render_success(
+            "FPS ویدیو تغییر کرد.",
+            result_file=output.name
+        )
+
+    except Exception as e:
+        return render_failure(
+            f"تغییر FPS ویدیو انجام نشد: {e}"
+        )
+
+
+# =========================================================
+# دانلود فایل
+# =========================================================
+
+@app.route(
+    "/download/<path:filename>"
+)
 def download(filename):
     return send_from_directory(
         OUTPUT_DIR,
@@ -2289,37 +3491,48 @@ def download(filename):
     )
 
 
-# ---------------------------------------------------------
+# =========================================================
 # Health Check
-# ---------------------------------------------------------
+# =========================================================
 
 @app.route("/health")
 def health():
     return jsonify(
         status="ok",
-        service="online"
+        service="online",
+        ffmpeg=bool(
+            shutil.which("ffmpeg")
+        )
     )
 
 
-# ---------------------------------------------------------
+# =========================================================
 # API
-# ---------------------------------------------------------
+# =========================================================
 
 @app.route("/api/tools")
 def api_tools():
     return jsonify(
         status="active",
-        tools=40
+        tools=50,
+        audio_tools=10,
+        image_tools=15,
+        pdf_tools=7,
+        text_tools=7,
+        utility_tools=2,
+        video_tools=10
     )
 
 
-# ---------------------------------------------------------
+# =========================================================
 # Sitemap
-# ---------------------------------------------------------
+# =========================================================
 
 @app.route("/sitemap.xml")
 def sitemap():
-    base_url = "https://rt-k9g5.onrender.com"
+    base_url = (
+        "https://rt-k9g5.onrender.com"
+    )
 
     routes = [
         "",
@@ -2353,9 +3566,9 @@ def sitemap():
     )
 
 
-# ---------------------------------------------------------
+# =========================================================
 # Robots
-# ---------------------------------------------------------
+# =========================================================
 
 @app.route("/robots.txt")
 def robots():
@@ -2367,9 +3580,9 @@ def robots():
     )
 
 
-# ---------------------------------------------------------
+# =========================================================
 # خطای حجم فایل
-# ---------------------------------------------------------
+# =========================================================
 
 @app.errorhandler(413)
 def file_too_large(error):
@@ -2381,9 +3594,9 @@ def file_too_large(error):
     )
 
 
-# ---------------------------------------------------------
+# =========================================================
 # خطای داخلی
-# ---------------------------------------------------------
+# =========================================================
 
 @app.errorhandler(500)
 def server_error(error):
@@ -2395,9 +3608,9 @@ def server_error(error):
     )
 
 
-# ---------------------------------------------------------
+# =========================================================
 # اجرای محلی
-# ---------------------------------------------------------
+# =========================================================
 
 if __name__ == "__main__":
     port = int(
