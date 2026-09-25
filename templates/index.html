@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <meta name="description"
-      content="ابزارک؛ مجموعه‌ای حرفه‌ای از بیش از ۴۰ ابزار آنلاین رایگان برای پردازش صوت، تصویر، PDF و متن.">
+      content="ابزارک؛ مجموعه‌ای حرفه‌ای از بیش از ۵۰ ابزار آنلاین رایگان برای پردازش صوت، تصویر، ویدیو، PDF و متن.">
 
 <meta name="robots" content="index,follow">
 
@@ -1163,7 +1163,7 @@ footer{
 
 <div class="hero-badge">
 <span class="pulse"></span>
-بیش از ۴۰ ابزار آنلاین کاربردی
+بیش از ۵۰ ابزار آنلاین کاربردی
 </div>
 
 <h1>
@@ -1176,7 +1176,7 @@ footer{
 
 <p>
 ابزارک مجموعه‌ای از ابزارهای سریع و کاربردی برای
-پردازش فایل‌های صوتی، تصویری، PDF و متن است.
+پردازش فایل‌های صوتی، تصویری، ویدیویی، PDF و متن است.
 بدون نیاز به نصب نرم‌افزار اضافی.
 </p>
 
@@ -1204,12 +1204,12 @@ footer{
 <section class="stats">
 
 <div class="stat">
-<strong>۴۰+</strong>
+<strong>۵۰+</strong>
 <span>ابزار آنلاین</span>
 </div>
 
 <div class="stat">
-<strong>۴</strong>
+<strong>۵</strong>
 <span>دسته اصلی</span>
 </div>
 
@@ -1396,6 +1396,10 @@ footer{
 
 <button class="filter" data-filter="utility">
 🧰 کاربردی
+</button>
+
+<button class="filter" data-filter="video">
+🎬 ویدیو
 </button>
 
 </div>
@@ -2927,6 +2931,207 @@ required>
 </article>
 
 
+<!-- 41 -->
+
+<article class="tool-card"
+data-category="video"
+data-search="تبدیل فرمت ویدیو video convert mp4 webm mov mkv">
+
+<span class="tool-tag">ویدیو</span>
+<div class="tool-icon">🎬</div>
+<h3>تبدیل فرمت ویدیو</h3>
+<p>تبدیل ویدیو بین فرمت‌های MP4، WebM، MOV و MKV.</p>
+<form class="tool-form" action="/video-convert" method="post" enctype="multipart/form-data">
+<input type="file" name="video_file" accept="video/*" required>
+<select name="format">
+<option value="mp4">MP4</option>
+<option value="webm">WebM</option>
+<option value="mov">MOV</option>
+<option value="mkv">MKV</option>
+</select>
+<button class="tool-btn">🎬 تبدیل ویدیو</button>
+</form>
+</article>
+
+
+<!-- 42 -->
+
+<article class="tool-card"
+data-category="video"
+data-search="استخراج صدا از ویدیو video audio mp3 wav aac">
+
+<div class="tool-icon">🎵</div>
+<h3>استخراج صدا از ویدیو</h3>
+<p>استخراج صدای ویدیو و تبدیل آن به فایل صوتی.</p>
+<form class="tool-form" action="/video-extract-audio" method="post" enctype="multipart/form-data">
+<input type="file" name="video_file" accept="video/*" required>
+<select name="format">
+<option value="mp3">MP3</option>
+<option value="wav">WAV</option>
+<option value="aac">AAC</option>
+<option value="m4a">M4A</option>
+</select>
+<button class="tool-btn">🎵 استخراج صدا</button>
+</form>
+</article>
+
+
+<!-- 43 -->
+
+<article class="tool-card"
+data-category="video"
+data-search="برش ویدیو cut video trim">
+
+<div class="tool-icon">✂️</div>
+<h3>برش ویدیو</h3>
+<p>جدا کردن یک بخش مشخص از فایل ویدیویی.</p>
+<form class="tool-form" action="/video-cut" method="post" enctype="multipart/form-data">
+<input type="file" name="video_file" accept="video/*" required>
+<div class="form-row">
+<input type="number" step="0.1" name="start" value="0" placeholder="شروع">
+<input type="number" step="0.1" name="duration" value="10" placeholder="مدت">
+</div>
+<button class="tool-btn">✂️ برش ویدیو</button>
+</form>
+</article>
+
+
+<!-- 44 -->
+
+<article class="tool-card"
+data-category="video"
+data-search="بی صدا کردن ویدیو mute video حذف صدا">
+
+<div class="tool-icon">🔇</div>
+<h3>بی‌صدا کردن ویدیو</h3>
+<p>حذف کامل صدای ویدیو بدون حذف تصویر.</p>
+<form class="tool-form" action="/video-mute" method="post" enctype="multipart/form-data">
+<input type="file" name="video_file" accept="video/*" required>
+<button class="tool-btn">🔇 بی‌صدا کردن</button>
+</form>
+</article>
+
+
+<!-- 45 -->
+
+<article class="tool-card"
+data-category="video"
+data-search="تغییر صدای ویدیو volume video">
+
+<div class="tool-icon">🔊</div>
+<h3>تغییر صدای ویدیو</h3>
+<p>کم یا زیاد کردن صدای ویدیو.</p>
+<form class="tool-form" action="/video-volume" method="post" enctype="multipart/form-data">
+<input type="file" name="video_file" accept="video/*" required>
+<input type="number" step="0.1" name="volume" value="1.2" min="0" max="10" placeholder="ضریب صدا">
+<button class="tool-btn">🔊 تغییر صدا</button>
+</form>
+</article>
+
+
+<!-- 46 -->
+
+<article class="tool-card"
+data-category="video"
+data-search="فشرده سازی ویدیو کاهش حجم video compress">
+
+<div class="tool-icon">🗜️</div>
+<h3>فشرده‌سازی ویدیو</h3>
+<p>کاهش حجم ویدیو با حفظ کیفیت مناسب.</p>
+<form class="tool-form" action="/video-compress" method="post" enctype="multipart/form-data">
+<input type="file" name="video_file" accept="video/*" required>
+<select name="quality">
+<option value="high">کیفیت بالا</option>
+<option value="medium" selected>کیفیت متوسط</option>
+<option value="low">حجم کمتر</option>
+</select>
+<button class="tool-btn">🗜️ فشرده‌سازی</button>
+</form>
+</article>
+
+
+<!-- 47 -->
+
+<article class="tool-card"
+data-category="video"
+data-search="عکس از ویدیو frame snapshot فریم">
+
+<div class="tool-icon">📸</div>
+<h3>گرفتن فریم از ویدیو</h3>
+<p>استخراج یک تصویر JPG از زمان دلخواه ویدیو.</p>
+<form class="tool-form" action="/video-frame" method="post" enctype="multipart/form-data">
+<input type="file" name="video_file" accept="video/*" required>
+<input type="number" step="0.1" name="timestamp" value="1" min="0" placeholder="زمان به ثانیه">
+<button class="tool-btn">📸 استخراج فریم</button>
+</form>
+</article>
+
+
+<!-- 48 -->
+
+<article class="tool-card"
+data-category="video"
+data-search="چرخش ویدیو rotate 90 180 270">
+
+<div class="tool-icon">🔄</div>
+<h3>چرخش ویدیو</h3>
+<p>چرخاندن ویدیو با زاویه ۹۰، ۱۸۰ یا ۲۷۰ درجه.</p>
+<form class="tool-form" action="/video-rotate" method="post" enctype="multipart/form-data">
+<input type="file" name="video_file" accept="video/*" required>
+<select name="angle">
+<option value="90">۹۰ درجه</option>
+<option value="180">۱۸۰ درجه</option>
+<option value="270">۲۷۰ درجه</option>
+</select>
+<button class="tool-btn">🔄 چرخش ویدیو</button>
+</form>
+</article>
+
+
+<!-- 49 -->
+
+<article class="tool-card"
+data-category="video"
+data-search="تغییر اندازه ویدیو resize width height">
+
+<div class="tool-icon">📐</div>
+<h3>تغییر اندازه ویدیو</h3>
+<p>تغییر عرض و ارتفاع ویدیو با FFmpeg.</p>
+<form class="tool-form" action="/video-resize" method="post" enctype="multipart/form-data">
+<input type="file" name="video_file" accept="video/*" required>
+<div class="form-row">
+<input type="number" name="width" value="1280" min="16" placeholder="عرض">
+<input type="number" name="height" value="720" min="16" placeholder="ارتفاع">
+</div>
+<button class="tool-btn">📐 تغییر اندازه</button>
+</form>
+</article>
+
+
+<!-- 50 -->
+
+<article class="tool-card"
+data-category="video"
+data-search="تغییر FPS فریم ریت ویدیو frame rate">
+
+<div class="tool-icon">🎞️</div>
+<h3>تغییر FPS ویدیو</h3>
+<p>تغییر نرخ فریم ویدیو به ۲۴، ۲۵، ۳۰، ۵۰، ۶۰ یا ۱۲۰.</p>
+<form class="tool-form" action="/video-fps" method="post" enctype="multipart/form-data">
+<input type="file" name="video_file" accept="video/*" required>
+<select name="fps">
+<option value="24">24 FPS</option>
+<option value="25">25 FPS</option>
+<option value="30" selected>30 FPS</option>
+<option value="50">50 FPS</option>
+<option value="60">60 FPS</option>
+<option value="120">120 FPS</option>
+</select>
+<button class="tool-btn">🎞️ تغییر FPS</button>
+</form>
+</article>
+
+
 </div>
 
 
@@ -2965,7 +3170,7 @@ required>
 <h3>ابزارهای متنوع</h3>
 
 <p>
-از صوت و تصویر گرفته تا PDF، متن و ابزارهای کاربردی؛ همه در یک مجموعه قرار گرفته‌اند.
+از صوت و تصویر گرفته تا ویدیو، PDF، متن و ابزارهای کاربردی؛ همه در یک مجموعه قرار گرفته‌اند.
 </p>
 
 </div>
@@ -2998,7 +3203,7 @@ required>
 </div>
 
 <div>
-مجموعه ابزارهای آنلاین برای متن، تصویر، صوت و PDF
+مجموعه ابزارهای آنلاین برای متن، تصویر، ویدیو، صوت و PDF
 </div>
 
 <div class="footer-links">
