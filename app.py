@@ -3543,8 +3543,7 @@ Sitemap: https://rt-k9g5.onrender.com/sitemap.xml
 
 @app.route("/sitemap.xml")
 def sitemap():
-    return send_file("sitemap.xml", mimetype="application/xml")
-
+    return "TEST SITEMAP"
 # =========================================================
 # خطای حجم فایل
 # =========================================================
