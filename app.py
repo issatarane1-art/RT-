@@ -3546,7 +3546,7 @@ from flask import Response
 
 @app.route("/sitemap.xml")
 def sitemap():
-    return send_file("sitemap.xml", mimetype="application/xml")
+   
     xml = """<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
