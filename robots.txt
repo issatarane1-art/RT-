@@ -1,4 +1,3 @@
 User-agent: *
 Allow: /
-
 Sitemap: https://rt-k9g5.onrender.com/sitemap.xml
