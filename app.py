@@ -3522,7 +3522,21 @@ def api_tools():
         utility_tools=2,
         video_tools=10
     )
+# =========================================================
+# Robots.txt
+# =========================================================
 
+@app.route("/robots.txt")
+def robots():
+    content = """User-agent: *
+Allow: /
+
+Sitemap: https://rt-k9g5.onrender.com/sitemap.xml
+"""
+    return Response(
+        content,
+        mimetype="text/plain"
+    )
 
 # =========================================================
 # Sitemap
