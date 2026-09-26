@@ -9,9 +9,8 @@ import string
 import difflib
 from pathlib import Path
 
-from flask import Flask, render_template, request, send_from_directory, jsonify
-from werkzeug.utils import secure_filename
-
+from flask import Flask, render_template, request
+from flask import Response
 
 app = Flask(__name__)
 
@@ -3542,7 +3541,6 @@ Sitemap: https://rt-k9g5.onrender.com/sitemap.xml
 # Sitemap
 # =========================================================
 
-from flask import Response
 
 @app.route("/sitemap.xml")
 def sitemap():
