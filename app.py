@@ -3523,13 +3523,8 @@ def api_tools():
 # Robots.txt
 # =========================================================
        @app.route("/robots.txt")
-                       def robots():
-                       return (
-        "User-agent: *\n"
-           "Allow: /\n\n"
-                "Sitemap:
-        https://rt-k9g5.onrender.com/sitemap.xml\n"
-    )
+def robots():
+    return "User-agent: *\nAllow: /\n\nSitemap: https://rt-k9g5.onrender.com/sitemap.xml\n"
 
 # =========================================================
 # Sitemap
