@@ -3520,13 +3520,6 @@ def api_tools():
         video_tools=10
     )
 # =========================================================
-# Robots.txt
-# =========================================================
-       @app.route("/robots.txt")
-def robots():
-    return "User-agent: *\nAllow: /\n\nSitemap: https://rt-k9g5.onrender.com/sitemap.xml\n"
-
-# =========================================================
 # Sitemap
 # =========================================================
 
@@ -3555,7 +3548,19 @@ def sitemap():
         "Pragma": "no-cache",
         "Expires": "0"
     }
+# =========================================================
+# Robots.txt
+# =========================================================
+       
+@app.route("/robots.txt")
+def robots():
+    return (
+        "User-agent: *\n"
+        "Allow: /\n\n"
+        "Sitemap: https://rt-k9g5.onrender.com/sitemap.xml\n"
+    )
 
+چ
 
 # =========================================================
 # خطای حجم فایل
