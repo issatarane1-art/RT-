@@ -3560,7 +3560,6 @@ def robots():
         "Sitemap: https://rt-k9g5.onrender.com/sitemap.xml\n"
     )
 
-چ
 
 # =========================================================
 # خطای حجم فایل
