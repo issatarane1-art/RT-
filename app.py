@@ -3525,14 +3525,10 @@ def api_tools():
 
 @app.route("/robots.txt")
 def robots():
-    content = """User-agent: *
-Allow: /
-
-Sitemap: https://rt-k9g5.onrender.com/sitemap.xml
-"""
-    return Response(
-        content,
-        mimetype="text/plain"
+    return (
+        "User-agent: *\n"
+        "Allow: /\n\n"
+        "Sitemap: https://rt-k9g5.onrender.com/sitemap.xml\n"
     )
 
 # =========================================================
