@@ -3560,9 +3560,9 @@ def sitemap():
 </urlset>"""
 
     return Response(
-        xml,
-        status=200,
-        mimetype="application/xml"
+    xml,
+    status=200,
+    content_type="text/xml; charset=utf-8"
     )
 # =========================================================
 # خطای حجم فایل
