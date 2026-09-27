@@ -7,10 +7,7 @@ import subprocess
 import secrets
 import string
 import difflib
-from pathlib import Path
-
-from flask import Flask, render_template, request, send_from_directory, jsonify, send_file
-
+from flask import Flask, render_template, request, send_from_directory, jsonify
 app = Flask(__name__)
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -3542,27 +3539,31 @@ Sitemap: https://rt-k9g5.onrender.com/sitemap.xml
 
 @app.route("/sitemap.xml")
 def sitemap():
-    xml = """<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-<url>
-<loc>https://rt-k9g5.onrender.com/</loc>
-</url>
-<url>
-<loc>https://rt-k9g5.onrender.com/about</loc>
-</url>
-<url>
-<loc>https://rt-k9g5.onrender.com/contact</loc>
-</url>
-<url>
-<loc>https://rt-k9g5.onrender.com/text-to-speech</loc>
-</url>
-</urlset>"""
+    base_url = "https://rt-k9g5.onrender.com"
 
-    return Response(
-    xml,
-    status=200,
-    content_type="text/xml; charset=utf-8"
-    )
+    routes = [
+        "",
+        "/about",
+        "/contact",
+        "/text-to-speech"
+    ]
+
+    xml = '<?xml version="1.0" encoding="UTF-8"?>'
+    xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'
+
+    for route in routes:
+        xml += f"<url><loc>{base_url}{route}</loc></url>"
+
+    xml += "</urlset>"
+
+    return xml, 200, {
+        "Content-Type": "application/xml; charset=utf-8",
+        "Cache-Control": "no-cache, no-store, must-revalidate",
+        "Pragma": "no-cache",
+        "Expires": "0"
+    }
+
+
 # =========================================================
 # خطای حجم فایل
 # =========================================================
