@@ -3543,26 +3543,27 @@ Sitemap: https://rt-k9g5.onrender.com/sitemap.xml
 
 @app.route("/sitemap.xml")
 def sitemap():
-    return Response("""<?xml version="1.0" encoding="UTF-8"?>
+    xml = """<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-
 <url>
 <loc>https://rt-k9g5.onrender.com/</loc>
 </url>
-
 <url>
 <loc>https://rt-k9g5.onrender.com/about</loc>
 </url>
-
 <url>
 <loc>https://rt-k9g5.onrender.com/contact</loc>
 </url>
-
 <url>
 <loc>https://rt-k9g5.onrender.com/text-to-speech</loc>
 </url>
+</urlset>"""
 
-</urlset>""", mimetype="application/xml")
+    return Response(
+        xml,
+        status=200,
+        mimetype="application/xml"
+    )
 # =========================================================
 # خطای حجم فایل
 # =========================================================
