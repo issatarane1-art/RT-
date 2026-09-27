@@ -3527,7 +3527,7 @@ def api_tools():
 def robots():
     return (
         "User-agent: *\n"
-        "Allow: /\n\n"
+           "Allow: /\n\n"
         "Sitemap: https://rt-k9g5.onrender.com/sitemap.xml\n"
     )
 
