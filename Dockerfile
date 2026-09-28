@@ -1,30 +1,26 @@
 FROM python:3.11-slim
 
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ffmpeg \
+    ghostscript \
+    poppler-utils \
+    tesseract-ocr \
+    tesseract-ocr-fas \
+    tesseract-ocr-eng \
+    libsndfile1 \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-    ffmpeg \
-    tesseract-ocr \
-    tesseract-ocr-fas \
-    libsndfile1 \
-    ghostscript \
-    poppler-utils \
-    gcc \
-    g++ \
-    && rm -rf /var/lib/apt/lists/*
-
 COPY requirements.txt .
-
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-RUN mkdir -p uploads outputs
+RUN mkdir -p uploads outputs templates
 
 EXPOSE 10000
 
-CMD ["sh", "-c", "gunicorn --bind 0.0.0.0:${PORT:-10000} --workers 1 --threads 2 --timeout 900 app:app"]
+CMD ["gunicorn", "--bind", "0.0.0.0:10000", "--timeout", "600", "--workers", "1", "app:app"]
