@@ -262,18 +262,6 @@ def process_audio():
 # 3 - تبدیل صوت به متن
 # =========================================================
 
-def get_whisper_model():
-    global WHISPER_MODEL
-    if WHISPER_MODEL is None:
-        from faster_whisper import WhisperModel
-        WHISPER_MODEL = WhisperModel(
-            "tiny",
-            device="cpu",
-            compute_type="int8"
-        )
-    return WHISPER_MODEL
-
-
 @app.route("/speech-to-text", methods=["POST"])
 def speech_to_text():
     try:
@@ -293,37 +281,27 @@ def speech_to_text():
             wav_file
         )
 
-        try:
-            model = get_whisper_model()
-            segments, info = model.transcribe(
-                str(wav_file),
-                language="fa",
-                vad_filter=True
-            )
-            text_parts = [
-                seg.text.strip()
-                for seg in segments
-                if seg.text.strip()
-            ]
-            text = " ".join(text_parts).strip()
-        except ImportError:
-            text = (
-                "⚠️ برای فعال شدن این ابزار، "
-                "کتابخانه faster-whisper را نصب کنید."
-            )
-        except Exception as whisper_error:
-            text = f"خطا در تشخیص گفتار: {whisper_error}"
+        # برای فعال‌سازی این ابزار، از یکی از این سرویس‌ها استفاده کن:
+        # 1. Google Speech-to-Text API (رایگان تا ۶۰ دقیقه در ماه)
+        # 2. OpenAI Whisper API (پولی ولی ارزان)
+        # 3. یه سرور جداگانه برای Whisper
 
-        if not text:
-            text = "متنی از فایل صوتی شناسایی نشد."
+        text = (
+            "⚠️ این ابزار در حال حاضر غیرفعال است.\n\n"
+            "دلیل: برای کاهش مصرف منابع سرور و افزایش سرعت سایت، "
+            "پردازش صوت به متن غیرفعال شده.\n\n"
+            "اگه به این ابزار نیاز داری، از سرویس‌های آنلاین "
+            "مثل Google Speech-to-Text یا Whisper API استفاده کن."
+        )
 
         return render_success(
-            "تبدیل صوت به متن انجام شد.",
+            "اطلاعیه",
             transcribed_text=text
         )
 
     except Exception as e:
-        return render_failure(f"تبدیل صوت به متن انجام نشد: {e}")
+        return render_failure(f"خطا: {e}")
+
 
 
 # =========================================================
